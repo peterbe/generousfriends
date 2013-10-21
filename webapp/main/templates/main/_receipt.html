@@ -1,0 +1,32 @@
+{% extends "main/email_base.html" %}
+{% block document_title %}Receipt for your contribution to %s's Wish List{% endblock %}
+
+{% block extra_css %}
+p.the-url { text-align: center }
+p.the-url a { font-size: 140%; font-weight: bold; }
+{% endblock %}
+
+
+{% block content %}
+		<h3>Thank You!</h3>
+		<p class="lead">This is a receipt for your contribution on
+                <a href="{{ base_url }}{{ url }}">{% if wishlist.name %}{{ wishlist.name }}{% else %}{{ wishlist.email }}{% endif %}'s
+                Wish List</a>.
+                </p>
+
+<table>
+<tr>
+<td><strong>Contribution:</strong></td>
+<td><span class="price">${{ payment.amount|floatformat:2 }}</span></td>
+</tr>
+<tr>
+<td><strong>Transaction Fee:</strong></td>
+<td><span class="price">${{ payment.actual_fee|floatformat:2 }}</span></td>
+</tr>
+<tr>
+<td><strong>Payment Total:</strong></td>
+<td><span class="price">${{ payment.actual_amount|floatformat:2 }}</span></td>
+</tr>
+</table>
+
+{% endblock %}

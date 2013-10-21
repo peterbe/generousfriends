@@ -193,3 +193,7 @@ LOGOUT_REDIRECT_URL = '/signin/signedout/'
 COOKIE_SALT = 'set in settings/local.py'
 
 BROWSERID_REQUEST_ARGS = {'siteName': 'Generous Friends'}
+
+WEBMASTER_FROM = 'Generous Friends <noreply@generousfriends.com>'  # temp
+
+PAYMENT_TRANSACTION_PERCENTAGE = 5  #%

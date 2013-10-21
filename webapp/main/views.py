@@ -1,6 +1,8 @@
 import os
+import decimal
 from StringIO import StringIO
 
+import balanced
 import requests
 
 from django import http
@@ -10,8 +12,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import RequestSite
 from django.conf import settings
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
 from django.core.files import File
 from django.db import transaction
+from django.db.models import Sum
 
 from . import scrape
 from . import models
@@ -91,6 +96,17 @@ def wishlist_start(request):
     return render(request, 'main/wishlist_start.html', context)
 
 
+def get_progress(item):
+    goal_amount = item.price
+    sum_ = (
+        models.Payment.objects.filter(item=item)
+        .aggregate(Sum('amount'))
+    )
+    amount = sum_['amount__sum'] or decimal.Decimal('0')
+    percent = int(100 * float(amount / goal_amount))
+    return amount, percent
+
+
 def wishlist_home(request, identifier):
     wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
     item, = models.Item.objects.filter(wishlist=wishlist, preference=1).order_by('-modified')[:1]
@@ -102,8 +118,11 @@ def wishlist_home(request, identifier):
         if form.is_valid():
             amount = form.cleaned_data['amount']
             amount_cents = int(amount * 100)
+            actual_amount = (
+                amount +
+                amount * decimal.Decimal(settings.PAYMENT_TRANSACTION_PERCENTAGE / 100.0)
+            )
 
-            import balanced
             balanced.configure(settings.BALANCED_API_KEY)
             customer = balanced.Customer().save()
             customer.add_card(form.cleaned_data['uri'])
@@ -115,23 +134,35 @@ def wishlist_home(request, identifier):
             #    description='Hold for %s (%s)' % (wishlist, item)
             #)
 
-            models.Payment.objects.create(
+            payment = models.Payment.objects.create(
                 wishlist=wishlist,
                 item=item,
                 email=form.cleaned_data['email'],
                 amount=amount,
+                actual_amount=actual_amount,
                 balanced_hash=form.cleaned_data.get('hash'),
                 balanced_id=form.cleaned_data.get('id'),
             )
+            progress_amount, progress_percent = get_progress(item)
             data = {
                 'amount': float(amount),
-                'progress_amount': 21.0,
-                'progress_percentage': 12
+                'progress_amount': progress_amount,
+                'progress_percent': progress_percent
             }
             response = utils.json_response(data)
+            contribution_item = '%s_%s' % (item.pk, payment.pk)
+            try:
+                past_contributions = request.get_signed_cookie(
+                    'contributions',
+                    salt=settings.COOKIE_SALT
+                )
+            except KeyError:
+                past_contributions = ''
+            past_contributions = past_contributions.split('|')
+            contributions.append(contribution_item)
             response.set_signed_cookie(
-                'contribution',
-                '%s_%s_%s' % (wishlist.identifier, item.pk, amount),
+                'contributions',
+                contributions,
                 salt=settings.COOKIE_SALT,
                 max_age=60 * 60 * 24 * 300,
                 secure=request.is_secure(),
@@ -146,6 +177,7 @@ def wishlist_home(request, identifier):
                     secure=request.is_secure(),
                     httponly=True
                 )
+                _send_receipt(payment, request)
             return response
 
         else:
@@ -175,12 +207,37 @@ def wishlist_home(request, identifier):
     if request.GET.get('preview'):
         yours = False
 
-    progress_percent = 10
-    progress_amount = 6.00
+    progress_amount, progress_percent = get_progress(item)
 
     absolute_url = 'https://' if request.is_secure() else 'http://'
     absolute_url += RequestSite(request).domain
     absolute_url += reverse('main:wishlist', args=(wishlist.identifier,))
+
+
+    try:
+        contributions = request.get_signed_cookie(
+            'contributions',
+            salt=settings.COOKIE_SALT
+        )
+        contributions = contributions.split('|')
+    except KeyError:
+        contributions = []
+    contribution_items = []
+    for contribution in contributions:
+        item_pk, payment_pk = contribution.split('_')
+        try:
+            _item = models.Item.objects.get(pk=item_pk)
+        except models.Item.DoesNotExist:
+            continue
+        if _item != item:
+            continue
+        try:
+            _payment = models.Payment.objects.get(pk=payment_pk)
+        except models.Item.DoesNotExist:
+            continue
+        contribution_items.append(_payment)
+    contributions = contribution_items
+
     context = {
         'wishlist': wishlist,
         'item': item,
@@ -190,8 +247,47 @@ def wishlist_home(request, identifier):
         'progress_amount': progress_amount,
         'balanced_marketplace_uri': settings.BALANCED_MARKETPLACE_URI,
         'payments': models.Payment.objects.filter(wishlist=wishlist).order_by('added'),
+        'WEBMASTER_FROM': settings.WEBMASTER_FROM,
+        'contributions': contributions,
     }
     return render(request, 'main/wishlist.html', context)
+    r.set_signed_cookie(
+        'contributions',
+        '1_4',
+        salt=settings.COOKIE_SALT,
+        max_age=60 * 60 * 24 * 300,
+        secure=request.is_secure(),
+        httponly=True
+    )
+    return r
+
+
+def _send_receipt(payment, request):
+    protocol = 'https' if request.is_secure() else 'http'
+    base_url = '%s://%s' % (protocol, RequestSite(request).domain)
+    wishlist = payment.wishlist
+    item = payment.item
+    context = {
+        'wishlist': wishlist,
+        'item': item,
+        'payment': payment,
+        'base_url': base_url,
+        'url': reverse('main:wishlist', args=(wishlist.identifier,)),
+    }
+    body = render_to_string('main/_receipt.html', context)
+    headers = {'Reply-To': payment.email}
+    subject = (
+        "Receipt for your contribution to %s's Wish List"
+        % (wishlist.name or wishlist.email)
+    )
+    email = EmailMessage(
+        subject,
+        body,
+        settings.WEBMASTER_FROM,
+        [payment.email],
+        headers=headers,
+    )
+    email.send()
 
 
 @transaction.commit_on_success
@@ -264,12 +360,43 @@ def wishlist_your_name(request, identifier):
         name = form.cleaned_data['your_name']
         wishlist.name = name
         wishlist.email = email
-        wishlist.verification_email_sent = True
         wishlist.save()
-        _send_verification_email(wishlist)
+        _send_verification_email(wishlist, request)
         return redirect('main:wishlist', wishlist.identifier)
     else:
         return http.HttpResponse('ERROR! %s' % form.errors)
 
 
-def _send_verification_email(wishlist):
+def _send_verification_email(wishlist, request):
+    protocol = 'https' if request.is_secure() else 'http'
+    base_url = '%s://%s' % (protocol, RequestSite(request).domain)
+
+    verification = models.Verification.objects.create(
+        wishlist=wishlist,
+        email=wishlist.email,
+    )
+    context = {
+        'wishlist': wishlist,
+        'base_url': base_url,
+        'url': reverse('main:wishlist_verify', args=(verification.identifier,)),
+    }
+    body = render_to_string('main/_verification.html', context)
+    headers = {'Reply-To': wishlist.email}
+    subject = 'Verify your Wish List'
+    email = EmailMessage(
+        subject,
+        body,
+        settings.WEBMASTER_FROM,
+        [wishlist.email],
+        headers=headers,
+    )
+    email.send()
+
+
+def wishlist_verify(request, identifier):
+    verification = get_object_or_404(models.Verification, identifier=identifier)
+    wishlist = verification.wishlist
+    wishlist.verified = True
+    wishlist.save()
+
+    return redirect('main:wishlist', wishlist.identifier)

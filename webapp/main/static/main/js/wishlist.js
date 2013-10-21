@@ -25,12 +25,14 @@ function handleBalancedCallback(response, form) {
       $('.thank-you .amount').text('$' + response.amount.toFixed(2));
       $('.thank-you').show();
       setTimeout(function() {
-        $('.progress .label').text('$' + response.progress_amount.toFixed(2));
         $('.progress .progress-bar').css('width', response.progress_percent + '%');
+        $('.progress .label, .progress .sr-only').text(response.progress_percent + '%');
+        $('.progress-amount').text('$' + response.progress_amount.toFixed(2));
       }, 1000);
     });
     req.fail(function() {
-      $('form.pay .other-errors').show();
+      $('form.pay .other-error').show();
+
     });
     req.always(function() {
       _stop_waiting(form);

@@ -1,0 +1,22 @@
+{% extends "main/email_base.html" %}
+{% block document_title %}Verify Your Wish List{% endblock %}
+
+{% block extra_css %}
+p.the-url { text-align: center }
+p.the-url a { font-size: 140%; font-weight: bold; }
+{% endblock %}
+
+
+{% block content %}
+						<h3>Hi, {% if wishlist.name %}{{ wishlist.name }}{% endif %}</h3>
+						<p class="lead">Please verify your
+                                                <a href="{{ base_url }}{% url 'main:wishlist' wishlist.identifier %}">Wish List</a></p>
+
+                                                <p class="the-url">
+                                                    <a href="{{ base_url }}{{ url }}">{{ base_url }}{{ url }}</a><br>
+                                                </p>
+
+                                                <p><strong>Note!</strong>
+                                                If you have no idea what this is, then please ignore this email.
+                                                </p>
+{% endblock %}

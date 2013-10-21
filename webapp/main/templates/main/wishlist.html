@@ -15,22 +15,28 @@ form.pay .other-error { display:none; }
 
 {% block main %}
 
-    {% if yours %}
-    {% if not wishlist.verified %}
-    <div class="row marketing">
-    {% include 'main/_your_name.html' %}
-    </div>
-    {% endif %}
+    {% if yours and not wishlist.verified %}
+      {% if wishlist.verification_email_sent %}
+        <div class="row marketing">
+        {% include 'main/_verification_email_sent.html' %}
+        </div>
+      {% else %}
+        {% if not wishlist.verified %}
+        <div class="row marketing">
+        {% include 'main/_your_name.html' %}
+        </div>
+        {% endif %}
+      {% endif %}
     {% endif %}
 
       <div class="jumbotron">
         {% if yours %}
           <h2>This is what I want the most</h2>
         {% else %}
-          {% if wishlist.user.first_name %}
-            <h2>This is what {{ wishlist.user.first_name }} want the most</h2>
+          {% if wishlist.name %}
+            <h2>This is what <i>{{ wishlist.name }}</i> want the most</h2>
           {% else %}
-            <h2>This is what {{ wishlist.user.email }} want the most</h2>
+            <h2>This is what <i>{{ wishlist.email }}</i> want the most</h2>
           {% endif %}
         {% endif %}
         {% thumbnail item.picture "200x200" as thumb %}
@@ -38,7 +44,9 @@ form.pay .other-error { display:none; }
         {% endthumbnail %}
         <h4>{{ item.title }}</h4>
         <h4 class="price">${{ item.price|floatformat:2 }}</h4>
-        <p>You can read all about it on <a href="{{ item.url }}" target="_blank">Amazon.com</a></p>
+        <p>You can read all about it on
+        <a href="{% if item.affiliates_url %}{{ item.affiliates_url }}{% else %}{{ item.url }}{% endif %}" target="_blank">Amazon.com</a>
+        </p>
       </div>
 
     <div class="row marketing">
@@ -55,15 +63,34 @@ form.pay .other-error { display:none; }
     {% else %}
 
       <div class="col-lg-12">
-        <h4>Progress So Far</h4>
+        <h4>Progress So Far <span class="price progress-amount">${{ progress_amount|floatformat:2 }}</span>
+        out of <span class="price">${{ item.price|floatformat:2 }}</span></h4>
         <div class="progress">
           <div class="progress-bar progress-bar-info" role="progressbar"
                aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100"
                style="width: {{ progress_percent }}%">
-            <span class="sr-only">{{ progress_percent }}% Complete</span>
-            <span class="label">${{ progress_amount|floatformat:2 }}</span>
+            <span class="sr-only">{{ progress_percent }}%</span>
+            <span class="label">{{ progress_percent }}%</span>
           </div>
         </div>
+      </div>
+
+      <div class="col-lg-12">
+
+        {% if contributions %}
+        <div class="your-contribution">
+          <h3>You're A Great Friend!</h3>
+          {% for payment in contributions %}
+          <p>Thank you for your contribution of
+            <span class="price">${{ payment.amount|floatformat:2 }}</span>.</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+      </div>
+
+
+      <div class="col-lg-12">
 
         <div class="thank-you">
           <h1>Thank You ...in advance</h2>
@@ -72,8 +99,13 @@ form.pay .other-error { display:none; }
           <p>If the goal is not reached, your money will be refunded without any additional processing fees.</p>
           <h4>Again, Thank You!</h4>
         </div>
+
         <form class="form-horizontal pay" method="post" role="form">{% csrf_token %}
-          <h4>Make a Contribution of Your Own</h4>
+          {% if contributions %}
+          <h4>Make Another Contribution</h4>
+          {% else %}
+          <h3>Make a Contribution</h3>
+          {% endif %}
           <div class="other-error has-error">
             <h4>Some other error occurred</h4>
             <p>Your payment could not be processed at this time.</p>

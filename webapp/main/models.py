@@ -1,3 +1,5 @@
+import uuid
+
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.db import models
@@ -12,7 +14,6 @@ class Wishlist(models.Model):
     user = models.ForeignKey(User, null=True)
     slug = models.SlugField(null=True)
     verified = models.BooleanField(default=False)
-    verification_email_sent = models.BooleanField(default=False)
     email = models.EmailField(null=True)
     name = models.CharField(max_length=100)
     mugshot = ImageField(upload_to=utils.upload_path('mugshot'))
@@ -23,11 +24,16 @@ class Wishlist(models.Model):
     def __str__(self):
         return self.identifier
 
+    @property
+    def verification_email_sent(self):
+        return bool(Verification.objects.filter(wishlist=self))
+
 
 class Item(models.Model):
     wishlist = models.ForeignKey(Wishlist)
     title = models.CharField(max_length=200)
     url = models.URLField()
+    affiliates_url = models.URLField(null=True)
     price = models.DecimalField(max_digits=5, decimal_places=2)
     picture = ImageField(upload_to=utils.upload_path('pictures'))
     preference = models.IntegerField(default=0)
@@ -42,6 +48,7 @@ class Payment(models.Model):
     wishlist = models.ForeignKey(Wishlist)
     item = models.ForeignKey(Item)
     amount = models.DecimalField(max_digits=5, decimal_places=2)
+    actual_amount = models.DecimalField(max_digits=5, decimal_places=2)
     email = models.EmailField(null=True)
     name = models.CharField(max_length=100, null=True)
     hide_name = models.BooleanField(default=False)
@@ -51,6 +58,23 @@ class Payment(models.Model):
     balanced_id = models.CharField(max_length=200, null=True)
     added = models.DateTimeField(default=utils.now)
     modified = models.DateTimeField(default=utils.now)
+
+    @property
+    def actual_fee(self):
+        return self.actual_amount - self.amount
+
+
+def identifier_maker(length):
+    def maker():
+        return uuid.uuid4().hex[:length]
+    return maker
+
+
+class Verification(models.Model):
+    wishlist = models.ForeignKey(Wishlist)
+    email = models.EmailField()
+    identifier = models.CharField(max_length=16, default=identifier_maker(16))
+    added = models.DateTimeField(default=utils.now)
 
 
 @receiver(models.signals.pre_save, sender=Wishlist)
