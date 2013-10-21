@@ -1,0 +1,77 @@
+{% extends "signin/base.html" %}
+
+{% block extra_head %}
+{% endblock %}
+
+{% block content_inner %}
+
+        <div class="pure-g-r content-ribbon">
+            <div class="pure-u-1">
+                <div class="l-box">
+                    <h4 class="content-subhead">Register</h4>
+
+                    {% if existing %}
+                    <div class="existing">
+                    <h3>Hmm... A house with that address has already been registered.</h3>
+                    {% for house in existing %}
+                    <p><b>{{ house.name }}</b> is currently owned by:</p>
+                    <ul>
+                      {% for user in house.owners.all() %}
+                      <li>{{ user.email | obfuscate_email }}</li>
+                      {% endfor %}
+                    </ul>
+                    {% endfor %}
+                    <p>Perhaps you have multiple accounts but logged in with the wrong email address?</p>
+                    </div>
+                    {% endif %}
+
+                    <h3>Minimal Information to Register</h3>
+
+                    <form class="search-form pure-form">
+                      <fieldset>
+                      <label for="id_address">Address:</label>
+                      <input type="text" name="address" id="id_address"
+                        class="pure-input-1-2 pure-input-rounded"
+                        placeholder="for example: 1234 Fake street, CA">
+                      <button type="submit" class="pure-button xpure-button-primary">Search</button>
+                      </fieldset>
+                    </form>
+
+                    <form method="post" class="register pure-form pure-form-stacked" style="display:none">
+                      {{ csrf() }}
+                      <fieldset>
+                        {{ pureform(form) }}
+                        <button type="submit" class="pure-button pure-button-primary">Proceed </button>
+                      </fieldset>
+                    </form>
+                </div><!-- /l-box -->
+            </div><!-- /pure-u-1 -->
+        </div>
+
+
+        <div class="pure-g-r content-ribbon">
+            <div class="pure-u-1">
+                <div class="l-box">
+                  <div class="loading" style="display:none">
+                  Searching...
+                  </div>
+                  <div class="alternatives" style="display:none">
+                  <h4>Is it...?</h4>
+                  <ul>
+
+                  </ul>
+                  <a href="#" class="wasnot">No? Enter more of the address</a>
+                  </div>
+                </div>
+            </div>
+        </div>
+
+
+
+{% endblock %}
+
+{% block extra_javascript %}
+{{ super() }}
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+<script src="{{ static('signin/js/register.js') }}"></script>
+{% endblock %}

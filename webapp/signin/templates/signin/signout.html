@@ -1,0 +1,18 @@
+{% extends "signin/base.html" %}
+{% load browserid %}
+
+{% block main %}
+{% browserid_info %}
+
+      <div class="jumbotron">
+        <a href="/browserid/logout/" data-next="/" class="btn btn-large btn-primary browserid-logout">Sign Out</a>
+      </div>
+
+
+{% endblock %}
+
+
+{% block javascript %}
+<script src="{{ STATIC_URL }}assets/js/jquery-1.10.2.min.js"></script>
+{% browserid_js %}
+{% endblock %}
