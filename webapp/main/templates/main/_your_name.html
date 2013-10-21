@@ -1,0 +1,30 @@
+        <h3>Important!</h3>
+        <p><b>Your Wish List is saved</b> and <b>almost ready</b> to be shared but first your need to
+        <b>verify your email address</b>.</p>
+
+        <form class="your-name form-horizontal" role="form"
+         action="{% url 'main:wishlist_your_name' wishlist.identifier %}" method="post">{% csrf_token %}
+          <div class="form-group">
+            <label for="id_your_email" class="col-lg-4 control-label">Your Email Address:</label>
+            <div class="col-lg-8">
+              <input type="text" name="your_email" id="id_your_email"
+               value="{% if wishlist.email %}{{ wishlist.email }}{% endif %}" class="form-control">
+              <span class="help-block" style="display:none">You must enter your email address so your Wish List can be verified.</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="id_your_name" class="col-lg-4 control-label">Your Name:</label>
+            <div class="col-lg-8">
+              <input type="text" name="your_name" id="id_your_name"
+               value="{% if wishlist.name %}{{ wishlist.name }}{% endif %}" class="form-control">
+              <span class="help-block" style="display:none">You must enter your name so your friends and family know it's you.</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-lg-offset-2 col-lg-10">
+              <button type="submit" class="btn btn-primary btn-default">Send Verification Email</button>
+              <img src="{{ STATIC_URL }}main/images/spinner.gif" alt="Please wait" class="please-wait">
+              <span class="please-wait">Please wait...</span>
+            </div>
+          </div>
+        </form>

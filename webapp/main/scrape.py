@@ -14,6 +14,24 @@ import requests
 class NotFoundError(Exception):
     pass
 
+def mkdir(newdir):
+    """works the way a good mkdir should :)
+        - already exists, silently complete
+        - regular file in the way, raise an exception
+        - parent directory(ies) does not exist, make them as well
+    """
+    if os.path.isdir(newdir):
+        return
+    if os.path.isfile(newdir):
+        raise OSError("a file with the same name as the desired "
+                      "dir, '%s', already exists." % newdir)
+    head, tail = os.path.split(newdir)
+    if head and not os.path.isdir(head):
+        mkdir(head)
+    if tail:
+        os.mkdir(newdir)
+
+
 def _download(url, cache_seconds=3600 * 20):
     key = hashlib.md5(url).hexdigest()
 
@@ -37,7 +55,7 @@ def _download(url, cache_seconds=3600 * 20):
     if not os.path.isdir('.cache'):
         os.mkdir('.cache')
     dirname = os.path.dirname(cache_file)
-    os.makedirs(dirname)
+    mkdir(dirname)
     with open(cache_file, 'w') as f:
         f.write(html)
     return html
@@ -53,7 +71,6 @@ def _parse_price(price):
 def scrape(wishlistid):
     url = 'http://www.amazon.com/registry/wishlist/%s?layout=compact' % wishlistid
     html = _download(url)
-    #print len(html)
     doc = PyQuery(html)
     items = []
     name = None
@@ -71,7 +88,7 @@ def scrape(wishlistid):
         for elem in doc('td.g-title a', row_elem):
 
             text = elem.text.strip()
-            print text
+            print repr(text)
 
             item_url = urlparse.urljoin('http://www.amazon.com', elem.attrib['href'])
             item = {

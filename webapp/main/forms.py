@@ -4,7 +4,8 @@ import decimal
 from django import forms
 
 
-WISHLIST_ID_REGEX = re.compile('/([0-9A-Z]{10,15})/')
+WISHLIST_URL_ID_REGEX = re.compile('/([0-9A-Z]{10,15})/')
+WISHLIST_ID_REGEX = re.compile('^[0-9A-Z]{10,15}$')
 
 
 class WishlistIDForm(forms.Form):
@@ -14,7 +15,10 @@ class WishlistIDForm(forms.Form):
     def clean_identifier(self):
         value = self.cleaned_data['identifier']
         if '://' in value:
-            value = WISHLIST_ID_REGEX.findall(value)[0]
+            value = WISHLIST_URL_ID_REGEX.findall(value)[0]
+
+        if not WISHLIST_ID_REGEX.match(value):
+            raise forms.ValidationError("Doesn't look like a valid Wish List ID")
 
         return value
 
@@ -36,3 +40,8 @@ class PaymentForm(forms.Form):
         if value < 0.5:
             raise forms.ValidationError('Minimum is $.50')
         return value
+
+
+class YourNameForm(forms.Form):
+    your_email = forms.EmailField()
+    your_name = forms.CharField()

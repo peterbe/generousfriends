@@ -81,6 +81,25 @@ function _repent() {
 
 $(function() {
 
+  $('form.your-name').submit(function() {
+    var form = this;
+    var _any_error = false;
+    $('input[type="text"]', form).each(function() {
+      var $input = $(this);
+      var value = $.trim($input.val());
+      if (!value) {
+        _any_error = true;
+        var $parent = $input.closest('.form-group');
+        $parent.addClass('has-error');
+        $('.help-block', $parent).show();
+        $input.on('keypress', _repent);
+      }
+    });
+    if (_any_error) return false;
+    return true;
+  });
+
+
   $('.has-error input').on('change', function() {
     console.log("CHANGED FROM ERROR");
     var $parent = $(this).parent('.has-error');
@@ -121,11 +140,15 @@ $(function() {
     $(this).off('focus');
     $(this).select();
   });
-});
-$('form.name').submit(function() {
-  var first_name = $('form.name input[name="first_name"]').val();
-  if (!$.trim(first_name)) {
-    return false;
-  }
+
+  $('form.name').submit(function() {
+    var first_name = $('form.name input[name="first_name"]').val();
+    if (!$.trim(first_name)) {
+      return false;
+    }
+
+  });
+
+  $('button[disabled]').removeProp('disabled');
 
 });

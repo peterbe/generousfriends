@@ -33,7 +33,7 @@
           <a href="{{ item.url }}" target="_blank"><img src="{{ thumb.url }}" width="{{ thumb.width }}" height="{{ item.height }}" alt="{{ item.title }}"></a>
           <h4>{{ item.title }}</h4>
           <h4 class="price">${{ item.price|floatformat:2 }}</h4>
-          <button type="submit" name="item" value="{{ item.id }}" class="btn btn-primary">This one</button>
+          <button type="submit" name="item" value="{{ item.id }}" class="btn btn-primary">Pick this one</button>
         </div>
         {% endthumbnail %}
         {% endfor %}

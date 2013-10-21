@@ -5,6 +5,7 @@ import requests
 
 from django import http
 from django.core.urlresolvers import reverse
+from django.core.cache import cache
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import RequestSite
@@ -35,11 +36,15 @@ def wishlist_start(request):
         form = forms.WishlistIDForm(request.POST)
         if form.is_valid():
             identifier = form.cleaned_data['identifier']
+            cache_key = 'scraping-%s' % identifier
+            if cache.get(cache_key):
+                return {'error': 'Still working on %s' % identifier}
             admin_url = reverse('main:wishlist_admin', args=(identifier,))
 
             if models.Wishlist.objects.filter(identifier=identifier):
                 #wishlist = models.Wishlist.objects.get(identifier=identifier)
                 return {'error': 'That Wish List has already been set up'}
+            cache.set(cache_key, identifier, 60)
             try:
                 information = scrape.scrape(identifier)
                 items = information['items']
@@ -146,7 +151,11 @@ def wishlist_home(request, identifier):
         else:
             return http.HttpResponseBadRequest(str(form.errors))
 
-    cookie_identifier = request.get_signed_cookie('wishlist', salt=settings.COOKIE_SALT)
+    try:
+        cookie_identifier = request.get_signed_cookie('wishlist', salt=settings.COOKIE_SALT)
+    except KeyError:
+        cookie_identifier = None
+
     yours = False
     if cookie_identifier == wishlist.identifier:
         yours = True
@@ -160,6 +169,8 @@ def wishlist_home(request, identifier):
                 request.user.first_name = request.POST.get('first_name')
                 request.user.save()
                 return redirect('main:wishlist', wishlist.identifier)
+    elif not wishlist.verified:
+        return http.HttpResponse('This Wish List has not yet been verified.')
 
     if request.GET.get('preview'):
         yours = False
@@ -178,16 +189,19 @@ def wishlist_home(request, identifier):
         'progress_percent': progress_percent,
         'progress_amount': progress_amount,
         'balanced_marketplace_uri': settings.BALANCED_MARKETPLACE_URI,
+        'payments': models.Payment.objects.filter(wishlist=wishlist).order_by('added'),
     }
     return render(request, 'main/wishlist.html', context)
 
 
+@transaction.commit_on_success
 def wishlist_admin(request, identifier):
     wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
-    cookie_identifier = request.get_signed_cookie('wishlist', salt=settings.COOKIE_SALT)
-    if not cookie_identifier:
-        raise NotImplementedError
-    elif cookie_identifier != wishlist.identifier:
+    try:
+        cookie_identifier = request.get_signed_cookie('wishlist', salt=settings.COOKIE_SALT)
+    except KeyError:
+        return http.HttpResponse('Not your Wish List')
+    if cookie_identifier != wishlist.identifier:
         raise NotImplementedError
     if request.user.is_authenticated() and not wishlist.user:
         wishlist.user = request.user
@@ -207,6 +221,9 @@ def wishlist_admin(request, identifier):
     items = models.Item.objects.filter(wishlist=wishlist).order_by('added')
     if not items:
         information = scrape.scrape(wishlist.identifier)
+        if information['name'] and not wishlist.name:
+            wishlist.name = information['name']
+            wishlist.save()
         for thing in information['items']:
             r = requests.get(thing['picture']['url'])
             filename = os.path.basename(thing['picture']['url'])
@@ -219,11 +236,40 @@ def wishlist_admin(request, identifier):
                 url=thing['url'],
                 picture=content
             )
-            print thing
         # try again
-        items = models.Item.objects.filter(wishlist=wishlist)
+        items = models.Item.objects.filter(wishlist=wishlist).order_by('added')
     context = {
         'items': items,
         'wishlist': wishlist,
     }
     return render(request, 'main/wishlist_admin.html', context)
+
+
+@transaction.commit_on_success
+def wishlist_your_name(request, identifier):
+    wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
+    try:
+        cookie_identifier = request.get_signed_cookie('wishlist', salt=settings.COOKIE_SALT)
+    except KeyError:
+        return http.HttpResponse('Not your Wish List')
+    if cookie_identifier != wishlist.identifier:
+        raise NotImplementedError
+
+    if request.method != 'POST':
+        return redirect('main:wishlist', wishlist.identifier)
+
+    form = forms.YourNameForm(request.POST)
+    if form.is_valid():
+        email = form.cleaned_data['your_email']
+        name = form.cleaned_data['your_name']
+        wishlist.name = name
+        wishlist.email = email
+        wishlist.verification_email_sent = True
+        wishlist.save()
+        _send_verification_email(wishlist)
+        return redirect('main:wishlist', wishlist.identifier)
+    else:
+        return http.HttpResponse('ERROR! %s' % form.errors)
+
+
+def _send_verification_email(wishlist):

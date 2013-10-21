@@ -16,7 +16,10 @@ urlpatterns = patterns(
     url(r'^(?P<identifier>[0-9A-Z]{10,15})/$',
         views.wishlist_home,
         name='wishlist'),
-    url(r'^(?P<identifier>[0-9A-Z]{10,15})/configure/$',
+    url(r'^(?P<identifier>[0-9A-Z]{10,15})/pick-one/$',
         views.wishlist_admin,
         name='wishlist_admin'),
+    url(r'^(?P<identifier>[0-9A-Z]{10,15})/your-name/$',
+        views.wishlist_your_name,
+        name='wishlist_your_name'),
 )
