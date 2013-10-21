@@ -1,1 +1,3 @@
 .cache/
+webapp/media/
+webapp/settings/local.py
