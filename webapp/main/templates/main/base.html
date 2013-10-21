@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Peter">
+
+    <title>{% block document_title %}Generous Friends{% endblock %}</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{{ STATIC_URL }}main/css/jumbotron-narrow.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="{{ STATIC_URL }}/assets/js/html5shiv.js"></script>
+      <script src="{{ STATIC_URL }}/assets/js/respond.min.js"></script>
+    <![endif]-->
+    {% block extra_head %}
+    {% endblock %}
+  </head>
+
+  <body>
+
+    <div class="container">
+      <div class="header">
+      {% if request.user.is_authenticated %}Logged in
+      ({{ request.user.first_name }}){% endif %}
+        <ul class="nav nav-pills pull-right">
+
+          <li class="active"><a href="#">Home</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+        <h3 class="text-muted"><a href="/">Generous Friends</a></h3>
+      </div>
+
+      {% block main %}
+      {% endblock %}
+
+      <div class="footer">
+        <p>&copy; Generous Friends</p>
+      </div>
+
+    </div> <!-- /container -->
+
+
+    {% block javascript %}
+    {% endblock %}
+  </body>
+</html>

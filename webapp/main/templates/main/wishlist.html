@@ -1,0 +1,198 @@
+{% extends "main/base.html" %}
+{% load thumbnail %}
+
+{% block document_title %}This is what I want the most{% endblock %}
+
+{% block extra_head %}
+<style type="text/css">
+.please-wait,
+.credit-card,
+.help-block,
+.thank-you,
+form.pay .other-error { display:none; }
+</style>
+{% endblock %}
+
+{% block main %}
+
+      <div class="jumbotron">
+        {% if yours %}
+          <h2>This is what I want the most</h2>
+        {% else %}
+          {% if wishlist.user.first_name %}
+            <h2>This is what {{ wishlist.user.first_name }} want the most</h2>
+          {% else %}
+            <h2>This is what {{ wishlist.user.email }} want the most</h2>
+          {% endif %}
+        {% endif %}
+        {% thumbnail item.picture "200x200" as thumb %}
+        <img src="{{ thumb.url }}" width="{{ thumb.width }}" height="{{ item.height }}" alt="{{ item.title }}">
+        {% endthumbnail %}
+        <h4>{{ item.title }}</h4>
+        <h4 class="price">${{ item.price|floatformat:2 }}</h4>
+        <p>You can read all about it on <a href="{{ item.url }}" target="_blank">Amazon.com</a></p>
+      </div>
+
+    <div class="row marketing">
+    {% if yours %}
+      {% if request.user.is_anonymous %}
+        <h3>Important!</h3>
+        <p><b>Your Wish List is saved</b> and ready to be shared but to be able to
+        <b>secure it</b>, it's recommend that you <b>sign in</b> so you can come back later and modify it.</p>
+        <p style="text-align:center">
+          <a href="{% url 'signin:start' %}" class="btn btn-primary btn-lg">Sign in now</a>
+        </p>
+      {% else %}
+        {% if request.user.first_name %}
+
+        <h2>Let the Sharing Begin!</h2>
+
+        <p>Now, you need to subtly share this page with friends and family and hope they feel generous. Or, last a little bit generous.</p>
+
+        <form class="form-horizontal" role="form">
+          <div class="form-group">
+            <label for="absolute_url" class="col-lg-2 control-label">URL:</label>
+            <div class="col-lg-10">
+            <input type="text" id="absolute_url" value="{{ absolute_url }}" class="form-control">
+            </div>
+          </div>
+        </form>
+
+        <p>This page will look different when they visit it,
+        click here to <a href="?preview=1">Preview What Your Friends and Family see</a>.
+        </p>
+        {% else %}
+        <h2>But what is your name?</h2>
+        <p>When you share this page, you'll want your name on it so that people really know it's you!</p>
+
+        <form action="." method="post" class="form-horizontal name" role="form">{% csrf_token %}
+          <div class="form-group">
+            <label for="first_name" class="col-lg-2 control-label">Your Name:</label>
+            <div class="col-lg-10">
+            <input type="text" name="first_name" id="first_name" value="{{ request.user.first_name }}" class="form-control">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-lg-offset-2 col-lg-10">
+              <button type="submit" class="btn btn-primary btn-default">Save</button>
+            </div>
+          </div>
+        </form>
+
+        {% endif %}
+
+        <!--
+        <h3>Wish List Verified</h3>
+        <p>You are signed in as <b>{{ request.user.email }}</b>. Well done!</p>
+        -->
+
+      {% endif %}
+    {% else %}
+
+      <div class="col-lg-12">
+        <h4>Progress So Far</h4>
+        <div class="progress">
+          <div class="progress-bar progress-bar-info" role="progressbar"
+               aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100"
+               style="width: {{ progress_percent }}%">
+            <span class="sr-only">{{ progress_percent }}% Complete</span>
+            <span class="label">${{ progress_amount|floatformat:2 }}</span>
+          </div>
+        </div>
+
+        <div class="thank-you">
+          <h1>Thank You ...in advance</h2>
+          <p>Your contribution of <b class="price amount"></b> has been accepted by
+          <b>Balanced Payments&trade;</b>.</p>
+          <p>If the goal is not reached, your money will be refunded without any additional processing fees.</p>
+          <h4>Again, Thank You!</h4>
+        </div>
+        <form class="form-horizontal pay" method="post" role="form">{% csrf_token %}
+          <h4>Make a Contribution of Your Own</h4>
+          <div class="other-error has-error">
+            <h4>Some other error occurred</h4>
+            <p>Your payment could not be processed at this time.</p>
+            <p>Please try again a little later.</p>
+          </div>
+          <div class="form-group">
+            <label for="id_amount" class="col-lg-4 control-label">Amount:</label>
+            <div class="col-lg-4">
+              <input type="text" id="id_amount" name="amount" class="form-control" placeholder="e.g. $15">
+              + 3% transaction fee
+            </div>
+          </div>
+          <div class="form-group credit-card" style="display:none">
+
+            <div class="form-group">
+              <label for="id_email" class="col-lg-4 control-label">Your Email:</label>
+              <div class="col-lg-6">
+                <input type="text" id="id_email" name="email" class="form-control" placeholder="your@email.com">
+                <span class="help-block"><!--So you can get a receipt and if something happens with the payment--></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_card_number" class="col-lg-4 control-label">Card Number:</label>
+              <div class="col-lg-6">
+                <input type="text" id="id_card_number" name="card_number" class="form-control" placeholder="1234 1234 1234 1234">
+                <span class="help-block"></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_expiration_month" class="col-lg-4 control-label">Expiration Date (Month):</label>
+              <div class="col-lg-2">
+                <input type="text" id="id_expiration_month" name="expiration_month" class="form-control" placeholder="month">
+                <span class="help-block"></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_expiration_year" class="col-lg-4 control-label">Expiration Date (Year):</label>
+              <div class="col-lg-2">
+                <input type="text" id="id_expiration_year" name="expiration_year" class="form-control" placeholder="year">
+                <span class="help-block"></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_security_code" class="col-lg-4 control-label">Security Code (CSC):</label>
+              <div class="col-lg-2">
+                <input type="text" id="id_security_code" name="security_code" class="form-control" placeholder="123">
+                <span class="help-block"></span>
+              </div>
+            </div>
+
+          </div>
+          <div class="form-group credit-card" style="display:none">
+            <div class="col-lg-offset-2 col-lg-10">
+              <button type="submit" class="btn btn-default btn-primary">Submit Your Contribution</button>
+              <img src="{{ STATIC_URL }}main/images/spinner.gif" alt="Please wait" class="please-wait">
+              <span class="please-wait">Please wait...</span>
+            </div>
+          </div>
+
+          <div class="form-group credit-card" style="display:none">
+            <a href="https://www.balancedpayments.com" target="_blank"><img src="{{ STATIC_URL }}main/images/balanced-cards.png" alt="Balanced Cards"></a>
+            <a href="https://www.balancedpayments.com" target="_blank"><img src="{{ STATIC_URL }}main/images/balanced-payments.png" alt="Balanced Payments"></a>
+          </div>
+        </form>
+
+
+      </div>
+
+    {% endif %}
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+{% if not yours %}
+<script type="text/javascript" src="https://js.balancedpayments.com/v1/balanced.js"></script>
+<script type="text/javascript">
+  balanced.init('{{ balanced_marketplace_uri }}');
+</script>
+{% endif %}
+<script src="{{ STATIC_URL }}assets/js/jquery-1.10.2.min.js"></script>
+<script src="{{ STATIC_URL }}main/js/wishlist.js"></script>
+{% endblock %}
