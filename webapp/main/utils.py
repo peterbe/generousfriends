@@ -1,5 +1,7 @@
+import re
 import os
 import datetime
+import decimal
 import hashlib
 import functools
 import unicodedata
@@ -35,10 +37,12 @@ def upload_path(tag):
     return _upload_path_tagged
 
 
-class DateTimeEncoder(json.JSONEncoder):
+class PracticalJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime.datetime):
             return obj.isoformat()
+        if isinstance(obj, decimal.Decimal):
+            return float(obj)
         return json.JSONEncoder.default(self, obj)
 
 
@@ -56,7 +60,7 @@ def json_response(data, indent=0):
     return http.HttpResponse(
                 _json_clean(json.dumps(
                     data,
-                    cls=DateTimeEncoder,
+                    cls=PracticalJSONEncoder,
                     indent=indent
                 )),
                 content_type='application/json; charset=UTF-8'
@@ -73,3 +77,7 @@ def _json_clean(value):
     # http://stackoverflow.com/questions/1580647/json-why-are-forward-slashe\
     # s-escaped
     return value.replace("</", "<\\/")
+
+
+def obfuscate_email(email):
+    return re.sub('(\w{3})@(\w{3})', '...@...', email)

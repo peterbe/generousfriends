@@ -1,4 +1,4 @@
-# Django settings for webapp project.
+from decimal import Decimal
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -196,4 +196,5 @@ BROWSERID_REQUEST_ARGS = {'siteName': 'Generous Friends'}
 
 WEBMASTER_FROM = 'Generous Friends <noreply@generousfriends.com>'  # temp
 
-PAYMENT_TRANSACTION_PERCENTAGE = 5  #%
+PAYMENT_TRANSACTION_PERCENTAGE = 3.5  #%
+PAYMENT_TRANSACTION_AMOUNT = Decimal('1.00')  #$

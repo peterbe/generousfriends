@@ -7,6 +7,13 @@ function _stop_waiting(form) {
   $('button[type="submit"]', form).removeProp('disabled');
 }
 
+function _show_field_error($input, message) {
+  var $parent = $input.closest('.form-group');
+  $('.help-block', $parent).text(message).show();
+  $parent.addClass('has-error');
+  $input.on('keypress', _repent);
+}
+
 function handleBalancedCallback(response, form) {
 
   switch (response.status) {
@@ -21,18 +28,34 @@ function handleBalancedCallback(response, form) {
     data.email = $('#id_email').val();
     var req = $.post($(form).attr('action'), data);
     req.done(function(response) {
-      $('form.pay').hide();
-      $('.thank-you .amount').text('$' + response.amount.toFixed(2));
-      $('.thank-you').show();
-      setTimeout(function() {
-        $('.progress .progress-bar').css('width', response.progress_percent + '%');
-        $('.progress .label, .progress .sr-only').text(response.progress_percent + '%');
-        $('.progress-amount').text('$' + response.progress_amount.toFixed(2));
-      }, 1000);
+      if (response.error) {
+        console.dir(response.error);
+        if (response.error.email) {
+          alert("Problem with that email address");
+          _show_field_error($('#id_email'), response.error.email[0]);
+        }
+        if (response.error.amount) {
+          alert("Problem with that amount");
+          _show_field_error($('#id_amount'), response.error.amount[0]);
+        }
+        if (!(response.error.email || response.error.amount)) {
+          console.log('OTHER ERROR');
+          $('form.pay .other-error').show();
+        }
+      } else {
+        $('form.pay').hide();
+        $('.thank-you .amount').text('$' + response.amount.toFixed(2));
+        $('.thank-you').show();
+        setTimeout(function() {
+          $('.progress .progress-bar').css('width', response.progress_percent + '%');
+          $('.progress .label, .progress .sr-only').text(response.progress_percent + '%');
+          $('.progress-amount').text('$' + response.progress_amount.toFixed(2));
+        }, 1000);
+      }
     });
     req.fail(function() {
+      console.log('FAILED!');
       $('form.pay .other-error').show();
-
     });
     req.always(function() {
       _stop_waiting(form);
@@ -44,10 +67,7 @@ function handleBalancedCallback(response, form) {
     $.each(response.error, function(field, message) {
       var $input = $('[name="' + field + '"]');
       if ($input.length) {
-        var $parent = $input.closest('.form-group');
-        $('.help-block', $parent).text(message).show();
-        $parent.addClass('has-error');
-        $input.on('keypress', _repent);
+        _show_field_error($input, message);
       } else {
         console.log(field, message);
       }
@@ -112,6 +132,7 @@ $(function() {
 
   $('form.pay').on('submit', function() {
     var form = this;
+    $('.other-error', form).hide();
     _please_wait(form);
     var data = {}
     data.card_number =  $('#id_card_number').val();

@@ -22,8 +22,10 @@ $(function() {
     }, 350);
     var req = $.post(location.href, data);
     req.done(function(response) {
+      if (response.redirect) {
+        location.href = response.redirect;
+      }
       $bar.css('width', '100%');
-      console.log(response)
       if (response.redirect) {
         location.href = response.redirect;
       } else {

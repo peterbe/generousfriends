@@ -3,6 +3,7 @@ import uuid
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Sum
 
 from sorl.thumbnail import ImageField
 
@@ -14,6 +15,7 @@ class Wishlist(models.Model):
     user = models.ForeignKey(User, null=True)
     slug = models.SlugField(null=True)
     verified = models.BooleanField(default=False)
+    #verified = models.DateTimeField(null=True)
     email = models.EmailField(null=True)
     name = models.CharField(max_length=100)
     mugshot = ImageField(upload_to=utils.upload_path('mugshot'))
@@ -42,6 +44,15 @@ class Item(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def amount_remaining(self):
+        total = Payment.objects.filter(item=self).aggregate(Sum('amount'))
+        if total['amount__sum']:
+            total = total['amount__sum']
+            return self.price - total
+        else:
+            return self.price
 
 
 class Payment(models.Model):

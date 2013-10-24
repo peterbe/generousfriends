@@ -47,8 +47,7 @@ def wishlist_start(request):
             admin_url = reverse('main:wishlist_admin', args=(identifier,))
 
             if models.Wishlist.objects.filter(identifier=identifier):
-                #wishlist = models.Wishlist.objects.get(identifier=identifier)
-                return {'error': 'That Wish List has already been set up'}
+                return {'redirect': reverse('main:wishlist_taken', args=(identifier,))}
             cache.set(cache_key, identifier, 60)
             try:
                 information = scrape.scrape(identifier)
@@ -69,7 +68,7 @@ def wishlist_start(request):
                     'wishlist',
                     wishlist.identifier,
                     salt=settings.COOKIE_SALT,
-                    max_age=60 * 60 * 24 * 7,
+                    max_age=60 * 60 * 24 * 300,
                     secure=request.is_secure(),
                     httponly=True
                 )
@@ -78,7 +77,7 @@ def wishlist_start(request):
                         'wishlist_name',
                         information['name'],
                         salt=settings.COOKIE_SALT,
-                        max_age=60 * 60 * 24 * 7,
+                        max_age=60 * 60 * 24 * 300,
                         secure=request.is_secure(),
                         httponly=True
                     )
@@ -107,6 +106,7 @@ def get_progress(item):
     return amount, percent
 
 
+@utils.json_view
 def wishlist_home(request, identifier):
     wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
     item, = models.Item.objects.filter(wishlist=wishlist, preference=1).order_by('-modified')[:1]
@@ -114,7 +114,7 @@ def wishlist_home(request, identifier):
         return redirect('main:wishlist_admin', wishlist.identifier)
 
     if request.method == 'POST' and 'uri' in request.POST:
-        form = forms.PaymentForm(request.POST)
+        form = forms.PaymentForm(request.POST, item=item)
         if form.is_valid():
             amount = form.cleaned_data['amount']
             amount_cents = int(amount * 100)
@@ -159,10 +159,10 @@ def wishlist_home(request, identifier):
             except KeyError:
                 past_contributions = ''
             past_contributions = past_contributions.split('|')
-            contributions.append(contribution_item)
+            past_contributions.append(contribution_item)
             response.set_signed_cookie(
                 'contributions',
-                contributions,
+                '|'.join(past_contributions),
                 salt=settings.COOKIE_SALT,
                 max_age=60 * 60 * 24 * 300,
                 secure=request.is_secure(),
@@ -181,12 +181,9 @@ def wishlist_home(request, identifier):
             return response
 
         else:
-            return http.HttpResponseBadRequest(str(form.errors))
+            return {'error': form.errors}
 
-    try:
-        cookie_identifier = request.get_signed_cookie('wishlist', salt=settings.COOKIE_SALT)
-    except KeyError:
-        cookie_identifier = None
+    cookie_identifier = request.get_signed_cookie('wishlist', None, salt=settings.COOKIE_SALT)
 
     yours = False
     if cookie_identifier == wishlist.identifier:
@@ -213,13 +210,13 @@ def wishlist_home(request, identifier):
     absolute_url += RequestSite(request).domain
     absolute_url += reverse('main:wishlist', args=(wishlist.identifier,))
 
-
     try:
         contributions = request.get_signed_cookie(
             'contributions',
             salt=settings.COOKIE_SALT
         )
-        contributions = contributions.split('|')
+        contributions = [x.strip() for x in contributions.split('|')
+                         if x.strip()]
     except KeyError:
         contributions = []
     contribution_items = []
@@ -238,6 +235,8 @@ def wishlist_home(request, identifier):
         contribution_items.append(_payment)
     contributions = contribution_items
 
+    email = request.get_signed_cookie('email', None, salt=settings.COOKIE_SALT)
+
     context = {
         'wishlist': wishlist,
         'item': item,
@@ -249,7 +248,12 @@ def wishlist_home(request, identifier):
         'payments': models.Payment.objects.filter(wishlist=wishlist).order_by('added'),
         'WEBMASTER_FROM': settings.WEBMASTER_FROM,
         'contributions': contributions,
+        'PAYMENT_TRANSACTION_PERCENTAGE': settings.PAYMENT_TRANSACTION_PERCENTAGE,
+        'PAYMENT_TRANSACTION_AMOUNT': settings.PAYMENT_TRANSACTION_AMOUNT,
+        'email': email,
+        'fee_example': get_fee_example(decimal.Decimal('15.00')),
     }
+
     return render(request, 'main/wishlist.html', context)
     r.set_signed_cookie(
         'contributions',
@@ -261,6 +265,27 @@ def wishlist_home(request, identifier):
     )
     return r
 
+
+def get_fee_example(price):
+    example = {
+        'amount': price,
+    }
+    example['percentage'] = (
+        example['amount'] * decimal.Decimal(settings.PAYMENT_TRANSACTION_PERCENTAGE / 100.0)
+    )
+    example['base'] = (
+        settings.PAYMENT_TRANSACTION_AMOUNT
+    )
+    example['total'] = (
+        example['amount'] +
+        example['percentage'] +
+        example['base']
+    )
+    example['amount_percentage'] = float(decimal.Decimal('100.') * example['amount'] / example['total'])
+    example['percentage_percentage'] = float(decimal.Decimal('100.') * example['percentage'] / example['total'])
+    example['base_percentage'] = float(decimal.Decimal('100.') * example['base'] / example['total'])
+
+    return example
 
 def _send_receipt(payment, request):
     protocol = 'https' if request.is_secure() else 'http'
@@ -398,5 +423,41 @@ def wishlist_verify(request, identifier):
     wishlist = verification.wishlist
     wishlist.verified = True
     wishlist.save()
+    response = redirect('main:wishlist', wishlist.identifier)
+    response.set_signed_cookie(
+        'wishlist',
+        wishlist.identifier,
+        salt=settings.COOKIE_SALT,
+        max_age=60 * 60 * 24 * 300,
+        secure=request.is_secure(),
+        httponly=True
+    )
+    return response
 
-    return redirect('main:wishlist', wishlist.identifier)
+
+@transaction.commit_on_success
+def wishlist_taken(request, identifier):
+    wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
+    context = {
+        'wishlist': wishlist,
+    }
+    if request.method == 'POST':
+        form = forms.TakenForm(request.POST, wishlist=wishlist)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            _send_verification_email(wishlist, request)
+            url = reverse('main:wishlist_taken', args=(wishlist.identifier,))
+            return redirect(url + '?email=%s' % email)
+    else:
+        form = form = forms.TakenForm(wishlist=wishlist)
+    context['form'] = form
+    if request.GET.get('email', '').lower().strip() == wishlist.email.lower().strip():
+        context['sent_to'] = request.GET['email']
+        context['WEBMASTER_FROM'] = settings.WEBMASTER_FROM
+    else:
+        context['sent_to'] = None
+    if wishlist.email:
+        context['email_obfuscated'] = utils.obfuscate_email(wishlist.email)
+    else:
+        context['email_obfuscated'] = None
+    return render(request, 'main/wishlist_taken.html', context)

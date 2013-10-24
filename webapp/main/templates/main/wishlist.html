@@ -10,6 +10,10 @@
 .help-block,
 .thank-you,
 form.pay .other-error { display:none; }
+form.pay .other-error p {
+    color: red;
+    font-weight: bold;
+}
 </style>
 {% endblock %}
 
@@ -34,9 +38,9 @@ form.pay .other-error { display:none; }
           <h2>This is what I want the most</h2>
         {% else %}
           {% if wishlist.name %}
-            <h2>This is what <i>{{ wishlist.name }}</i> want the most</h2>
+            <h2>This is what <i>{{ wishlist.name }}</i> wants the most</h2>
           {% else %}
-            <h2>This is what <i>{{ wishlist.email }}</i> want the most</h2>
+            <h2>This is what <i>{{ wishlist.email }}</i> wants the most</h2>
           {% endif %}
         {% endif %}
         {% thumbnail item.picture "200x200" as thumb %}
@@ -81,8 +85,8 @@ form.pay .other-error { display:none; }
         <div class="your-contribution">
           <h3>You're A Great Friend!</h3>
           {% for payment in contributions %}
-          <p>Thank you for your contribution of
-            <span class="price">${{ payment.amount|floatformat:2 }}</span>.</p>
+          <h4>Thank you for your contribution of
+            <span class="price">${{ payment.amount|floatformat:2 }}</span>.</h4>
           {% endfor %}
         </div>
         {% endif %}
@@ -113,9 +117,10 @@ form.pay .other-error { display:none; }
           </div>
           <div class="form-group">
             <label for="id_amount" class="col-lg-4 control-label">Amount:</label>
-            <div class="col-lg-4">
+            <div class="col-lg-6">
               <input type="text" id="id_amount" name="amount" class="form-control" placeholder="e.g. $15">
-              + 3% transaction fee
+              + {{ PAYMENT_TRANSACTION_PERCENTAGE }}% + ${{ PAYMENT_TRANSACTION_AMOUNT|floatformat:2 }} transaction fee [<a data-toggle="modal" href="#transaction-fee">tell me more</a>]
+              <span class="help-block"></span>
             </div>
           </div>
           <div class="form-group credit-card" style="display:none">
@@ -123,7 +128,8 @@ form.pay .other-error { display:none; }
             <div class="form-group">
               <label for="id_email" class="col-lg-4 control-label">Your Email:</label>
               <div class="col-lg-6">
-                <input type="text" id="id_email" name="email" class="form-control" placeholder="your@email.com">
+                <input type="text" id="id_email" name="email" class="form-control" placeholder="your@email.com"
+                 value="{% if email %}{{ email }}{% endif %}">
                 <span class="help-block"><!--So you can get a receipt and if something happens with the payment--></span>
               </div>
             </div>
@@ -181,6 +187,64 @@ form.pay .other-error { display:none; }
     {% endif %}
     </div>
 
+  <!-- Modal -->
+  <div class="modal fade" id="transaction-fee" tabindex="-1" role="dialog" aria-labelledby="about-transaction-fee" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">About the Transaction Fee</h4>
+        </div>
+        <div class="modal-body">
+          <p>
+          <a href="https://www.balancedpayments.com/" target="_blank"><b>Balanced Payments&trade;</b></a> takes care of all credit card processing.<br>
+          They <b>charge us 2.9%</b> of the amount plus a <b>base of 30 cents</b> for every transaction.
+          <a href="https://www.balancedpayments.com/pricing">See for yourself</a>.
+          </p>
+          <p>
+          To also cover the <strong>shipping cost</strong> we add a <b>tiny margin</b> on top of what Balanced Payments&trade; charges.
+          </p>
+          <p><b>For example...</b><br>
+          If you make a contribution of <b class="price">${{ fee_example.amount|floatformat:2 }}</b> towards your friends Wish List, then...
+          </p>
+          <div class="progress">
+            <div class="progress-bar progress-bar-success" style="width: {{ fee_example.amount_percentage }}%">
+              <span class="sr-only">{{ fee_example.amount_percentage }}% Complete (success)</span>
+            </div>
+            <div class="progress-bar progress-bar-warning" style="width: {{ fee_example.base_percentage }}%">
+              <span class="sr-only">{{ fee_example.base_percentage }}% Complete (warning)</span>
+            </div>
+            <div class="progress-bar progress-bar-danger" style="width: {{ fee_example.percentage_percentage }}%">
+              <span class="sr-only">{{ fee_example.base_percentage }}% Complete (danger)</span>
+            </div>
+          </div>
+          <table class="table table-condensed">
+            <tr>
+              <td>Your contribution towards the Wish List</td>
+              <td style="text-align:right">${{ fee_example.amount|floatformat:2 }}</td>
+            </tr>
+            <tr>
+              <td>Transaction fee (base)</td>
+              <td style="text-align:right">${{ PAYMENT_TRANSACTION_AMOUNT|floatformat:2 }}</td>
+            </tr>
+            <tr>
+              <td>Transaction fee (percentage)</td>
+              <td style="text-align:right">${{ fee_example.percentage|floatformat:2 }}</td>
+            </tr>
+            <tr>
+              <td><b>Total debited on your card:</b></td>
+              <td style="text-align:right"><b>${{ fee_example.total|floatformat:2 }}</b></td>
+            </tr>
+          </table>
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
 {% endblock %}
 
 {% block javascript %}
@@ -192,4 +256,5 @@ form.pay .other-error { display:none; }
 {% endif %}
 <script src="{{ STATIC_URL }}assets/js/jquery-1.10.2.min.js"></script>
 <script src="{{ STATIC_URL }}main/js/wishlist.js"></script>
+<script async src="{{ STATIC_URL }}assets/js/bootstrap.modal.min.js"></script>
 {% endblock %}
