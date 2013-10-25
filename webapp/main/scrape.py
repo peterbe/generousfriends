@@ -12,6 +12,9 @@ from pyquery import PyQuery
 import requests
 
 
+_ROOT_DIR = os.path.join(settings.MEDIA_ROOT, '.scrape-cache')
+
+
 class NotFoundError(Exception):
     pass
 
@@ -41,8 +44,7 @@ def _download(url, cache_seconds=3600 * 20):
     else:
         key += '.html'
     cache_file = os.path.join(
-        settings.MEDIA_ROOT,
-        '.cache',
+        _ROOT_DIR,
         key[:2], key[2:4], key[4:]
     )
     if os.path.isfile(cache_file):
@@ -57,8 +59,8 @@ def _download(url, cache_seconds=3600 * 20):
         # treat 500 errors differently?
         raise NotFoundError(response.status_code)
     html = response.content
-    if not os.path.isdir('.cache'):
-        os.mkdir('.cache')
+    if not os.path.isdir(_ROOT_DIR):
+        mkdir(_ROOT_DIR)
     dirname = os.path.dirname(cache_file)
     mkdir(dirname)
     with open(cache_file, 'w') as f:
