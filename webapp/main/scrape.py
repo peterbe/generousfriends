@@ -6,6 +6,7 @@ import hashlib
 import decimal
 from cStringIO import StringIO
 
+from django.conf import settings
 from PIL import Image
 from pyquery import PyQuery
 import requests
@@ -39,7 +40,11 @@ def _download(url, cache_seconds=3600 * 20):
         key += '.%s' % url.split('.')[-1]
     else:
         key += '.html'
-    cache_file = os.path.join('.cache', key[:2], key[2:4], key[4:])
+    cache_file = os.path.join(
+        settings.MEDIA_ROOT,
+        '.cache',
+        key[:2], key[2:4], key[4:]
+    )
     if os.path.isfile(cache_file):
         age = time.time() - os.stat(cache_file)[stat.ST_MTIME]
         if age < cache_seconds:
