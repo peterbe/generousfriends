@@ -28,4 +28,7 @@ urlpatterns = patterns(
     url(r'^(?P<identifier>[0-9A-Z]{10,15})/already-set-up/$',
         views.wishlist_taken,
         name='wishlist_taken'),
+    url(r'^about-us/$',
+        views.about_us,
+        name='about_us'),
 )

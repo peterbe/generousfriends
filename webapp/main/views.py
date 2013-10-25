@@ -481,3 +481,7 @@ def wishlist_taken(request, identifier):
     else:
         context['email_obfuscated'] = None
     return render(request, 'main/wishlist_taken.html', context)
+
+
+def about_us(request):
+    return render(request, 'main/about_us.html')
