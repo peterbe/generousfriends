@@ -190,7 +190,7 @@ def wishlist_home(request, identifier):
         yours = True
         if request.user.is_authenticated() and not wishlist.user:
             wishlist.user = request.user
-            wishlist.verified = True
+            wishlist.verified = utils.now()
             wishlist.save()
 
         if request.method == 'POST':
