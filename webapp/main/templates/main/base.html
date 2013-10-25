@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="author" content="Peter">
+    <meta name="author" content="Peter Bengtsson">
+    <meta name="description" content="Get What You Really Want For Christmas - Crowdfund your wish list">
 
     <title>{% block document_title %}Generous Friends{% endblock %}</title>
 
@@ -11,7 +12,7 @@
     <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="{{ STATIC_URL }}main/css/jumbotron-narrow.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}main/css/main.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -26,22 +27,20 @@
 
     <div class="container">
       <div class="header">
-      {% if request.user.is_authenticated %}Logged in
-      ({{ request.user.first_name }}){% endif %}
         <ul class="nav nav-pills pull-right">
 
           <li class="active"><a href="#">Home</a></li>
           <li><a href="#">About</a></li>
           <li><a href="#">Contact</a></li>
         </ul>
-        <h3 class="text-muted"><a href="/">Generous Friends</a></h3>
+        <h3 class="text-muted"><a href="/">Wish List Granted</a></h3>
       </div>
 
       {% block main %}
       {% endblock %}
 
       <div class="footer">
-        <p>&copy; Generous Friends</p>
+        <p>&copy; Wish List Granted</p>
       </div>
 
     </div> <!-- /container -->

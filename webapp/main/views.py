@@ -34,6 +34,25 @@ def home(request):
     pass
 
 
+def handler500(request):
+    import traceback
+    import sys
+    data = {}
+    if 1 or settings.TRACEBACKS_ON_500:
+        err_type, err_value, err_traceback = sys.exc_info()
+        out = StringIO()
+        traceback.print_exc(file=out)
+        traceback_formatted = out.getvalue()
+        data['err_type'] = err_type
+        data['err_value'] = err_value
+        data['err_traceback'] = traceback_formatted
+        data['report_traceback'] = True
+    else:
+        data['report_traceback'] = False
+
+    return render(request, '500.html', data, status=500)
+
+
 @utils.json_view
 def wishlist_start(request):
     context = {}

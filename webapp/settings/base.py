@@ -1,7 +1,6 @@
 from decimal import Decimal
 
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+DEBUG = TEMPLATE_DEBUG = False
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -39,7 +38,7 @@ SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
-USE_I18N = True
+USE_I18N = False
 
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale.
@@ -97,7 +96,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    #'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -118,11 +117,11 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
-    'django.contrib.messages',
+    #'django.contrib.messages',
     'django.contrib.staticfiles',
     'webapp.signin',
     'webapp.main',
-    'django_browserid',
+    #'django_browserid',
     'sorl.thumbnail',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
@@ -162,7 +161,7 @@ LOGGING = {
 }
 
 AUTHENTICATION_BACKENDS = (
-   'django_browserid.auth.BrowserIDBackend',
+   #'django_browserid.auth.BrowserIDBackend',
    'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -176,7 +175,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     'django.core.context_processors.tz',
     #'django.contrib.messages.context_processors.messages',
-    'django_browserid.context_processors.browserid',
+    #'django_browserid.context_processors.browserid',
     'webapp.main.context_processors.base',
 )
 
@@ -192,9 +191,9 @@ LOGOUT_REDIRECT_URL = '/signin/signedout/'
 
 COOKIE_SALT = 'set in settings/local.py'
 
-BROWSERID_REQUEST_ARGS = {'siteName': 'Generous Friends'}
+#BROWSERID_REQUEST_ARGS = {'siteName': 'Generous Friends'}
 
-WEBMASTER_FROM = 'Generous Friends <noreply@generousfriends.com>'  # temp
+WEBMASTER_FROM = 'Wish List Granted <noreply@wishlistgranted.com>'
 
 PAYMENT_TRANSACTION_PERCENTAGE = 3.5  #%
 PAYMENT_TRANSACTION_AMOUNT = Decimal('1.00')  #$

@@ -5,6 +5,9 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 #admin.autodiscover()
 
+handler500 = 'webapp.main.views.handler500'
+
+
 urlpatterns = patterns('',
 #    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 #    url(r'^admin/', include(admin.site.urls)),
