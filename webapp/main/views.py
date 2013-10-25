@@ -60,14 +60,15 @@ def wishlist_start(request):
         form = forms.WishlistIDForm(request.POST)
         if form.is_valid():
             identifier = form.cleaned_data['identifier']
+            admin_url = reverse('main:wishlist_admin', args=(identifier,))
+            if models.Wishlist.objects.filter(identifier=identifier):
+                return {'redirect': reverse('main:wishlist_taken', args=(identifier,))}
+
             cache_key = 'scraping-%s' % identifier
             if cache.get(cache_key):
                 return {'error': 'Still working on %s' % identifier}
-            admin_url = reverse('main:wishlist_admin', args=(identifier,))
 
-            if models.Wishlist.objects.filter(identifier=identifier):
-                return {'redirect': reverse('main:wishlist_taken', args=(identifier,))}
-            cache.set(cache_key, identifier, 60)
+            cache.set(cache_key, identifier, 10)
             try:
                 information = scrape.scrape(identifier)
                 items = information['items']
