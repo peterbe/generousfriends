@@ -29,6 +29,14 @@ form.pay .other-error p {
     color: red;
     font-weight: bold;
 }
+
+.share {
+    font-weight: bold;
+    text-align: center;
+}
+.share a {
+    font-size: 24px;
+}
 </style>
 {% endblock %}
 
@@ -65,16 +73,31 @@ form.pay .other-error p {
           <h2>This is what <i>{{ wishlist.name_or_email }}</i> wants the most</h2>
         {% endif %}
         {% thumbnail item.picture "200x200" as thumb %}
-        <img src="{{ thumb.url }}" width="{{ thumb.width }}" height="{{ item.height }}" alt="{{ item.title }}">
+        <a href="{{ item.affiliates_url_or_url }}" target="_blank"><img src="{{ thumb.url }}" width="{{ thumb.width }}" height="{{ item.height }}" alt="{{ item.title }}"></a>
         {% endthumbnail %}
         <h4>{{ item.title }}</h4>
         <h4 class="price">${{ item.price|floatformat:2 }}</h4>
         <p>You can read all about it on
-        <a href="{% if item.affiliates_url %}{{ item.affiliates_url }}{% else %}{{ item.url }}{% endif %}" target="_blank">Amazon.com</a>
+        <a href="{{ item.affiliates_url_or_url }}" target="_blank">Amazon.com</a>
         </p>
       </div>
 
     <div class="row marketing">
+
+      <div class="col-lg-12">
+
+        <h4>Progress So Far <span class="price progress-amount">${{ progress_amount|floatformat:2 }}</span>
+        out of <span class="price">${{ item.price|floatformat:2 }}</span></h4>
+        <div class="progress">
+          <div class="progress-bar {% if progress_complete %}progress-bar-success{% else %}progress-bar-info{% endif %}" role="progressbar"
+               aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100"
+               style="width: {{ progress_percent }}%">
+            <span class="sr-only">{{ progress_percent }}%</span>
+            <span class="label">{{ progress_percent }}%</span>
+          </div>
+        </div>
+      </div>
+
     {% if yours %}
       {% if not payments %}
         <!--<p>Changed your mind? <a href="{% url 'main:wishlist_admin' wishlist.identifier %}">Want to pick a different item?</a></p>-->
@@ -88,23 +111,10 @@ form.pay .other-error p {
     {% else %}
 
       <div class="col-lg-12">
-        <h4>Progress So Far <span class="price progress-amount">${{ progress_amount|floatformat:2 }}</span>
-        out of <span class="price">${{ item.price|floatformat:2 }}</span></h4>
-        <div class="progress">
-          <div class="progress-bar progress-bar-info" role="progressbar"
-               aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100"
-               style="width: {{ progress_percent }}%">
-            <span class="sr-only">{{ progress_percent }}%</span>
-            <span class="label">{{ progress_percent }}%</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-12">
 
         {% if contributions %}
         <div class="your-contribution">
-          <h3>You're A Great Friend!</h3>
+          <h3>What A Kind Person You Are!</h3>
           {% for payment in contributions %}
           <h4>Thank you for your contribution of
             <span class="price">${{ payment.amount|floatformat:2 }}</span>.</h4>
@@ -210,7 +220,6 @@ form.pay .other-error p {
         {% else %}
         <p>No contributions can be made on Wish Lists that haven't yet been verified.</p>
 	{% endif %}
-
 
       </div>
 

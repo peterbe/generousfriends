@@ -57,6 +57,10 @@ class Item(models.Model):
         else:
             return self.price
 
+    @property
+    def affiliates_url_or_url(self):
+        return self.affiliates_url or self.url
+
 
 class Payment(models.Model):
     wishlist = models.ForeignKey(Wishlist)
