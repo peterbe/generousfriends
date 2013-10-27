@@ -65,7 +65,11 @@ def wishlist_start(request):
             identifier = form.cleaned_data['identifier']
             admin_url = reverse('main:wishlist_admin', args=(identifier,))
             if models.Wishlist.objects.filter(identifier=identifier):
-                return {'redirect': reverse('main:wishlist_taken', args=(identifier,))}
+                wishlist = models.Wishlist.objects.get(identifier=identifier)
+                if wishlist.email:
+                    return {'redirect': reverse('main:wishlist_taken', args=(identifier,))}
+                else:
+                    wishlist.delete()
 
             cache_key = 'scraping-%s' % identifier
             if cache.get(cache_key):

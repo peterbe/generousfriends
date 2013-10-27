@@ -1,3 +1,4 @@
+import codecs
 import urlparse
 import time
 import stat
@@ -36,7 +37,7 @@ def mkdir(newdir):
         os.mkdir(newdir)
 
 
-def _download(url, cache_seconds=3600 * 20):
+def _download(url, cache_seconds=3600 * 20, binary=False):
     key = hashlib.md5(url).hexdigest()
 
     if '.' in url and len(url.split('.')[-1]) < 5:
@@ -50,7 +51,14 @@ def _download(url, cache_seconds=3600 * 20):
     if os.path.isfile(cache_file):
         age = time.time() - os.stat(cache_file)[stat.ST_MTIME]
         if age < cache_seconds:
-            return open(cache_file).read()
+            if binary:
+                opener = lambda x: open(x).read()
+            else:
+                opener = lambda x: codecs.open(x, 'r', 'utf-8').read()
+            try:
+                return opener(cache_file)
+            except UnicodeDecodeError:
+                pass
         os.remove(cache_file)
 
     print "CACHE MISS", url
@@ -58,14 +66,22 @@ def _download(url, cache_seconds=3600 * 20):
     if response.status_code < 200 or response.status_code >= 400:
         # treat 500 errors differently?
         raise NotFoundError(response.status_code)
-    html = response.content
+    if binary:
+        content = response.content
+    else:
+        content = response.text
+    print repr(content[:100])
     if not os.path.isdir(_ROOT_DIR):
         mkdir(_ROOT_DIR)
     dirname = os.path.dirname(cache_file)
     mkdir(dirname)
-    with open(cache_file, 'w') as f:
-        f.write(html)
-    return html
+    if binary:
+        writer = lambda x: open(x, 'wb')
+    else:
+        writer = lambda x: codecs.open(x, 'w', 'utf-8')
+    with writer(cache_file) as f:
+        f.write(content)
+    return content
 
 
 def _parse_price(price):
@@ -112,10 +128,14 @@ def scrape(wishlistid):
                 if image_url in _checked:
                     continue
                 _checked.add(image_url)
-                content = _download(image_url)
+                content = _download(image_url, binary=True)
                 if content:
                     f = StringIO(content)
-                    img = Image.open(f)
+                    try:
+                        img = Image.open(f)
+                    except IOError:
+                        print "Was unable to open (as image)", image_url
+                        continue
                     width, __ = img.size
                     if width <= 40:
                         # thumbnail
@@ -126,8 +146,8 @@ def scrape(wishlistid):
                         'url': image_url,
                         'size': img.size
                     }
-
-            items.append(item)
+            if 'picture' in item:
+                items.append(item)
     return {'items': items, 'name': name}
 
 
