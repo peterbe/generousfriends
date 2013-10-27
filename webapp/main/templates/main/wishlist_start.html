@@ -6,10 +6,10 @@
 
       <div class="jumbotron">
         <h3>Get What You REALLY Want for Christmas</h3>
-        <p class="lead">Enter your Amazon&trade; Wish List ID (or URL)</p>
+        <p class="lead">Enter your Amazon&trade; Wish List URL</p>
         <form action="." method="post">
         {% csrf_token %}
-        <input type="text" name="identifier" class="form-control" placeholder="E.g. 4QOY1EVGY or http://www.amazon.com/gp/registry/wishlist/4QOY1EVGY/">
+        <input type="text" name="identifier" class="form-control" placeholder="E.g. http://www.amazon.com/gp/registry/wishlist/4QOY1EVGY/">
         <button type="submit" class="btn btn-primary">Submit your Wish List</button>
 
         <div class="form-error alert alert-danger alert-dismissable" style="display:none">
