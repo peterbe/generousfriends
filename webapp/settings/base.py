@@ -197,3 +197,5 @@ WEBMASTER_FROM = 'Wish List Granted <noreply@wishlistgranted.com>'
 
 PAYMENT_TRANSACTION_PERCENTAGE = 3.5  #%
 PAYMENT_TRANSACTION_AMOUNT = Decimal('1.00')  #$
+
+TRACEBACKS_ON_500 = False

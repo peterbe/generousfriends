@@ -8,3 +8,4 @@ django-browserid==0.9
 sorl-thumbnail==11.12
 psycopg2
 balanced==0.11.14
+premailer==1.13

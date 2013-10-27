@@ -4,6 +4,7 @@ from StringIO import StringIO
 
 import balanced
 import requests
+import premailer
 
 from django import http
 from django.core.urlresolvers import reverse
@@ -13,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import RequestSite
 from django.conf import settings
 from django.template.loader import render_to_string
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.core.files import File
 from django.db import transaction
 from django.db.models import Sum
@@ -22,6 +23,8 @@ from . import scrape
 from . import models
 from . import utils
 from . import forms
+
+from html2text import html2text
 
 
 def start(request):
@@ -38,7 +41,7 @@ def handler500(request):
     import traceback
     import sys
     data = {}
-    if 1 or settings.TRACEBACKS_ON_500:
+    if settings.TRACEBACKS_ON_500:
         err_type, err_value, err_traceback = sys.exc_info()
         out = StringIO()
         traceback.print_exc(file=out)
@@ -319,19 +322,25 @@ def _send_receipt(payment, request):
         'base_url': base_url,
         'url': reverse('main:wishlist', args=(wishlist.identifier,)),
     }
-    body = render_to_string('main/_receipt.html', context)
+    html_body = render_to_string('main/_receipt.html', context)
     headers = {'Reply-To': payment.email}
     subject = (
         "Receipt for your contribution to %s's Wish List"
         % (wishlist.name or wishlist.email)
     )
-    email = EmailMessage(
+    html_body = premailer.transform(
+        html_body,
+        base_url=base_url
+    )
+    body = html2text(html_body)
+    email = EmailMultiAlternatives(
         subject,
         body,
         settings.WEBMASTER_FROM,
         [payment.email],
         headers=headers,
     )
+    email.attach_alternative(html_body, "text/html")
     email.send()
 
 
@@ -425,16 +434,26 @@ def _send_verification_email(wishlist, request):
         'base_url': base_url,
         'url': reverse('main:wishlist_verify', args=(verification.identifier,)),
     }
-    body = render_to_string('main/_verification.html', context)
+    html_body = render_to_string('main/_verification.html', context)
+    #with open('example.html', 'w') as f:
+    #    f.write(html_body)
+
+    html_body = premailer.transform(
+        html_body,
+        base_url=base_url
+    )
+    body = html2text(html_body)
+
     headers = {'Reply-To': wishlist.email}
     subject = 'Verify your Wish List'
-    email = EmailMessage(
+    email = EmailMultiAlternatives(
         subject,
         body,
         settings.WEBMASTER_FROM,
         [wishlist.email],
         headers=headers,
     )
+    email.attach_alternative(html_body, "text/html")
     email.send()
 
 
