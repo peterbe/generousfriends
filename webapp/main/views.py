@@ -173,6 +173,7 @@ def wishlist_home(request, identifier):
             progress_amount, progress_percent = get_progress(item)
             data = {
                 'amount': float(amount),
+                'actual_amount': float(actual_amount),
                 'progress_amount': progress_amount,
                 'progress_percent': progress_percent
             }

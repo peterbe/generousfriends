@@ -1,7 +1,17 @@
 {% extends "main/base.html" %}
 {% load thumbnail %}
 
-{% block document_title %}This is what I want the most{% endblock %}
+{% block document_title %}
+{% if yours %}
+This is what I want the most
+{% else %}
+  {% if wishlist.name %}
+    This is what {{ wishlist.name }} wants the most
+  {% else %}
+    This is what {{ wishlist.email }} wants the most
+  {% endif %}
+{% endif %}
+{% endblock %}
 
 {% block extra_head %}
 <style type="text/css">
@@ -99,8 +109,13 @@ form.pay .other-error p {
         <div class="thank-you">
           <h1>Thank You ...in advance</h2>
           <p>Your contribution of <b class="price amount"></b> has been accepted by
-          <b>Balanced Payments&trade;</b>.</p>
-          <p>If the goal is not reached, your money will be refunded without any additional processing fees.</p>
+          <b>Balanced Payments&trade;</b>. You will see a charge of <b class="price actual-amount"></b>
+          on you card.</p>
+
+          <!-- this needs to depend on if it was met now or not -->
+          <p class="not-yet-met">
+            If the goal is not reached, your money will be refunded without any processing fees.
+          </p>
           <h4>Again, Thank You!</h4>
         </div>
 

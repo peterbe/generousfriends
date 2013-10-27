@@ -45,6 +45,10 @@ function handleBalancedCallback(response, form) {
       } else {
         $('form.pay').hide();
         $('.thank-you .amount').text('$' + response.amount.toFixed(2));
+        $('.thank-you .actual-amount').text('$' + response.actual_amount.toFixed(2));
+        if (response.progress_percent >= 100.) {
+          $('.thank-you .not-yet-met').hide();
+        }
         $('.thank-you').show();
         setTimeout(function() {
           $('.progress .progress-bar').css('width', response.progress_percent + '%');
