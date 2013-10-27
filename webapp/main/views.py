@@ -1,5 +1,7 @@
+import time
 import os
 import decimal
+import datetime
 from StringIO import StringIO
 
 import balanced
@@ -18,6 +20,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.files import File
 from django.db import transaction
 from django.db.models import Sum
+from django.views.decorators.csrf import csrf_exempt
 
 from . import scrape
 from . import models
@@ -548,3 +551,20 @@ def wishlist_taken(request, identifier):
 
 def about_us(request):
     return render(request, 'main/about_us.html')
+
+
+
+@csrf_exempt
+def inbound_email(request):
+    body = request.body
+    root = os.path.join(settings.MEDIA_ROOT, '.inbound-emails')
+    today = datetime.date.today()
+    save_dir = os.path.join(root, today.strftime('%Y/%m/%d'))
+    utils.mkdir(save_dir)
+    filename = '%s.json' % int(time.time())
+    filepath = os.path.join(save_dir, filename)
+    with open(filepath, 'w') as f:
+        f.write(body)
+        print "SAVED", filepath
+    print repr(body)
+    return http.HttpResponse('ok')

@@ -1,3 +1,4 @@
+import time
 import codecs
 import urlparse
 import time
@@ -18,23 +19,6 @@ _ROOT_DIR = os.path.join(settings.MEDIA_ROOT, '.scrape-cache')
 
 class NotFoundError(Exception):
     pass
-
-def mkdir(newdir):
-    """works the way a good mkdir should :)
-        - already exists, silently complete
-        - regular file in the way, raise an exception
-        - parent directory(ies) does not exist, make them as well
-    """
-    if os.path.isdir(newdir):
-        return
-    if os.path.isfile(newdir):
-        raise OSError("a file with the same name as the desired "
-                      "dir, '%s', already exists." % newdir)
-    head, tail = os.path.split(newdir)
-    if head and not os.path.isdir(head):
-        mkdir(head)
-    if tail:
-        os.mkdir(newdir)
 
 
 def _download(url, cache_seconds=3600 * 20, binary=False):
