@@ -29,6 +29,10 @@ class Wishlist(models.Model):
     def verification_email_sent(self):
         return bool(Verification.objects.filter(wishlist=self))
 
+    @property
+    def name_or_email(self):
+        return self.name or self.email
+
 
 class Item(models.Model):
     wishlist = models.ForeignKey(Wishlist)

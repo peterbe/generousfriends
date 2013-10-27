@@ -6,7 +6,7 @@
     <meta name="author" content="Peter Bengtsson">
     <meta name="description" content="Get What You Really Want For Christmas - Crowdfund your wish list">
 
-    <title>{% block document_title %}Generous Friends{% endblock %}</title>
+    <title>{% block document_title %}{{ PROJECT_TITLE }}{% endblock %}</title>
 
     <!-- Bootstrap core CSS -->
     <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet">
@@ -33,7 +33,7 @@
           <li><a href="{% url 'main:about_us' %}">About This Site</a></li>
           <!--<li><a href="#">Contact</a></li>-->
         </ul>
-        <h3 class="text-muted"><a href="/">Wish List Granted</a></h3>
+        <h3 class="text-muted"><a href="/">{{ PROJECT_TITLE }}</a></h3>
       </div>
 
       {% block main %}

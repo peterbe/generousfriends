@@ -5,15 +5,20 @@
 {% if yours %}
 This is what I want the most
 {% else %}
-  {% if wishlist.name %}
-    This is what {{ wishlist.name }} wants the most
-  {% else %}
-    This is what {{ wishlist.email }} wants the most
-  {% endif %}
+  This is what {{ wishlist.name_or_email }} wants the most
 {% endif %}
 {% endblock %}
 
 {% block extra_head %}
+{% if wishlist.verified %}
+<meta property="og:title" content="This is what {{ wishlist.name_or_email }} wants the most: {{ item.title }}">
+<meta property="og:description" content="{{ PROJECT_STRAPLINE }}">
+{% thumbnail item.picture "200x200" as thumb %}
+<meta property="og:image" content="{{ thumb.url }}">
+<meta property="og:image:width" content="{{ thumb.width }}">
+<meta property="og:image:height" content="{{ thumb.height }}">
+{% endthumbnail %}
+{% endif %}
 <style type="text/css">
 .please-wait,
 .credit-card,
@@ -47,11 +52,7 @@ form.pay .other-error p {
         {% if yours %}
           <h2>This is what I want the most</h2>
         {% else %}
-          {% if wishlist.name %}
-            <h2>This is what <i>{{ wishlist.name }}</i> wants the most</h2>
-          {% else %}
-            <h2>This is what <i>{{ wishlist.email }}</i> wants the most</h2>
-          {% endif %}
+          <h2>This is what <i>{{ wishlist.name_or_email }}</i> wants the most</h2>
         {% endif %}
         {% thumbnail item.picture "200x200" as thumb %}
         <img src="{{ thumb.url }}" width="{{ thumb.width }}" height="{{ item.height }}" alt="{{ item.title }}">

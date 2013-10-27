@@ -29,6 +29,24 @@ from html2text import html2text
 
 def start(request):
     context = {}
+    your_wishlist_identifier = request.get_signed_cookie(
+        'wishlist',
+        None,
+        salt=settings.COOKIE_SALT
+    )
+    visited_wishlists = []
+    for identifier in request.session.get('visited_wishlists', []):
+        try:
+            wishlist = models.Wishlist.objects.get(identifier=identifier)
+            if your_wishlist_identifier == wishlist.identifier:
+                wishlist.yours = True
+                visited_wishlists.append(wishlist)
+            elif wishlist.verified:
+                wishlist.yours = False
+                visited_wishlists.append(wishlist)
+        except models.Wishlist.DoesNotExist:
+            continue
+    context['visited_wishlists'] = visited_wishlists
     return render(request, 'main/start.html', context)
 
 
@@ -136,9 +154,11 @@ def get_progress(item):
 @utils.json_view
 def wishlist_home(request, identifier):
     wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
-    item, = models.Item.objects.filter(wishlist=wishlist, preference=1).order_by('-modified')[:1]
-    if not item:
+    items = models.Item.objects.filter(wishlist=wishlist, preference=1).order_by('-modified')[:1]
+    if not items:
         return redirect('main:wishlist_admin', wishlist.identifier)
+    else:
+        item, = items
 
     if request.method == 'POST' and 'uri' in request.POST:
         form = forms.PaymentForm(request.POST, item=item)
@@ -228,6 +248,11 @@ def wishlist_home(request, identifier):
                 return redirect('main:wishlist', wishlist.identifier)
     elif not wishlist.verified:
         return http.HttpResponse('This Wish List has not yet been verified.')
+
+    visited = request.session.get('visited_wishlists', [])
+    if wishlist.identifier not in visited:
+        visited.append(wishlist.identifier)
+        request.session['visited_wishlists'] = visited
 
     if request.GET.get('preview'):
         yours = False
