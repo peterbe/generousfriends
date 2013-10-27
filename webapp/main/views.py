@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import RequestSite
 from django.conf import settings
 from django.template.loader import render_to_string
-from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives
 from django.core.files import File
 from django.db import transaction
 from django.db.models import Sum
@@ -453,6 +453,14 @@ def _send_verification_email(wishlist, request):
         [wishlist.email],
         headers=headers,
     )
+    print "SENDING"
+    print body
+    print html_body
+    print "TO"
+    print [wishlist.email]
+    print "FROM"
+    print settings.WEBMASTER_FROM
+    print
     email.attach_alternative(html_body, "text/html")
     email.send()
 
