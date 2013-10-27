@@ -453,14 +453,6 @@ def _send_verification_email(wishlist, request):
         [wishlist.email],
         headers=headers,
     )
-    print "SENDING"
-    print body
-    print html_body
-    print "TO"
-    print [wishlist.email]
-    print "FROM"
-    print settings.WEBMASTER_FROM
-    print
     email.attach_alternative(html_body, "text/html")
     email.send()
 
@@ -468,7 +460,7 @@ def _send_verification_email(wishlist, request):
 def wishlist_verify(request, identifier):
     verification = get_object_or_404(models.Verification, identifier=identifier)
     wishlist = verification.wishlist
-    wishlist.verified = True
+    wishlist.verified = utils.now()
     wishlist.save()
     response = redirect('main:wishlist', wishlist.identifier)
     response.set_signed_cookie(
