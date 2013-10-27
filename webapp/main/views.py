@@ -152,8 +152,19 @@ def get_progress(item):
 
 
 @utils.json_view
-def wishlist_home(request, identifier):
-    wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
+def wishlist_home(request, identifier, fuzzy=False):
+    try:
+        wishlist = models.Wishlist.objects.get(identifier=identifier)
+    except models.Wishlist.DoesNotExist:
+        if not fuzzy:
+            raise http.Http404
+        _search = models.Wishlist.objects.filter(identifier__istartswith=identifier)
+        if _search.count() == 1:
+            wishlist, = _search
+            return redirect('main:wishlist', wishlist.identifier)
+        else:
+            raise http.Http404
+
     items = models.Item.objects.filter(wishlist=wishlist, preference=1).order_by('-modified')[:1]
     if not items:
         return redirect('main:wishlist_admin', wishlist.identifier)
@@ -246,8 +257,8 @@ def wishlist_home(request, identifier):
                 request.user.first_name = request.POST.get('first_name')
                 request.user.save()
                 return redirect('main:wishlist', wishlist.identifier)
-    elif not wishlist.verified:
-        return http.HttpResponse('This Wish List has not yet been verified.')
+    #elif not wishlist.verified:
+    #    return http.HttpResponse('This Wish List has not yet been verified.')
 
     visited = request.session.get('visited_wishlists', [])
     if wishlist.identifier not in visited:

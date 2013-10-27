@@ -34,6 +34,16 @@ form.pay .other-error p {
 
 {% block main %}
 
+    {% if not wishlist.verified %}
+    <div class="row marketing">
+        <div class="form-error alert alert-danger alert-dismissable">
+        <h3>Wish List Not Verified</h3>
+        <p>This Wish List has not been verified yet. Meaning the owner of it has not verified their
+        email address.</p>
+        </div>
+    </div>
+    {% endif %}
+
     {% if yours and not wishlist.verified %}
       {% if wishlist.verification_email_sent %}
         <div class="row marketing">
@@ -120,6 +130,7 @@ form.pay .other-error p {
           <h4>Again, Thank You!</h4>
         </div>
 
+	{% if wishlist.verified %}
         <form class="form-horizontal pay" method="post" role="form">{% csrf_token %}
           {% if contributions %}
           <h4>Make Another Contribution</h4>
@@ -196,6 +207,9 @@ form.pay .other-error p {
             <a href="https://www.balancedpayments.com" target="_blank"><img src="{{ STATIC_URL }}main/images/balanced-payments.png" alt="Balanced Payments"></a>
           </div>
         </form>
+        {% else %}
+        <p>No contributions can be made on Wish Lists that haven't yet been verified.</p>
+	{% endif %}
 
 
       </div>
