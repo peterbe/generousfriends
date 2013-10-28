@@ -13,6 +13,7 @@ from PIL import Image
 from pyquery import PyQuery
 import requests
 
+from .utils import mkdir
 
 _ROOT_DIR = os.path.join(settings.MEDIA_ROOT, '.scrape-cache')
 
@@ -75,7 +76,10 @@ def _parse_price(price):
         pass
 
 
-def scrape(wishlistid):
+def scrape(wishlistid, shallow=False):
+    """
+    if @shallow don't bother downloading the images
+    """
     url = 'http://www.amazon.com/registry/wishlist/%s?layout=compact' % wishlistid
     html = _download(url)
     doc = PyQuery(html)
@@ -108,6 +112,8 @@ def scrape(wishlistid):
             item_image_url = None
             _checked = set()
             for img in item_doc('#main-image-container img,#main-image-content img'):
+                if shallow:
+                    break
                 image_url = img.attrib['src']
                 if image_url in _checked:
                     continue

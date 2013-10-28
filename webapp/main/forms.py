@@ -3,8 +3,8 @@ import decimal
 
 from django import forms
 
+from . import utils
 
-WISHLIST_URL_ID_REGEX = re.compile('/([0-9A-Z]{10,15})/')
 WISHLIST_ID_REGEX = re.compile('^[0-9A-Z]{10,15}$')
 
 
@@ -15,9 +15,8 @@ class WishlistIDForm(forms.Form):
     def clean_identifier(self):
         value = self.cleaned_data['identifier']
         if '://' in value:
-            try:
-                value = WISHLIST_URL_ID_REGEX.findall(value)[0]
-            except IndexError:
+            value = utils.find_wishlist_identifier(value)
+            if not value:
                 raise forms.ValidationError("Doesn't look like a valid Wish List ID")
 
         if not WISHLIST_ID_REGEX.match(value):

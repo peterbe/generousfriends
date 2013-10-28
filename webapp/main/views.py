@@ -1,7 +1,9 @@
+import json
 import time
 import os
 import decimal
 import datetime
+import hashlib
 from StringIO import StringIO
 
 import balanced
@@ -254,6 +256,7 @@ def wishlist_home(request, identifier, fuzzy=False):
             wishlist.user = request.user
             wishlist.verified = utils.now()
             wishlist.save()
+            _send_wishlist_created_email(wishlist, request)
 
         if request.method == 'POST':
             if request.user.is_authenticated() and request.POST.get('first_name'):
@@ -482,8 +485,6 @@ def _send_verification_email(wishlist, request):
         'url': reverse('main:wishlist_verify', args=(verification.identifier,)),
     }
     html_body = render_to_string('main/_verification.html', context)
-    #with open('example.html', 'w') as f:
-    #    f.write(html_body)
 
     html_body = premailer.transform(
         html_body,
@@ -506,9 +507,14 @@ def _send_verification_email(wishlist, request):
 
 def wishlist_verify(request, identifier):
     verification = get_object_or_404(models.Verification, identifier=identifier)
+
     wishlist = verification.wishlist
+    before = wishlist.verified
     wishlist.verified = utils.now()
     wishlist.save()
+    if not before:
+        _send_wishlist_created_email(wishlist, request)
+
     response = redirect('main:wishlist', wishlist.identifier)
     response.set_signed_cookie(
         'wishlist',
@@ -553,18 +559,74 @@ def about_us(request):
     return render(request, 'main/about_us.html')
 
 
-
 @csrf_exempt
+@transaction.commit_on_success
 def inbound_email(request):
     body = request.body
+    structure = json.loads(body)
     root = os.path.join(settings.MEDIA_ROOT, '.inbound-emails')
     today = datetime.date.today()
     save_dir = os.path.join(root, today.strftime('%Y/%m/%d'))
     utils.mkdir(save_dir)
-    filename = '%s.json' % int(time.time())
+    filename = '%s.json' % hashlib.md5(body).hexdigest()
     filepath = os.path.join(save_dir, filename)
     with open(filepath, 'w') as f:
-        f.write(body)
-        print "SAVED", filepath
-    print repr(body)
-    return http.HttpResponse('ok')
+        json.dump(structure, f, indent=2)
+        #print "SAVED", filepath
+    #from pprint import pprint
+    #pprint(structure)
+    #print structure.keys()
+    #print structure['FromFull']
+    #print structure['TextBody']
+    identifier = None
+    for url in utils.find_urls(structure['TextBody']):
+        identifier = utils.find_wishlist_identifier(url)
+        if identifier:
+            # can it be scraped?
+            try:
+                scrape.scrape(identifier, shallow=True)
+            except scrape.NotFoundError:
+                identifier = None
+
+    if identifier:
+        wishlist = models.Wishlist.objects.create(
+            identifier=identifier,
+            email=structure['FromFull']['Email'],
+            name=structure['FromFull']['Name'],
+            verified=utils.now()
+        )
+        _send_wishlist_created_email(wishlist, request)
+    return http.HttpResponse('ok\n')
+
+
+def _send_wishlist_created_email(wishlist, request):
+    protocol = 'https' if request.is_secure() else 'http'
+    base_url = '%s://%s' % (protocol, RequestSite(request).domain)
+
+    subject = 'Your Wish List Has Been Set Up!'
+    context = {
+        'wishlist': wishlist,
+        'base_url': base_url,
+        'url': reverse('main:wishlist', args=(wishlist.identifier,)),
+        'subject': subject,
+        'PROJECT_TITLE': settings.PROJECT_TITLE,
+        'PROJECT_STRAPLINE': settings.PROJECT_STRAPLINE,
+    }
+    html_body = render_to_string('main/_welcome_email.html', context)
+
+    html_body = premailer.transform(
+        html_body,
+        base_url=base_url
+    )
+    body = html2text(html_body)
+
+    headers = {'Reply-To': wishlist.email}
+    email = EmailMultiAlternatives(
+        subject,
+        body,
+        settings.WEBMASTER_FROM,
+        [wishlist.email],
+        headers=headers,
+    )
+    email.attach_alternative(html_body, "text/html")
+    email.send()

@@ -1,0 +1,23 @@
+{% extends "main/email_base.html" %}
+{% block document_title %}{{ subject }}{% endblock %}
+
+{% block extra_css %}
+p.the-url { text-align: center }
+p.the-url a { font-size: 140%; font-weight: bold; }
+{% endblock %}
+
+
+{% block content %}
+  {% if wishlist.name %}
+    <h3>Hi {{ wishlist.name }}!</h3>
+  {% else %}
+    <h3>Hey!</h3>
+  {% endif %}
+
+  <p>Hurray! Your Wish List has now been set up. That means you can now share this page
+  with your friends and family. The URL you need to send them is:
+  <p class="the-url">
+    <a href="{{ base_url }}{{ url }}">{{ base_url }}{{ url }}</a><br>
+  </p>
+
+{% endblock %}

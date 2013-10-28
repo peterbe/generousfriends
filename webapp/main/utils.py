@@ -99,3 +99,16 @@ def mkdir(newdir):
         mkdir(head)
     if tail:
         os.mkdir(newdir)
+
+
+# https://github.com/facebook/tornado/blob/master/tornado/escape.py
+_URL_RE = re.compile(r"""\b((?:([\w-]+):(/{1,3})|www[.])(?:(?:(?:[^\s&()]|&amp;|&quot;)*(?:[^!"#$%&'()*+,.:;<=>?@\[\]^`{|}~\s]))|(?:\((?:[^\s&()]|&amp;|&quot;)*\)))+)""")
+
+def find_urls(text):
+    return list(set([x[0] for x in _URL_RE.findall(text)]))
+
+_WISHLIST_URL_ID_REGEX = re.compile('/([0-9A-Z]{10,15})/')
+
+def find_wishlist_identifier(text):
+    for identifier in _WISHLIST_URL_ID_REGEX.findall(text):
+        return identifier
