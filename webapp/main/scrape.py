@@ -55,7 +55,6 @@ def _download(url, cache_seconds=3600 * 20, binary=False):
         content = response.content
     else:
         content = response.text
-    print repr(content[:100])
     if not os.path.isdir(_ROOT_DIR):
         mkdir(_ROOT_DIR)
     dirname = os.path.dirname(cache_file)

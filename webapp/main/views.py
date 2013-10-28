@@ -595,7 +595,7 @@ def inbound_email(request):
             name=structure['FromFull']['Name'],
             verified=utils.now()
         )
-        _send_wishlist_created_email(wishlist, request)
+        _send_verification_email(wishlist, request)
     return http.HttpResponse('ok\n')
 
 
