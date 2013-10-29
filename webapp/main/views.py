@@ -87,29 +87,29 @@ def wishlist_start(request):
     if request.method == 'POST':
         form = forms.WishlistIDForm(request.POST)
         if form.is_valid():
-            identifier = form.cleaned_data['identifier']
-            admin_url = reverse('main:wishlist_admin', args=(identifier,))
-            if models.Wishlist.objects.filter(identifier=identifier):
-                wishlist = models.Wishlist.objects.get(identifier=identifier)
+            amazon_id = form.cleaned_data['amazon_id']
+            #
+            if models.Wishlist.objects.filter(amazon_id=amazon_id):
+                wishlist = models.Wishlist.objects.get(amazon_id=amazon_id)
                 if wishlist.email:
-                    return {'redirect': reverse('main:wishlist_taken', args=(identifier,))}
+                    return {'redirect': reverse('main:wishlist_taken', args=(wishlist.identifier,))}
                 else:
                     wishlist.delete()
 
-            cache_key = 'scraping-%s' % identifier
+            cache_key = 'scraping-%s' % amazon_id
             if cache.get(cache_key):
-                return {'error': 'Still working on %s' % identifier}
+                return {'error': 'Still working on %s' % amazon_id}
 
-            cache.set(cache_key, identifier, 10)
+            cache.set(cache_key, amazon_id, 10)
             try:
-                information = scrape.scrape(identifier)
+                information = scrape.scrape(amazon_id)
                 items = information['items']
             except scrape.NotFoundError:
                 items = None
 
             if items:
                 wishlist = models.Wishlist.objects.create(
-                    identifier=identifier,
+                    amazon_id=amazon_id,
                 )
                 name = request.get_signed_cookie('name', None, salt=settings.COOKIE_SALT)
                 if name:
@@ -120,6 +120,7 @@ def wishlist_start(request):
                     wishlist.email = email
                     wishlist.save()
 
+                admin_url = reverse('main:wishlist_admin', args=(wishlist.identifier,))
                 data = {'redirect': admin_url}
                 response = utils.json_response(data)
                 response.set_signed_cookie(
@@ -143,9 +144,9 @@ def wishlist_start(request):
                 return response
 
             elif items is None:
-                return {'error': 'Could not find your Amazon.com Wish List that ID (%s)' % identifier}
+                return {'error': 'Could not find your Amazon.com Wish List that ID (%s)' % amazon_id}
             else:
-                return {'error': 'No items found on Amazon.com for that ID (%s)' % identifier}
+                return {'error': 'No items found on Amazon.com for that ID (%s)' % amazon_id}
         else:
             return {'error': str(form.errors)}
     else:
@@ -446,7 +447,7 @@ def wishlist_admin(request, identifier):
 
     items = models.Item.objects.filter(wishlist=wishlist).order_by('added')
     if not items:
-        information = scrape.scrape(wishlist.identifier)
+        information = scrape.scrape(wishlist.amazon_id)
         if information['name'] and not wishlist.name:
             wishlist.name = information['name']
             wishlist.save()
@@ -603,25 +604,20 @@ def inbound_email(request):
     filepath = os.path.join(save_dir, filename)
     with open(filepath, 'w') as f:
         json.dump(structure, f, indent=2)
-        #print "SAVED", filepath
-    #from pprint import pprint
-    #pprint(structure)
-    #print structure.keys()
-    #print structure['FromFull']
-    #print structure['TextBody']
+
     identifier = None
     for url in utils.find_urls(structure['TextBody']):
-        identifier = utils.find_wishlist_identifier(url)
-        if identifier:
+        amazon_id = utils.find_wishlist_amazon_id(url)
+        if amazon_id:
             # can it be scraped?
             try:
-                scrape.scrape(identifier, shallow=True)
+                scrape.scrape(amazon_id, shallow=True)
             except scrape.NotFoundError:
-                identifier = None
+                amazon_id = None
 
     if identifier:
         wishlist = models.Wishlist.objects.create(
-            identifier=identifier,
+            amazon_id=amazon_id,
             email=structure['FromFull']['Email'],
             name=structure['FromFull']['Name'],
             verified=utils.now()

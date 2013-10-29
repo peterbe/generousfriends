@@ -10,12 +10,12 @@ WISHLIST_ID_REGEX = re.compile('^[0-9A-Z]{10,15}$')
 
 class WishlistIDForm(forms.Form):
 
-    identifier = forms.CharField()
+    amazon_id = forms.CharField()
 
-    def clean_identifier(self):
-        value = self.cleaned_data['identifier']
+    def clean_amazon_id(self):
+        value = self.cleaned_data['amazon_id']
         if '://' in value:
-            value = utils.find_wishlist_identifier(value)
+            value = utils.find_wishlist_amazon_id(value)
             if not value:
                 raise forms.ValidationError("Doesn't look like a valid Wish List ID")
 

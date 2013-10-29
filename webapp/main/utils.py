@@ -6,9 +6,16 @@ import hashlib
 import functools
 import unicodedata
 import json
+import uuid
 
 from django import http
 from django.utils.timezone import utc
+
+
+def identifier_maker(length):
+    def maker():
+        return uuid.uuid4().hex[:length]
+    return maker
 
 
 def now():
@@ -109,6 +116,6 @@ def find_urls(text):
 
 _WISHLIST_URL_ID_REGEX = re.compile('/([0-9A-Z]{10,15})/')
 
-def find_wishlist_identifier(text):
+def find_wishlist_amazon_id(text):
     for identifier in _WISHLIST_URL_ID_REGEX.findall(text):
         return identifier

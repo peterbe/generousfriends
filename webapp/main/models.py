@@ -1,5 +1,3 @@
-import uuid
-
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.db import models
@@ -11,7 +9,8 @@ from . import utils
 
 
 class Wishlist(models.Model):
-    identifier = models.CharField(max_length=20, db_index=True, unique=True)
+    identifier = models.CharField(max_length=10, default=utils.identifier_maker(10))
+    amazon_id = models.CharField(max_length=20, db_index=True, unique=True)
     user = models.ForeignKey(User, null=True)
     slug = models.SlugField(null=True)
     verified = models.DateTimeField(null=True)
@@ -67,7 +66,7 @@ class Payment(models.Model):
     item = models.ForeignKey(Item)
     amount = models.DecimalField(max_digits=5, decimal_places=2)
     actual_amount = models.DecimalField(max_digits=5, decimal_places=2)
-    #hide_amount = models.BooleanField(default=False)
+    hide_amount = models.BooleanField(default=False)
     email = models.EmailField(null=True)
     name = models.CharField(max_length=100, null=True)
     hide_name = models.BooleanField(default=False)
@@ -83,16 +82,10 @@ class Payment(models.Model):
         return self.actual_amount - self.amount
 
 
-def identifier_maker(length):
-    def maker():
-        return uuid.uuid4().hex[:length]
-    return maker
-
-
 class Verification(models.Model):
     wishlist = models.ForeignKey(Wishlist)
     email = models.EmailField()
-    identifier = models.CharField(max_length=16, default=identifier_maker(16))
+    identifier = models.CharField(max_length=16, default=utils.identifier_maker(16))
     added = models.DateTimeField(default=utils.now)
 
 
