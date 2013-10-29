@@ -23,8 +23,12 @@ This is what I want the most
 .please-wait,
 .credit-card,
 .help-block,
-.thank-you,
-form.pay .other-error { display:none; }
+#thank-you,
+#your-message,
+form.pay .other-error,
+#your-message .other-error,
+#your-message-saved { display:none; }
+
 form.pay .other-error p {
     color: red;
     font-weight: bold;
@@ -37,12 +41,35 @@ form.pay .other-error p {
 .share a {
     font-size: 24px;
 }
+
+#thank-you, #your-message {
+    padding: 7px;
+    background-color: #fff;
+    /*transition: background 0.5s linear;*/
+    transition: background 1.0s linear;
+}
+#thank-you.new, #your-message.new {
+    background-color: rgb(221, 221, 221);
+}
+
+/* overrides from bootstrap */
+#progress .progress {
+    height: 30px;
+    margin-bottom: 40px;
+}
+#progress .progress .label {
+    font-size: 100%;
+    line-height: 2.5;
+}
+.contributions .contribution {
+    margin-bottom: 25px;
+}
 </style>
 {% endblock %}
 
 {% block main %}
 
-    {% if not wishlist.verified %}
+    {% if not yours and not wishlist.verified %}
     <div class="row marketing">
         <div class="form-error alert alert-danger alert-dismissable">
         <h3>Wish List Not Verified</h3>
@@ -82,7 +109,7 @@ form.pay .other-error p {
         </p>
       </div>
 
-    <div class="row marketing">
+    <div class="row marketing" id="progress">
 
       <div class="col-lg-12">
 
@@ -103,19 +130,37 @@ form.pay .other-error p {
         <!--<p>Changed your mind? <a href="{% url 'main:wishlist_admin' wishlist.identifier %}">Want to pick a different item?</a></p>-->
       {% endif %}
 
-        {% if wishlist.verified %}
-
-        {% include 'main/_begin_sharing.html' %}
+      {% if contributions %}
+      <div class="contributions">
+        <h2>Contributions made so far</h2>
+        {% for payment in contributions %}
+        <div class="contribution">
+        <h4>From
+          {% if payment.name and not payment.hide_name %}{{ payment.name }}{% else %}Anonymous{% endif %}
+          <span class="price">${{ payment.amount|floatformat:2 }}</span></h4>
+        </h4>
+        {% if payment.message and not payment.hide_message %}
+        <blockquote>
+          <p>{{ payment.message|linebreaks }}</p>
+        </blockquote>
         {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if wishlist.verified %}
+      {% include 'main/_begin_sharing.html' %}
+      {% endif %}
 
     {% else %}
 
       <div class="col-lg-12">
 
-        {% if contributions %}
+        {% if your_contributions %}
         <div class="your-contribution">
           <h3>What A Kind Person You Are!</h3>
-          {% for payment in contributions %}
+          {% for payment in your_contributions %}
           <h4>Thank you for your contribution of
             <span class="price">${{ payment.amount|floatformat:2 }}</span>.</h4>
           {% endfor %}
@@ -127,7 +172,7 @@ form.pay .other-error p {
 
       <div class="col-lg-12">
 
-        <div class="thank-you">
+        <div id="thank-you">
           <h1>Thank You ...in advance</h2>
           <p>Your contribution of <b class="price amount"></b> has been accepted by
           <b>Balanced Payments&trade;</b>. You will see a charge of <b class="price actual-amount"></b>
@@ -138,11 +183,54 @@ form.pay .other-error p {
             If the goal is not reached, your money will be refunded without any processing fees.
           </p>
           <h4>Again, Thank You!</h4>
+          <p>Do you want to <a href="{% url 'main:wishlist_start' %}">Start your own Wish List</a>?</p>
         </div>
+
+        <div id="your-message-saved">
+          <h4>Your message has been saved and added to your contribution</h4>
+        </div>
+
+        <div id="your-message">
+          <h2>Do you want to leave a message?</h2>
+          <form action="{% url 'main:wishlist_your_message' wishlist.identifier %}" class="form-horizontal" method="post" role="form">{% csrf_token %}
+          <input type="hidden" name="payment" value="">
+          <div class="form-group">
+            <label for="id_name" class="col-lg-4 control-label">Name:</label>
+            <div class="col-lg-8">
+              <input type="text" id="id_name" name="name" class="form-control" placeholder="">
+              <span class="help-block"></span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="id_message" class="col-lg-4 control-label">Message:</label>
+            <div class="col-lg-8">
+              <textarea id="id_message" name="message" class="form-control"></textarea>
+              <span class="help-block"></span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="col-lg-offset-4 col-lg-8">
+              <button type="submit" class="btn btn-default btn-primary">Submit Your Message</button>
+              <button type="button" class="btn btn-default skip">No thanks. Skip this</button>
+              <img src="{{ STATIC_URL }}main/images/spinner.gif" alt="Please wait" class="please-wait">
+              <span class="please-wait">Please wait...</span>
+            </div>
+          </div>
+
+          <div class="other-error has-error">
+            <h4>Some unexpected error occurred</h4>
+            <p>Your payment went through and it's connected to your email address at least.</p>
+            <p>Please try again a little later.</p>
+          </div>
+
+          </form>
+        </div><!-- /#your-message -->
 
 	{% if wishlist.verified %}
         <form class="form-horizontal pay" method="post" role="form">{% csrf_token %}
-          {% if contributions %}
+          {% if your_contributions %}
           <h4>Make Another Contribution</h4>
           {% else %}
           <h3>Make a Contribution</h3>

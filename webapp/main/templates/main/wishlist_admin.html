@@ -28,14 +28,19 @@
         <div class="col-lg-12">
         <form action="." method="post">{% csrf_token %}
         {% for item in items %}
-        {% thumbnail item.picture "100x100" as thumb %}
+
         <div class="item clearfix">
-          <a href="{{ item.url }}" target="_blank"><img src="{{ thumb.url }}" width="{{ thumb.width }}" height="{{ item.height }}" alt="{{ item.title }}"></a>
+          {% if item.picture %}
+            {% thumbnail item.picture "100x100" as thumb %}
+            <a href="{{ item.affiliates_url_or_url }}" target="_blank"><img src="{{ thumb.url }}" width="{{ thumb.width }}" height="{{ item.height }}" alt="{{ item.title }}"></a>
+            {% endthumbnail %}
+          {% else %}
+            <a href="{{ item.affiliates_url_or_url }}" target="_blank"><img src="{{ STATIC_URL }}main/images/no-available-image-100x100.png" alt="No Image Available"></a>
+          {% endif %}
           <h4>{{ item.title }}</h4>
           <h4 class="price">${{ item.price|floatformat:2 }}</h4>
           <button type="submit" name="item" value="{{ item.id }}" class="btn btn-primary">Pick this one</button>
         </div>
-        {% endthumbnail %}
         {% endfor %}
         </form>
         </div>

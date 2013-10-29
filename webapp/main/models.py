@@ -67,6 +67,7 @@ class Payment(models.Model):
     item = models.ForeignKey(Item)
     amount = models.DecimalField(max_digits=5, decimal_places=2)
     actual_amount = models.DecimalField(max_digits=5, decimal_places=2)
+    #hide_amount = models.BooleanField(default=False)
     email = models.EmailField(null=True)
     name = models.CharField(max_length=100, null=True)
     hide_name = models.BooleanField(default=False)

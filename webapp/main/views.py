@@ -23,6 +23,7 @@ from django.core.files import File
 from django.db import transaction
 from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 from . import scrape
 from . import models
@@ -80,6 +81,7 @@ def handler500(request):
 
 
 @utils.json_view
+@transaction.commit_on_success
 def wishlist_start(request):
     context = {}
     if request.method == 'POST':
@@ -109,9 +111,15 @@ def wishlist_start(request):
                 wishlist = models.Wishlist.objects.create(
                     identifier=identifier,
                 )
-                if request.user.is_authenticated():
-                    wishlist.user = request.user
+                name = request.get_signed_cookie('name', None, salt=settings.COOKIE_SALT)
+                if name:
+                    wishlist.name = name
                     wishlist.save()
+                email = request.get_signed_cookie('email', None, salt=settings.COOKIE_SALT)
+                if email:
+                    wishlist.email = email
+                    wishlist.save()
+
                 data = {'redirect': admin_url}
                 response = utils.json_response(data)
                 response.set_signed_cookie(
@@ -122,9 +130,9 @@ def wishlist_start(request):
                     secure=request.is_secure(),
                     httponly=True
                 )
-                if information['name']:
+                if information['name'] and not name:
                     response.set_signed_cookie(
-                        'wishlist_name',
+                        'name',
                         information['name'],
                         salt=settings.COOKIE_SALT,
                         max_age=60 * 60 * 24 * 300,
@@ -211,7 +219,8 @@ def wishlist_home(request, identifier, fuzzy=False):
                 'amount': float(amount),
                 'actual_amount': float(actual_amount),
                 'progress_amount': progress_amount,
-                'progress_percent': progress_percent
+                'progress_percent': progress_percent,
+                'payment_id': payment.pk,
             }
             response = utils.json_response(data)
             contribution_item = '%s_%s' % (item.pk, payment.pk)
@@ -263,8 +272,6 @@ def wishlist_home(request, identifier, fuzzy=False):
                 request.user.first_name = request.POST.get('first_name')
                 request.user.save()
                 return redirect('main:wishlist', wishlist.identifier)
-    #elif not wishlist.verified:
-    #    return http.HttpResponse('This Wish List has not yet been verified.')
 
     visited = request.session.get('visited_wishlists', [])
     if wishlist.identifier not in visited:
@@ -283,16 +290,18 @@ def wishlist_home(request, identifier, fuzzy=False):
     absolute_url += reverse('main:wishlist', args=(wishlist.identifier,))
 
     try:
-        contributions = request.get_signed_cookie(
+        your_contributions = request.get_signed_cookie(
             'contributions',
             salt=settings.COOKIE_SALT
         )
-        contributions = [x.strip() for x in contributions.split('|')
-                         if x.strip()]
+        your_contributions = [
+            x.strip() for x in your_contributions.split('|')
+            if x.strip()
+        ]
     except KeyError:
-        contributions = []
+        your_contributions = []
     contribution_items = []
-    for contribution in contributions:
+    for contribution in your_contributions:
         item_pk, payment_pk = contribution.split('_')
         try:
             _item = models.Item.objects.get(pk=item_pk)
@@ -305,9 +314,15 @@ def wishlist_home(request, identifier, fuzzy=False):
         except models.Item.DoesNotExist:
             continue
         contribution_items.append(_payment)
-    contributions = contribution_items
+    your_contributions = contribution_items
 
     email = request.get_signed_cookie('email', None, salt=settings.COOKIE_SALT)
+
+    contributions = (
+        models.Payment.objects
+        .filter(wishlist=wishlist, item=item)
+        .order_by('added')
+    )
 
     context = {
         'wishlist': wishlist,
@@ -325,6 +340,7 @@ def wishlist_home(request, identifier, fuzzy=False):
         'PAYMENT_TRANSACTION_AMOUNT': settings.PAYMENT_TRANSACTION_AMOUNT,
         'email': email,
         'fee_example': get_fee_example(decimal.Decimal('15.00')),
+        'contributions': contributions,
     }
 
     return render(request, 'main/wishlist.html', context)
@@ -371,6 +387,8 @@ def _send_receipt(payment, request):
         'payment': payment,
         'base_url': base_url,
         'url': reverse('main:wishlist', args=(wishlist.identifier,)),
+        'PROJECT_TITLE': settings.PROJECT_TITLE,
+        'PROJECT_STRAPLINE': settings.PROJECT_STRAPLINE,
     }
     html_body = render_to_string('main/_receipt.html', context)
     headers = {'Reply-To': payment.email}
@@ -416,6 +434,14 @@ def wishlist_admin(request, identifier):
             other_item.save()
         item.preference = 1
         item.save()
+
+        # do I already know your name and email?
+        if wishlist.name and wishlist.email:
+            # great! we can say it's verified already!
+            wishlist.verified = utils.now()
+            wishlist.save()
+            _send_wishlist_created_email(wishlist, request)
+
         return redirect('main:wishlist', wishlist.identifier)
 
     items = models.Item.objects.filter(wishlist=wishlist).order_by('added')
@@ -425,9 +451,12 @@ def wishlist_admin(request, identifier):
             wishlist.name = information['name']
             wishlist.save()
         for thing in information['items']:
-            r = requests.get(thing['picture']['url'])
-            filename = os.path.basename(thing['picture']['url'])
-            content = File(StringIO(r.content), name=filename)
+            if thing.get('picture'):
+                r = requests.get(thing['picture']['url'])
+                filename = os.path.basename(thing['picture']['url'])
+                content = File(StringIO(r.content), name=filename)
+            else:
+                content = None
 
             item = models.Item.objects.create(
                 wishlist=wishlist,
@@ -483,6 +512,8 @@ def _send_verification_email(wishlist, request):
         'wishlist': wishlist,
         'base_url': base_url,
         'url': reverse('main:wishlist_verify', args=(verification.identifier,)),
+        'PROJECT_TITLE': settings.PROJECT_TITLE,
+        'PROJECT_STRAPLINE': settings.PROJECT_STRAPLINE,
     }
     html_body = render_to_string('main/_verification.html', context)
 
@@ -555,8 +586,8 @@ def wishlist_taken(request, identifier):
     return render(request, 'main/wishlist_taken.html', context)
 
 
-def about_us(request):
-    return render(request, 'main/about_us.html')
+def about(request):
+    return render(request, 'main/about.html')
 
 
 @csrf_exempt
@@ -630,3 +661,33 @@ def _send_wishlist_created_email(wishlist, request):
     )
     email.attach_alternative(html_body, "text/html")
     email.send()
+
+
+@require_POST
+@transaction.commit_on_success
+def wishlist_your_message(request, identifier):
+    wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
+    payment = get_object_or_404(
+        models.Payment,
+        wishlist=wishlist,
+        pk=request.POST['payment']
+    )
+
+    name = request.POST['name'].strip()
+    message = request.POST['message'].strip()
+
+    payment.name = name
+    payment.message = message
+    payment.save()
+
+    response = utils.json_response(True)
+    if name:
+        response.set_signed_cookie(
+            'name',
+            name,
+            salt=settings.COOKIE_SALT,
+            max_age=60 * 60 * 24 * 300,
+            secure=request.is_secure(),
+            httponly=True
+        )
+    return response

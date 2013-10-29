@@ -135,8 +135,7 @@ def scrape(wishlistid, shallow=False):
                         'url': image_url,
                         'size': img.size
                     }
-            if 'picture' in item:
-                items.append(item)
+            items.append(item)
     return {'items': items, 'name': name}
 
 

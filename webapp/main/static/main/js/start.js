@@ -13,13 +13,13 @@ $(function() {
     var percent = 0;
     var $bar = $('.progress-bar', $fp);
     var progress = setInterval(function() {
-      percent += 3;
+      percent += 1;
       if (percent >= 100) {
         clearInterval(progress);
       } else {
         $bar.css('width', percent + '%');
       }
-    }, 350);
+    }, 300);
     var req = $.post(location.href, data);
     req.done(function(response) {
       if (response.redirect) {

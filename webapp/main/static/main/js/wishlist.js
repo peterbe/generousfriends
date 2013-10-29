@@ -44,17 +44,28 @@ function handleBalancedCallback(response, form) {
         }
       } else {
         $('form.pay').hide();
+
+        // reset all of these for security
+        $('#id_card_number').val('');
+        $('#id_expiration_month').val('');
+        $('#id_expiration_year').val('');
+        $('#id_security_code').val('');
+
         $('.thank-you .amount').text('$' + response.amount.toFixed(2));
         $('.thank-you .actual-amount').text('$' + response.actual_amount.toFixed(2));
         if (response.progress_percent >= 100.) {
           $('.thank-you .not-yet-met').hide();
         }
-        $('.thank-you').show();
         setTimeout(function() {
           $('.progress .progress-bar').css('width', response.progress_percent + '%');
           $('.progress .label, .progress .sr-only').text(response.progress_percent + '%');
           $('.progress-amount').text('$' + response.progress_amount.toFixed(2));
-        }, 1000);
+        }, 2 * 1000);
+
+        $('#thank-you').show().addClass('new');
+        $('#your-message').show().addClass('new');
+        $('#your-message input[name="payment"]').val(response.payment_id);
+        _hide_news(1);
       }
     });
     req.fail(function() {
@@ -105,7 +116,52 @@ function _repent() {
   $('.help-block', $parent).hide();
 }
 
+function _hide_news(seconds) {
+  setTimeout(function() {
+    $('.new').removeClass('new');
+  }, seconds * 1000);
+}
+
 $(function() {
+
+  $('#your-message form').submit(function() {
+    var form = this;
+    $('.other-error:visible', form).hide();
+
+    var data = {};
+    data.csrfmiddlewaretoken = $('input[name="csrfmiddlewaretoken"]', form).val();
+    data.payment = $('input[name="payment"]', form).val();
+    data.name = $('#id_name').val();
+    data.message = $('#id_message').val();
+    if (!$.trim(data.message) && !$.trim(data.name)) {
+      return false;
+    }
+    _please_wait(form);
+    var req = $.post($(form).attr('action'), data);
+    req.done(function(response) {
+      $('#id_message').val('');
+      $('#your-message').hide();
+      $('#your-message-saved').fadeIn(600);
+      setTimeout(function() {
+         $('#your-message-saved').fadeOut(600);
+      }, 5 * 1000);
+    });
+    req.always(function() {
+      _stop_waiting(form);
+    });
+    req.fail(function() {
+      $('.other-error', form).show();
+    });
+
+    console.log("MORE WORK TO DO");
+    return false;
+  });
+  console.dir($('#your-message form'));
+
+  $('#your-message button.skip').click(function() {
+    $('#your-message').fadeOut(300);
+    return false;
+  });
 
   $('form.your-name').submit(function() {
     var form = this;
@@ -177,5 +233,8 @@ $(function() {
   });
 
   $('button[disabled]').removeProp('disabled');
+
+  _hide_news(3);
+
 
 });
