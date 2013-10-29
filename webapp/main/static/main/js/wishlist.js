@@ -39,7 +39,6 @@ function handleBalancedCallback(response, form) {
           _show_field_error($('#id_amount'), response.error.amount[0]);
         }
         if (!(response.error.email || response.error.amount)) {
-          console.log('OTHER ERROR');
           $('form.pay .other-error').show();
         }
       } else {
@@ -69,7 +68,6 @@ function handleBalancedCallback(response, form) {
       }
     });
     req.fail(function() {
-      console.log('FAILED!');
       $('form.pay .other-error').show();
     });
     req.always(function() {
@@ -153,10 +151,8 @@ $(function() {
       $('.other-error', form).show();
     });
 
-    console.log("MORE WORK TO DO");
     return false;
   });
-  console.dir($('#your-message form'));
 
   $('#your-message button.skip').click(function() {
     $('#your-message').fadeOut(300);
@@ -183,9 +179,7 @@ $(function() {
 
 
   $('.has-error input').on('change', function() {
-    console.log("CHANGED FROM ERROR");
     var $parent = $(this).parent('.has-error');
-    console.dir($parent);
     $parent.removeClass('has-error');
     $('.help-block', $parent).hide();
   });
