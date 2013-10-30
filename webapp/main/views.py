@@ -605,7 +605,7 @@ def inbound_email(request):
     with open(filepath, 'w') as f:
         json.dump(structure, f, indent=2)
 
-    identifier = None
+    amazon_id = None
     for url in utils.find_urls(structure['TextBody']):
         amazon_id = utils.find_wishlist_amazon_id(url)
         if amazon_id:
@@ -615,7 +615,7 @@ def inbound_email(request):
             except scrape.NotFoundError:
                 amazon_id = None
 
-    if identifier:
+    if amazon_id:
         wishlist = models.Wishlist.objects.create(
             amazon_id=amazon_id,
             email=structure['FromFull']['Email'],
