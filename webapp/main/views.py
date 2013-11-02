@@ -537,6 +537,7 @@ def _send_verification_email(wishlist, request):
     )
     email.attach_alternative(html_body, "text/html")
     email.send()
+    print "Sending %r from %s to %s" % (subject, settings.WEBMASTER_FROM, wishlist.email)
 
 
 def wishlist_verify(request, identifier):
@@ -622,7 +623,7 @@ def inbound_email(request):
                 wishlist = models.Wishlist.objects.get(amazon_id=amazon_id)
                 print '\t\tAlready exists %r' % wishlist
                 _send_verification_email(wishlist, request)
-                print 'Sent verification email to %s' % wishlist.email
+                print '\t\tSent verification email to %s' % wishlist.email
                 return http.HttpResponse('ok\n')
             except models.Wishlist.DoesNotExist:
                 pass
