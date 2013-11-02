@@ -4,7 +4,6 @@ import os
 import decimal
 import datetime
 import hashlib
-import logging
 from StringIO import StringIO
 
 import balanced
@@ -34,7 +33,6 @@ from . import forms
 from html2text import html2text
 
 
-logger = logging.getLogger('generousfriends')
 
 
 def start(request):
@@ -604,7 +602,7 @@ def help(request):
 def inbound_email(request):
     body = request.body
     structure = json.loads(body)
-    logger.info('Inbound email from %s' % structure['FromFull'])
+    print 'Inbound email from %s' % structure['FromFull']
     root = os.path.join(settings.MEDIA_ROOT, '.inbound-emails')
     today = datetime.date.today()
     save_dir = os.path.join(root, today.strftime('%Y/%m/%d'))
@@ -612,21 +610,29 @@ def inbound_email(request):
     filename = '%s.json' % hashlib.md5(body).hexdigest()
     filepath = os.path.join(save_dir, filename)
     with open(filepath, 'w') as f:
-        logger.info('Dumping email to %s' % filepath)
+        print '\tDumping email to %s' % filepath
         json.dump(structure, f, indent=2)
 
     amazon_id = None
     for url in utils.find_urls(structure['TextBody']):
         amazon_id = utils.find_wishlist_amazon_id(url)
         if amazon_id:
+            print '\tFound amazon_id: %r' % amazon_id
+            try:
+                wishlist = models.Wishlist.objects.get(amazon_id=amazon_id)
+                print '\t\tAlready exists %r' % wishlist
+                _send_verification_email(wishlist, request)
+                print 'Sent verification email to %s' % wishlist.email
+                return http.HttpResponse('ok\n')
+            except models.Wishlist.DoesNotExist:
+                pass
             # can it be scraped?
-            logger.info('Found amazon_id: %r' % amazon_id)
             try:
                 scrape.scrape(amazon_id, shallow=True)
-                logger.info('Was able to scrape it')
+                print '\t\tWas able to scrape it'
             except scrape.NotFoundError:
                 amazon_id = None
-                logger.info('Was NOT able to scrape it')
+                print '\t\tWas NOT able to scrape it'
 
     if amazon_id:
         wishlist = models.Wishlist.objects.create(
@@ -635,9 +641,9 @@ def inbound_email(request):
             name=structure['FromFull']['Name'],
             verified=utils.now()
         )
-        logger.info('Created Wishlist %r' % wishlist)
+        print 'Created Wishlist %r' % wishlist
         _send_verification_email(wishlist, request)
-        logger.info('Sent verification email to %s' % wishlist.email)
+        print 'Sent verification email to %s' % wishlist.email
     return http.HttpResponse('ok\n')
 
 
