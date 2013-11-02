@@ -1,5 +1,3 @@
-* Switch to a uuid identifier [DONE]
-
 * Switch to noreply@wishlistgranted.com
 
 * Video instructions for web and mobile
@@ -8,10 +6,14 @@
 
 * Send an email to the wish list owner when contributions come in
 
-* Ability to add name and message [DONE]
-
 * Amazon.com and Balanced Payments in the footer
 
 * Link to Terms & Conditions in the footer
 
 * Rewrite 6 home page instructions into 3
+
+-DONE-
+
+* Switch to a uuid identifier [DONE]
+
+* Ability to add name and message [DONE]
