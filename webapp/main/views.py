@@ -620,7 +620,7 @@ def inbound_email(request):
         amazon_id = utils.find_wishlist_amazon_id(url)
         if amazon_id:
             # can it be scraped?
-            logger.info('Found amazon_id: %r' % amazon_id
+            logger.info('Found amazon_id: %r' % amazon_id)
             try:
                 scrape.scrape(amazon_id, shallow=True)
                 logger.info('Was able to scrape it')
