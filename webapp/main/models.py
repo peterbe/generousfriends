@@ -24,6 +24,9 @@ class Wishlist(models.Model):
     def __str__(self):
         return self.identifier
 
+    def __repr__(self):
+        return '<%s: %s (%s)>' % (self.__class__.__name__, self.identifier, self.amazon_id)
+
     @property
     def verification_email_sent(self):
         return bool(Verification.objects.filter(wishlist=self))

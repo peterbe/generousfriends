@@ -1,4 +1,4 @@
-* Switch to noreply@wishlistgranted.com
+* Set up MX record for wishlistgranted.com
 
 * Video instructions for web and mobile
 
@@ -17,3 +17,5 @@
 * Switch to a uuid identifier [DONE]
 
 * Ability to add name and message [DONE]
+
+* Switch to noreply@wishlistgranted.com
