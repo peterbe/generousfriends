@@ -87,3 +87,8 @@ body {
 .price {
     color: rgb(153, 0, 0);
 }
+
+
+.footer img {
+    padding-left: 15px;
+}
