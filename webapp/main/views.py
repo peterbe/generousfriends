@@ -254,6 +254,7 @@ def wishlist_home(request, identifier, fuzzy=False):
                     httponly=True
                 )
                 _send_receipt(payment, request)
+                #_send_payment_notification(payment, request)
             return response
 
         else:
@@ -393,12 +394,13 @@ def _send_receipt(payment, request):
         'PROJECT_TITLE': settings.PROJECT_TITLE,
         'PROJECT_STRAPLINE': settings.PROJECT_STRAPLINE,
     }
-    html_body = render_to_string('main/_receipt.html', context)
-    headers = {'Reply-To': payment.email}
     subject = (
         "Receipt for your contribution to %s's Wish List"
         % (wishlist.name or wishlist.email)
     )
+    context['subject'] = subject
+    html_body = render_to_string('main/_receipt.html', context)
+    headers = {'Reply-To': payment.email}
     html_body = premailer.transform(
         html_body,
         base_url=base_url
@@ -413,6 +415,46 @@ def _send_receipt(payment, request):
     )
     email.attach_alternative(html_body, "text/html")
     email.send()
+
+
+def _send_payment_notification(payment, request):
+    protocol = 'https' if request.is_secure() else 'http'
+    base_url = '%s://%s' % (protocol, RequestSite(request).domain)
+    wishlist = payment.wishlist
+    item = payment.item
+    context = {
+        'wishlist': wishlist,
+        'item': item,
+        'payment': payment,
+        'base_url': base_url,
+        'url': reverse('main:wishlist', args=(wishlist.identifier,)),
+        'PROJECT_TITLE': settings.PROJECT_TITLE,
+        'PROJECT_STRAPLINE': settings.PROJECT_STRAPLINE,
+    }
+    subject = "Yay! A contribution on your Wish List!"
+    context['subject'] = subject
+    progress_amount, progress_percent = get_progress(item)
+    context['progress_amount'] = progress_amount
+    context['progress_percent'] = progress_percent
+    context['progress_complete'] = progress_percent >= 100
+    context['amount_left'] = item.price - progress_amount
+    html_body = render_to_string('main/_notification.html', context)
+    headers = {'Reply-To': payment.email}
+    html_body = premailer.transform(
+        html_body,
+        base_url=base_url
+    )
+    body = html2text(html_body)
+    email = EmailMultiAlternatives(
+        subject,
+        body,
+        settings.WEBMASTER_FROM,
+        [wishlist.email],
+        headers=headers,
+    )
+    email.attach_alternative(html_body, "text/html")
+    email.send()
+    print "Sent payment notification to", wishlist.email
 
 
 @transaction.commit_on_success
@@ -691,12 +733,15 @@ def wishlist_your_message(request, identifier):
         pk=request.POST['payment']
     )
 
-    name = request.POST['name'].strip()
-    message = request.POST['message'].strip()
-
-    payment.name = name
-    payment.message = message
-    payment.save()
+    name = request.POST.get('name', '').strip()
+    message = request.POST.get('message', '').strip()
+    if name or message:
+        payment.name = name
+        payment.message = message
+        payment.save()
+    else:
+        print "No name or message left this time"
+    _send_payment_notification(payment, request)
 
     response = utils.json_response(True)
     if name:

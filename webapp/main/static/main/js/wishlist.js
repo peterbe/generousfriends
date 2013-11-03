@@ -155,7 +155,12 @@ $(function() {
   });
 
   $('#your-message button.skip').click(function() {
+    var $form = $(this).closest('form');
     $('#your-message').fadeOut(300);
+    var data = {};
+    data.csrfmiddlewaretoken = $('input[name="csrfmiddlewaretoken"]', $form).val();
+    data.payment = $('input[name="payment"]', $form).val();
+    $.post($form.attr('action'), data);
     return false;
   });
 

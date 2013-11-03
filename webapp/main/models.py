@@ -71,6 +71,7 @@ class Payment(models.Model):
     actual_amount = models.DecimalField(max_digits=5, decimal_places=2)
     hide_amount = models.BooleanField(default=False)
     email = models.EmailField(null=True)
+    #hide_email = models.BooleanField(default=False)
     name = models.CharField(max_length=100, null=True)
     hide_name = models.BooleanField(default=False)
     message = models.TextField(null=True)

@@ -1,0 +1,45 @@
+{% extends "main/email_base.html" %}
+{% block document_title %}{{ subject }}{% endblock %}
+
+{% block content %}
+  <h3>Good News!</h3>
+  <p class="lead">A contribution of <strong class="price">${{ payment.amount|floatformat:2 }}</strong>
+  has been made towards your Wish List item <a href="{{ base_url }}{{ url }}"><strong>{{ item.title }}</strong></a>.</p>
+  {% if payment.name %}
+    <p>The contribution was made by <strong>{{ payment.name }}</strong>.</p>
+    {% if payment.message %}
+      <p>{{ payment.name }} left the following message:</p>
+      <blockquote>{{ payment.message }}</blockquote>
+    {% endif %}
+  {% else %}
+    {% if payment.message %}
+      <p>The contribution was made by an <strong>anonymous friend</strong> who left the following message:</p>
+      <blockquote>{{ payment.message }}</blockquote>
+    {% else %}
+      <p>The contribution was made by an <strong>anonymous friend</strong> who chose to not leave a message.</p>
+    {% endif %}
+  {% endif %}
+
+{% if progress_complete %}
+  <h3>Congratulations! The full amount has now been met. Your wish is now granted!</h3>
+  <p class="lead">Your item will now be shipped to you.</p>
+{% else %}
+<table>
+<tr>
+<td><strong>Item price:</strong></td>
+<td><span class="price">${{ item.price|floatformat:2 }}</span></td>
+</tr>
+<tr>
+<td><strong>Total contributed:</strong></td>
+<td><span class="price">${{ progress_amount|floatformat:2 }}</span></td>
+</tr>
+<tr>
+<td><strong>Total remaining:</strong></td>
+<td><span class="price">${{ amount_left|floatformat:2 }}</span></td>
+</tr>
+</table>
+{% endif %}
+
+<p>Revisit your Wish List here: <a href="{{ base_url }}{{ url }}">{{ base_url }}{{ url }}</a></p>
+
+{% endblock %}
