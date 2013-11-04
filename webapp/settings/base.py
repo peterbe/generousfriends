@@ -202,3 +202,5 @@ TRACEBACKS_ON_500 = False
 
 PROJECT_TITLE = 'Wish List Granted'
 PROJECT_STRAPLINE = 'Get What You REALLY Want for Christmas'
+
+BALANCED_DEBUG = False

@@ -345,6 +345,7 @@ def wishlist_home(request, identifier, fuzzy=False):
         'email': email,
         'fee_example': get_fee_example(decimal.Decimal('15.00')),
         'contributions': contributions,
+        'BALANCED_DEBUG': settings.BALANCED_DEBUG,
     }
 
     return render(request, 'main/wishlist.html', context)

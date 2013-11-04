@@ -291,6 +291,14 @@ form.pay .other-error p {
               </div>
             </div>
 
+        {% if BALANCED_DEBUG %}
+        <div class="form-error alert alert-info alert-dismissable">
+          <p><b>Note!</b></p>
+          <p>All payments are currently in <strong>TEST MODE</strong>.</p>
+          <p>This message will go away when payments are for real.</p>
+        </div>
+        {% endif %}
+
           </div>
           <div class="form-group credit-card" style="display:none">
             <div class="col-lg-offset-2 col-lg-10">
