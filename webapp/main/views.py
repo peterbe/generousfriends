@@ -328,6 +328,11 @@ def wishlist_home(request, identifier, fuzzy=False):
         .order_by('added')
     )
 
+    days_left = None
+    if wishlist.verified:
+        now = datetime
+        days_left = (utils.now() - wishlist.verified).days
+
     context = {
         'wishlist': wishlist,
         'item': item,
@@ -346,6 +351,7 @@ def wishlist_home(request, identifier, fuzzy=False):
         'fee_example': get_fee_example(decimal.Decimal('15.00')),
         'contributions': contributions,
         'BALANCED_DEBUG': settings.BALANCED_DEBUG,
+        'days_left': days_left,
     }
 
     return render(request, 'main/wishlist.html', context)
