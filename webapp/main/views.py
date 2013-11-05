@@ -329,9 +329,16 @@ def wishlist_home(request, identifier, fuzzy=False):
     )
 
     days_left = None
-    if wishlist.verified:
-        now = datetime
-        days_left = (utils.now() - wishlist.verified).days
+    payments = (
+        models.Payment.objects
+        .filter(item=item, wishlist=wishlist)
+        .order_by('added')
+    )
+    if payments:
+        first_payment, = payments[:1]
+        days_left = (utils.now() - first_payment.added).days
+    else:
+        first_payment = None
 
     context = {
         'wishlist': wishlist,
@@ -352,6 +359,7 @@ def wishlist_home(request, identifier, fuzzy=False):
         'contributions': contributions,
         'BALANCED_DEBUG': settings.BALANCED_DEBUG,
         'days_left': days_left,
+        'first_payment': first_payment,
     }
 
     return render(request, 'main/wishlist.html', context)

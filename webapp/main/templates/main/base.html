@@ -21,9 +21,28 @@
     <![endif]-->
     {% block extra_head %}
     {% endblock %}
+
+    {% if BALANCED_DEBUG %}
+    <style>
+      .notice {
+        background-color: #FCF8E3;
+        padding: 10px;
+        border-bottom: 1px solid #EBCCD1;
+        border-radius: 6px;
+      }
+      .notice h3 { margin-top: 0; }
+      body { padding-top:0; }
+    </style>
+    {% endif %}
   </head>
 
   <body>
+      {% if BALANCED_DEBUG %}
+      <div class="notice">
+        <h3>NOTE! Server is in Development Mode</h3>
+        <p>This means that no real payment can be made and data entered might be lost. Please don't share unless for testing purposes.</p>
+      </div>
+      {% endif %}
 
     <div class="container">
       <div class="header">

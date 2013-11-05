@@ -130,9 +130,9 @@ h2.days-left {
 
       </div>
 
-      {% if wishlist.verified %}
+      {% if first_payment %}
       <div class="col-lg-2">
-        <h4>Days left:</h4>
+        <h4>Days left<a data-toggle="modal" href="#days-left">?</a></h4>
         <h2 class="days-left">{{ days_left }}</h2>
       </div>
       {% endif %}
@@ -334,7 +334,7 @@ h2.days-left {
     {% endif %}
     </div>
 
-  <!-- Modal -->
+  <!-- Modal (transaction-fee) -->
   <div class="modal fade" id="transaction-fee" tabindex="-1" role="dialog" aria-labelledby="about-transaction-fee" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -383,7 +383,40 @@ h2.days-left {
               <td style="text-align:right"><b>${{ fee_example.total|floatformat:2 }}</b></td>
             </tr>
           </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
+  <!-- Modal (days-left) -->
+  <div class="modal fade" id="days-left" tabindex="-1" role="dialog" aria-labelledby="about-days-left" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">About the Days Left</h4>
+        </div>
+        <div class="modal-body">
+          <p>
+          The count down of number of days left <b>starts when the first contribution comes in</b>.
           </p>
+          <p>
+          Then, if the total item price <b>not reached within 30 days</b> the Wish List is stopped (no new contributions)
+          and all contributions made so far are <b>refunded</b>.
+          </p>
+
+          {% if first_payment %}
+          <p>
+            This item had a first contribution of <b class="price">${{ first_payment.amount|floatformat:2 }}</b> on
+            <b>{{ first_payment.added|date:"D d N Y - H:i" }} UTC</b> which means this Wish List has <b>{{ days_left }} days</b> left.
+          </p>
+          {% else %}
+          <p>This item (<b>{{ item.title }}</b>) has not yet had any contributions made.</p>
+          {% endif %}
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
