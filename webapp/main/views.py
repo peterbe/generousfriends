@@ -475,7 +475,7 @@ def wishlist_admin(request, identifier):
         item_id = request.POST['item']
         item = get_object_or_404(models.Item, wishlist=wishlist, id=item_id)
         # change all others first
-        for other_item in models.Item.objects.filter(wishlist=wishlist).exclude(pk=item.pk, preference=0):
+        for other_item in models.Item.objects.filter(wishlist=wishlist).exclude(preference=0):
             other_item.preference += 1
             other_item.save()
         item.preference = 1
