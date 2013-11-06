@@ -15,7 +15,10 @@ import requests
 
 from .utils import mkdir
 
-_ROOT_DIR = os.path.join(settings.MEDIA_ROOT, '.scrape-cache')
+
+def root_dir():
+    _CACHE_DIR = getattr(settings, 'CACHE_DIR', settings.MEDIA_ROOT)
+    return os.path.join(_CACHE_DIR, '.scrape-cache')
 
 
 class NotFoundError(Exception):
@@ -30,7 +33,7 @@ def _download(url, cache_seconds=3600 * 20, binary=False):
     else:
         key += '.html'
     cache_file = os.path.join(
-        _ROOT_DIR,
+        root_dir(),
         key[:2], key[2:4], key[4:]
     )
     if os.path.isfile(cache_file):
@@ -55,8 +58,8 @@ def _download(url, cache_seconds=3600 * 20, binary=False):
         content = response.content
     else:
         content = response.text
-    if not os.path.isdir(_ROOT_DIR):
-        mkdir(_ROOT_DIR)
+    if not os.path.isdir(root_dir()):
+        mkdir(root_dir())
     dirname = os.path.dirname(cache_file)
     mkdir(dirname)
     if binary:

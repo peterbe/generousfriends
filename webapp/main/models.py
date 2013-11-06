@@ -9,10 +9,8 @@ from . import utils
 
 
 class Wishlist(models.Model):
-    identifier = models.CharField(max_length=10, default=utils.identifier_maker(10))
+    identifier = models.CharField(max_length=8, default=utils.identifier_maker(8))
     amazon_id = models.CharField(max_length=20, db_index=True, unique=True)
-    user = models.ForeignKey(User, null=True)
-    slug = models.SlugField(null=True)
     verified = models.DateTimeField(null=True)
     email = models.EmailField(null=True)
     name = models.CharField(max_length=100)
@@ -35,8 +33,18 @@ class Wishlist(models.Model):
     def name_or_email(self):
         return self.name or self.email
 
+    def get_preferred_item(self):
+        qs = (
+            Item.objects
+            .filter(wishlist=self, preference__gte=1)
+            .order_by('preference', '-modified')
+        )
+        for item in qs[:1]:
+            return item
+
 
 class Item(models.Model):
+    identifier = models.CharField(max_length=8, default=utils.identifier_maker(8))
     wishlist = models.ForeignKey(Wishlist)
     title = models.CharField(max_length=200)
     url = models.URLField()

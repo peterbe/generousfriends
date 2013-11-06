@@ -42,19 +42,19 @@ def start(request):
         None,
         salt=settings.COOKIE_SALT
     )
-    visited_wishlists = []
-    for identifier in request.session.get('visited_wishlists', []):
+    visited_items = []
+    for identifier in request.session.get('visited_items', []):
         try:
-            wishlist = models.Wishlist.objects.get(identifier=identifier)
-            if your_wishlist_identifier == wishlist.identifier:
-                wishlist.yours = True
-                visited_wishlists.append(wishlist)
-            elif wishlist.verified:
-                wishlist.yours = False
-                visited_wishlists.append(wishlist)
+            item = models.Item.objects.get(identifier=identifier)
+            if your_wishlist_identifier == item.wishlist.identifier:
+                item.yours = True
+                visited_items.append(item)
+            elif item.wishlist.verified:
+                item.yours = False
+                visited_items.append(item)
         except models.Wishlist.DoesNotExist:
             continue
-    context['visited_wishlists'] = visited_wishlists
+    context['visited_items'] = visited_items
     return render(request, 'main/start.html', context)
 
 
@@ -90,7 +90,6 @@ def wishlist_start(request):
         form = forms.WishlistIDForm(request.POST)
         if form.is_valid():
             amazon_id = form.cleaned_data['amazon_id']
-            #
             if models.Wishlist.objects.filter(amazon_id=amazon_id):
                 wishlist = models.Wishlist.objects.get(amazon_id=amazon_id)
                 if wishlist.email:
@@ -170,22 +169,32 @@ def get_progress(item):
 @utils.json_view
 def wishlist_home(request, identifier, fuzzy=False):
     try:
-        wishlist = models.Wishlist.objects.get(identifier=identifier)
-    except models.Wishlist.DoesNotExist:
-        if not fuzzy:
-            raise http.Http404
-        _search = models.Wishlist.objects.filter(identifier__istartswith=identifier)
-        if _search.count() == 1:
-            wishlist, = _search
-            return redirect('main:wishlist', wishlist.identifier)
-        else:
-            raise http.Http404
+        item = models.Item.objects.get(identifier=identifier)
+        wishlist = item.wishlist
+    except models.Item.DoesNotExist:
+        try:
+            wishlist = models.Wishlist.objects.get(identifier=identifier)
+            item = None
+        except models.Wishlist.DoesNotExist:
+            # it's neither a wishlist or an item
+            if not fuzzy:
+                raise http.Http404
+            _search = models.Item.objects.filter(identifier__istartswith=identifier)
+            if _search.count() == 1:
+                item, = _search
+                return redirect('main:wishlist', item.identifier)
+            _search = models.Wishlist.objects.filter(identifier__istartswith=identifier)
+            if _search.count() == 1:
+                wishlist, = _search
+                item = None
+            else:
+                raise http.Http404
 
-    items = models.Item.objects.filter(wishlist=wishlist, preference=1).order_by('-modified')[:1]
-    if not items:
-        return redirect('main:wishlist_admin', wishlist.identifier)
-    else:
-        item, = items
+    if not item:
+        item = wishlist.get_preferred_item()
+        if not item:
+            return redirect('main:wishlist_admin', wishlist.identifier)
+        return redirect('main:wishlist', item.identifier)
 
     if request.method == 'POST' and 'uri' in request.POST:
         form = forms.PaymentForm(request.POST, item=item)
@@ -201,6 +210,7 @@ def wishlist_home(request, identifier, fuzzy=False):
             customer = balanced.Customer().save()
             customer.add_card(form.cleaned_data['uri'])
             customer.debit(amount=amount_cents)
+            print dir(customer)
 
             #hold = balanced.Hold(
             #    source_uri=form.cleaned_data['uri'],
@@ -256,34 +266,19 @@ def wishlist_home(request, identifier, fuzzy=False):
                 _send_receipt(payment, request)
                 #_send_payment_notification(payment, request)
             return response
-
         else:
             return {'error': form.errors}
 
     cookie_identifier = request.get_signed_cookie('wishlist', None, salt=settings.COOKIE_SALT)
 
-    yours = False
-    if cookie_identifier == wishlist.identifier:
-        yours = True
-        if request.user.is_authenticated() and not wishlist.user:
-            wishlist.user = request.user
-            wishlist.verified = utils.now()
-            wishlist.save()
-            _send_wishlist_created_email(wishlist, request)
-
-        if request.method == 'POST':
-            if request.user.is_authenticated() and request.POST.get('first_name'):
-                request.user.first_name = request.POST.get('first_name')
-                request.user.save()
-                return redirect('main:wishlist', wishlist.identifier)
-
-    visited = request.session.get('visited_wishlists', [])
-    if wishlist.identifier not in visited:
-        visited.append(wishlist.identifier)
-        request.session['visited_wishlists'] = visited
-
+    yours = cookie_identifier == wishlist.identifier
     if request.GET.get('preview'):
         yours = False
+
+    visited = request.session.get('visited_items', [])
+    if item.identifier not in visited:
+        visited.append(item.identifier)
+        request.session['visited_items'] = visited
 
     progress_amount, progress_percent = get_progress(item)
     if not progress_percent:
@@ -291,7 +286,7 @@ def wishlist_home(request, identifier, fuzzy=False):
 
     absolute_url = 'https://' if request.is_secure() else 'http://'
     absolute_url += RequestSite(request).domain
-    absolute_url += reverse('main:wishlist', args=(wishlist.identifier,))
+    absolute_url += reverse('main:wishlist', args=(item.identifier,))
 
     try:
         your_contributions = request.get_signed_cookie(
@@ -329,13 +324,8 @@ def wishlist_home(request, identifier, fuzzy=False):
     )
 
     days_left = None
-    payments = (
-        models.Payment.objects
-        .filter(item=item, wishlist=wishlist)
-        .order_by('added')
-    )
-    if payments:
-        first_payment, = payments[:1]
+    if contributions:
+        first_payment, = contributions[:1]
         days_left = (utils.now() - first_payment.added).days
     else:
         first_payment = None
@@ -405,7 +395,7 @@ def _send_receipt(payment, request):
         'item': item,
         'payment': payment,
         'base_url': base_url,
-        'url': reverse('main:wishlist', args=(wishlist.identifier,)),
+        'url': reverse('main:wishlist', args=(item.identifier,)),
         'PROJECT_TITLE': settings.PROJECT_TITLE,
         'PROJECT_STRAPLINE': settings.PROJECT_STRAPLINE,
     }
@@ -486,8 +476,12 @@ def wishlist_admin(request, identifier):
         wishlist.save()
 
     if request.method == 'POST':
-        item_id = request.POST['item']
-        item = get_object_or_404(models.Item, wishlist=wishlist, id=item_id)
+        item_identifier = request.POST['item']
+        item = get_object_or_404(
+            models.Item,
+            wishlist=wishlist,
+            identifier=item_identifier
+        )
         # change all others first
         for other_item in models.Item.objects.filter(wishlist=wishlist).exclude(preference=0):
             other_item.preference += 1
@@ -500,9 +494,9 @@ def wishlist_admin(request, identifier):
             # great! we can say it's verified already!
             wishlist.verified = utils.now()
             wishlist.save()
-            _send_wishlist_created_email(wishlist, request)
+            _send_wishlist_created_email(item, request)
 
-        return redirect('main:wishlist', wishlist.identifier)
+        return redirect('main:wishlist', item.identifier)
 
     items = models.Item.objects.filter(wishlist=wishlist).order_by('added')
     if not items:
@@ -536,16 +530,17 @@ def wishlist_admin(request, identifier):
 
 @transaction.commit_on_success
 def wishlist_your_name(request, identifier):
-    wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
+    item = get_object_or_404(models.Item, identifier=identifier)
+    wishlist = item.wishlist
     try:
         cookie_identifier = request.get_signed_cookie('wishlist', salt=settings.COOKIE_SALT)
     except KeyError:
         return http.HttpResponse('Not your Wish List')
-    if cookie_identifier != wishlist.identifier:
+    if cookie_identifier != item.wishlist.identifier:
         raise NotImplementedError
 
     if request.method != 'POST':
-        return redirect('main:wishlist', wishlist.identifier)
+        return redirect('main:wishlist', item.identifier)
 
     form = forms.YourNameForm(request.POST)
     if form.is_valid():
@@ -554,16 +549,17 @@ def wishlist_your_name(request, identifier):
         wishlist.name = name
         wishlist.email = email
         wishlist.save()
-        _send_verification_email(wishlist, request)
-        return redirect('main:wishlist', wishlist.identifier)
+        _send_verification_email(item, request)
+        return redirect('main:wishlist', item.identifier)
     else:
         return http.HttpResponse('ERROR! %s' % form.errors)
 
 
-def _send_verification_email(wishlist, request):
+def _send_verification_email(item, request):
     protocol = 'https' if request.is_secure() else 'http'
     base_url = '%s://%s' % (protocol, RequestSite(request).domain)
 
+    wishlist = item.wishlist
     verification = models.Verification.objects.create(
         wishlist=wishlist,
         email=wishlist.email,
@@ -584,7 +580,7 @@ def _send_verification_email(wishlist, request):
     body = html2text(html_body)
 
     headers = {'Reply-To': wishlist.email}
-    subject = 'Verify your Wish List'
+    subject = 'Verify your Wish List please'
     email = EmailMultiAlternatives(
         subject,
         body,
@@ -601,13 +597,18 @@ def wishlist_verify(request, identifier):
     verification = get_object_or_404(models.Verification, identifier=identifier)
 
     wishlist = verification.wishlist
+    #item = verification.item
+    item = wishlist.get_preferred_item()
     before = wishlist.verified
     wishlist.verified = utils.now()
     wishlist.save()
-    if not before:
-        _send_wishlist_created_email(wishlist, request)
+    if not before and item:
+        _send_wishlist_created_email(item, request)
 
-    response = redirect('main:wishlist', wishlist.identifier)
+    if item:
+        response = redirect('main:wishlist', item.identifier)
+    else:
+        response = redirect('main:wishlist_admin', wishlist.identifier)
     response.set_signed_cookie(
         'wishlist',
         wishlist.identifier,
@@ -705,15 +706,17 @@ def inbound_email(request):
     return http.HttpResponse('ok\n')
 
 
-def _send_wishlist_created_email(wishlist, request):
+def _send_wishlist_created_email(item, request):
     protocol = 'https' if request.is_secure() else 'http'
     base_url = '%s://%s' % (protocol, RequestSite(request).domain)
 
     subject = 'Your Wish List Has Been Set Up!'
+    wishlist = item.wishlist
     context = {
         'wishlist': wishlist,
+        'item': item,
         'base_url': base_url,
-        'url': reverse('main:wishlist', args=(wishlist.identifier,)),
+        'url': reverse('main:wishlist', args=(item.identifier,)),
         'subject': subject,
         'PROJECT_TITLE': settings.PROJECT_TITLE,
         'PROJECT_STRAPLINE': settings.PROJECT_STRAPLINE,
@@ -741,10 +744,11 @@ def _send_wishlist_created_email(wishlist, request):
 @require_POST
 @transaction.commit_on_success
 def wishlist_your_message(request, identifier):
-    wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
+    item = get_object_or_404(models.Item, identifier=identifier)
+
     payment = get_object_or_404(
         models.Payment,
-        wishlist=wishlist,
+        item=item,
         pk=request.POST['payment']
     )
 

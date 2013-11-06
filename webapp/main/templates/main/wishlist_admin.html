@@ -39,7 +39,7 @@
           {% endif %}
           <h4>{{ item.title }}</h4>
           <h4 class="price">${{ item.price|floatformat:2 }}</h4>
-          <button type="submit" name="item" value="{{ item.id }}" class="btn btn-primary">Pick this one</button>
+          <button type="submit" name="item" value="{{ item.identifier }}" class="btn btn-primary">Pick this one</button>
         </div>
         {% endfor %}
         </form>

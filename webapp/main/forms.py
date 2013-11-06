@@ -30,7 +30,7 @@ class PaymentForm(forms.Form):
     amount = forms.CharField()
     hash = forms.CharField(required=False)
     id = forms.CharField(required=False)
-    email = forms.EmailField(required=False)
+    email = forms.EmailField()
 
     def __init__(self, *args, **kwargs):
         self.item = kwargs.pop('item')
@@ -44,7 +44,7 @@ class PaymentForm(forms.Form):
         except decimal.InvalidOperation as x:
             raise forms.ValidationError(str(x))
         if value < 0.5:
-            raise forms.ValidationError('Minimum is $.50')
+            raise forms.ValidationError('Minimum is $0.50')
         left = self.item.amount_remaining
         if value > left:
             raise forms.ValidationError('Too much. Only $%.2f left to contribute.' % left)
