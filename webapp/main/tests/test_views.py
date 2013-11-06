@@ -1,3 +1,4 @@
+import os
 import tempfile
 import shutil
 import json
@@ -16,6 +17,9 @@ from webapp.main import models
 from webapp.main import utils
 
 
+_HERE = os.path.dirname(__file__)
+
+
 class Response(object):
     def __init__(self, content=None, status_code=200):
         self.content = content
@@ -23,15 +27,15 @@ class Response(object):
         self.status_code = status_code
 
 
-class SimpleTest(TestCase):
+class TestViews(TestCase):
 
     def setUp(self):
-        super(SimpleTest, self).setUp()
+        super(TestViews, self).setUp()
         self.tempdir = tempfile.mkdtemp()
         settings.CACHE_DIR = self.tempdir
 
     def tearDown(self):
-        super(SimpleTest, self).tearDown()
+        super(TestViews, self).tearDown()
         shutil.rmtree(self.tempdir)
 
     @mock.patch('requests.get')
@@ -286,3 +290,71 @@ class SimpleTest(TestCase):
         payment = models.Payment.objects.get(pk=payment.pk)
         eq_(payment.name, 'Mary')
         eq_(payment.message, 'This is my message!')
+
+    @mock.patch('requests.get')
+    def test_inbound_email(self, rget):
+
+        def mocked_get(url, **options):
+            if 'VALIDBUTEMPTY' in url:
+                return Response("<html>Nothing</html>")
+            if 'VALIDBUT404S' in url:
+                return Response('not found', status_code=404)
+            if 'PERFECTLYVALID' in url:
+                return Response("""
+                <html>
+                <table class="g-compact-items">
+                <tr>
+                  <td class="g-price"><span>12.40</span></td>
+                  <td class="g-title"><a href="OTHERURL1">A Nice Thing</a></td>
+                </tr>
+                <tr>
+                  <td class="g-price"><span>99.00</span></td>
+                  <td class="g-title"><a href="OTHERURL2">A More Expensive Thing</a></td>
+                </tr>
+
+                </table>
+                </html>
+                """)
+            if 'OTHERURL1' in url:
+                return Response("""
+                <html>
+
+                </html>
+                """)
+            if 'OTHERURL2' in url:
+                return Response("""
+                <html>
+
+                </html>
+                """)
+            raise NotImplementedError(url)
+
+        rget.side_effect = mocked_get
+
+        url = reverse('main:inbound_email')
+        json_file = os.path.join(_HERE, 'inbound-example.json')
+        json_content = open(json_file).read()
+        response = self.client.post(url, json_content, content_type="application/json")
+        eq_(response.status_code, 200)
+
+        wishlist, = models.Wishlist.objects.all()
+        eq_(wishlist.email, 'mail@peterbe.com')
+        eq_(wishlist.name, 'Bengtsson Peter')
+
+        # an email is sent to verify
+        email_sent = mail.outbox[-1]
+        eq_(email_sent.subject, 'Verify your Wish List please')
+        verification, = models.Verification.objects.filter(wishlist=wishlist)
+        verify_url = reverse('main:wishlist_verify', args=(verification.identifier,))
+        ok_(verify_url in email_sent.body)
+
+        # go ahead and verify
+        response = self.client.get(verify_url)
+        eq_(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            reverse('main:wishlist_admin', args=(wishlist.identifier,))
+        )
+        # reload and check that it's been verified
+        wishlist = models.Wishlist.objects.get(pk=wishlist.pk)
+        ok_(wishlist.verified)

@@ -549,17 +549,16 @@ def wishlist_your_name(request, identifier):
         wishlist.name = name
         wishlist.email = email
         wishlist.save()
-        _send_verification_email(item, request)
+        _send_verification_email(wishlist, request)
         return redirect('main:wishlist', item.identifier)
     else:
         return http.HttpResponse('ERROR! %s' % form.errors)
 
 
-def _send_verification_email(item, request):
+def _send_verification_email(wishlist, request):
     protocol = 'https' if request.is_secure() else 'http'
     base_url = '%s://%s' % (protocol, RequestSite(request).domain)
 
-    wishlist = item.wishlist
     verification = models.Verification.objects.create(
         wishlist=wishlist,
         email=wishlist.email,
