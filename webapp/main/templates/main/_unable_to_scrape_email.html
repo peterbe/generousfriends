@@ -1,0 +1,26 @@
+{% extends "main/email_base.html" %}
+{% block document_title %}{{ subject }}{% endblock %}
+
+{% block extra_css %}
+p.big-url { text-align: center }
+p.big-url a { font-size: 140%; font-weight: bold; }
+{% endblock %}
+
+
+{% block content %}
+  {% if name %}
+    <h3>Hi {{ name }}!</h3>
+  {% else %}
+    <h3>Hi!</h3>
+  {% endif %}
+
+  <p>We are so sorry but the Wish List you emailed in from Amazon.com&trade;
+  could unfortunately not be processed.</p>
+  <p>Please try again by following the instructions of going to the
+  <a href="http://www.amazon.com">Amazon.com&trade;</a> web site and copy the address.</p>
+
+  <p class="the-big">
+    <a href="{{ base_url }}{% url 'main:wishlist_start' %}">Try again</a><br>
+  </p>
+
+{% endblock %}

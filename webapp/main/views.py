@@ -702,11 +702,13 @@ def inbound_email(request):
                 pass
             # can it be scraped?
             try:
-                scrape.scrape(amazon_id, shallow=True)
+                found = scrape.scrape(amazon_id, shallow=True)
                 print '\t\tWas able to scrape it'
             except scrape.NotFoundError:
                 amazon_id = None
                 print '\t\tWas NOT able to scrape it'
+            if not found['items']:
+                print "\t\tUnable to find any items for", repr(amazon_id)
 
     if amazon_id:
         wishlist = models.Wishlist.objects.create(
@@ -718,7 +720,45 @@ def inbound_email(request):
         print 'Created Wishlist %r' % wishlist
         _send_verification_email(wishlist, request)
         print 'Sent verification email to %s' % wishlist.email
+    else:
+        _send_unable_to_scrape_error(
+            structure['FromFull']['Email'],
+            structure['FromFull']['Name'],
+            request
+        )
     return http.HttpResponse('ok\n')
+
+
+def _send_unable_to_scrape_error(email, name, request):
+    protocol = 'https' if request.is_secure() else 'http'
+    base_url = '%s://%s' % (protocol, RequestSite(request).domain)
+
+    subject = 'Your Wish List could unfortunately not be processed'
+    context = {
+        'base_url': base_url,
+        'subject': subject,
+        'name': name,
+        'PROJECT_TITLE': settings.PROJECT_TITLE,
+        'PROJECT_STRAPLINE': settings.PROJECT_STRAPLINE,
+    }
+    html_body = render_to_string('main/_unable_to_scrape_email.html', context)
+
+    html_body = premailer.transform(
+        html_body,
+        base_url=base_url
+    )
+    body = html2text(html_body)
+
+    headers = {'Reply-To': email}
+    email = EmailMultiAlternatives(
+        subject,
+        body,
+        settings.WEBMASTER_FROM,
+        [email],
+        headers=headers,
+    )
+    email.attach_alternative(html_body, "text/html")
+    email.send()
 
 
 def _send_wishlist_created_email(item, request):
