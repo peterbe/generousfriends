@@ -3,7 +3,7 @@
         <b>verify your email address</b>.</p>
 
         <form class="your-name form-horizontal" role="form"
-         action="{% url 'main:wishlist_your_name' wishlist.identifier %}" method="post">{% csrf_token %}
+         action="{% url 'main:wishlist_your_name' item.identifier %}" method="post">{% csrf_token %}
           <div class="form-group">
             <label for="id_your_email" class="col-lg-4 control-label">Your Email Address:</label>
             <div class="col-lg-8">
