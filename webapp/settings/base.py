@@ -121,7 +121,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'webapp.signin',
     'webapp.main',
-    #'django_browserid',
+    'webapp.manage',
+    'django_browserid',
     'sorl.thumbnail',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
@@ -161,7 +162,7 @@ LOGGING = {
 }
 
 AUTHENTICATION_BACKENDS = (
-   #'django_browserid.auth.BrowserIDBackend',
+   'django_browserid.auth.BrowserIDBackend',
    'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -175,25 +176,25 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     'django.core.context_processors.tz',
     #'django.contrib.messages.context_processors.messages',
-    #'django_browserid.context_processors.browserid',
+    'django_browserid.context_processors.browserid',
     'webapp.main.context_processors.base',
 )
 
 # Path to redirect to on successful login.
-LOGIN_REDIRECT_URL = '/signin/'
-LOGIN_URL = '/signin/'
+LOGIN_REDIRECT_URL = '/manage/'
+LOGIN_URL = '/manage/'
 
 # Path to redirect to on unsuccessful login attempt.
-LOGIN_REDIRECT_URL_FAILURE = '/signin/failed/'
+LOGIN_REDIRECT_URL_FAILURE = '/manage/'
 
 # Path to redirect to on logout.
-LOGOUT_REDIRECT_URL = '/signin/signedout/'
+LOGOUT_REDIRECT_URL = '/manage/'
 
 COOKIE_SALT = 'set in settings/local.py'
 
 #BROWSERID_REQUEST_ARGS = {'siteName': 'Generous Friends'}
 
-WEBMASTER_FROM = 'Wish List Granted <noreply@wishlistgranted.com>'
+WEBMASTER_FROM = 'Wish List Granted <mail@wishlistgranted.com>'
 
 PAYMENT_TRANSACTION_PERCENTAGE = 3.5  #%
 PAYMENT_TRANSACTION_AMOUNT = Decimal('1.00')  #$

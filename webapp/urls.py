@@ -11,8 +11,8 @@ handler500 = 'webapp.main.views.handler500'
 urlpatterns = patterns('',
 #    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 #    url(r'^admin/', include(admin.site.urls)),
-#    url(r'^browserid/', include('django_browserid.urls')),
-#    url(r'^signin/', include('house.signin.urls', namespace='signin')),
+    url(r'^browserid/', include('django_browserid.urls')),
+    url(r'^manage/', include('webapp.manage.urls', namespace='manage')),
     url(r'', include('webapp.main.urls', namespace='main')),
 )
 

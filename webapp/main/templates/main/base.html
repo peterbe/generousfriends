@@ -46,26 +46,27 @@
 
     <div class="container">
       <div class="header">
+        {% block header %}
         <ul class="nav nav-pills pull-right">
 
-          <!--<li class="active"><a href="#">Home</a></li>-->
           <li><a href="{% url 'main:about' %}">About This Site</a></li>
           <li><a href="{% url 'main:help' %}">Help</a></li>
-          <!--<li><a href="#">Contact</a></li>-->
         </ul>
         <h3 class="text-muted"><a href="/">{{ PROJECT_TITLE }}</a></h3>
+        {% endblock %}
       </div>
 
       {% block main %}
       {% endblock %}
 
       <div class="footer">
+        {% block footer %}
         <p style="float:right">
 	  <a href="http://www.amazon.com" target="_blank" title="Using your Amazon.com&trade; Wish List"><img src="{{ STATIC_URL }}main/images/amazon.com-logo-180.jpg" alt="Amazon.com"></a>
 	  <a href="https://www.balancedpayments.com" target="_blank" title="Payments Secured by Balanced"><img src="{{ STATIC_URL }}main/images/balanced-payments.png" alt="Balanced Payments"></a>
 	</p>
         <p>&copy; Wish List Granted</p>
-
+        {% endblock %}
       </div>
 
     </div> <!-- /container -->
