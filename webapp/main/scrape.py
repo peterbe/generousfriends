@@ -13,7 +13,7 @@ from PIL import Image
 from pyquery import PyQuery
 import requests
 
-from .utils import mkdir
+from webapp.main.utils import mkdir
 
 
 def root_dir():
@@ -84,6 +84,8 @@ def scrape(wishlistid, shallow=False):
     """
     url = 'http://www.amazon.com/registry/wishlist/%s?layout=compact' % wishlistid
     html = _download(url)
+    #print codecs.open('ashley.html', 'w', 'utf8').write(html)
+    #print url
     doc = PyQuery(html)
     items = []
     name = None
@@ -91,14 +93,14 @@ def scrape(wishlistid, shallow=False):
         for name_elem in doc('.stable', profile_elem):
             print repr(name_elem.text.strip())
 
-    for row_elem in doc('table.g-compact-items tr'):
+    for row_elem in doc('table.g-compact-items tr, table.compact-items tr'):
         price = None
-        for price_elem in doc('td.g-price span', row_elem):
+        for price_elem in doc('td.g-price span, td .price strong', row_elem):
             price = _parse_price(price_elem.text.strip())
         if price is None:
             continue
 
-        for elem in doc('td.g-title a', row_elem):
+        for elem in doc('td.g-title a, .productTitle a', row_elem):
 
             text = elem.text.strip()
             print repr(text)
