@@ -499,6 +499,7 @@ def wishlist_admin(request, identifier):
         return redirect('main:wishlist', item.identifier)
 
     items = models.Item.objects.filter(wishlist=wishlist).order_by('added')
+    items_scraped = None
     if not items:
         if not request.GET.get('niceredirect'):
             url = reverse('main:wishlist_admin', args=(wishlist.identifier,))
@@ -508,10 +509,12 @@ def wishlist_admin(request, identifier):
             }
             return render(request, 'main/wishlist_admin_redirect.html', context)
 
+        print "SCRAPING", wishlist.amazon_id
         information = scrape.scrape(wishlist.amazon_id)
         if information['name'] and not wishlist.name:
             wishlist.name = information['name']
             wishlist.save()
+        items_scraped = 0
         for thing in information['items']:
             if thing.get('picture'):
                 r = requests.get(thing['picture']['url'])
@@ -527,11 +530,16 @@ def wishlist_admin(request, identifier):
                 url=thing['url'],
                 picture=content
             )
+            items_scraped += 1
+
         # try again
         items = models.Item.objects.filter(wishlist=wishlist).order_by('added')
+
+    print "ITEMS_SCRAPED", items_scraped
     context = {
         'items': items,
         'wishlist': wishlist,
+        #'items_scraped': items_scraped,
     }
     return render(request, 'main/wishlist_admin.html', context)
 
