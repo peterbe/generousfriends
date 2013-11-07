@@ -1,6 +1,8 @@
 $(function() {
   $('form').submit(function() {
     var $form = $(this);
+    var amazon_id = $.trim($('input[name="amazon_id"]', $form).val());
+    if (!amazon_id) return false;
     $('.form-error, .form-progress').hide();
     $('button[type="submit"]', $form).attr('disabled', 'disabled');
     var data = {};

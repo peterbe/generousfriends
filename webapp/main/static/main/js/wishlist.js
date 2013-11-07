@@ -82,6 +82,7 @@ function handleBalancedCallback(response, form) {
       if ($input.length) {
         _show_field_error($input, message);
       } else {
+        alert('Other Error: ' + field + '\n' + message);
         console.log(field, message);
       }
     });

@@ -137,6 +137,10 @@ h2.days-left {
       </div>
       {% endif %}
 
+    </div><!-- /#progress -->
+
+    <div class="row marketing" id="contributions">
+
     {% if yours %}
       {% if not payments %}
         <!--<p>Changed your mind? <a href="{% url 'main:wishlist_admin' wishlist.identifier %}">Want to pick a different item?</a></p>-->
@@ -204,7 +208,7 @@ h2.days-left {
 
         <div id="your-message">
           <h2>Do you want to leave a message?</h2>
-          <form action="{% url 'main:wishlist_your_message' wishlist.identifier %}" class="form-horizontal" method="post" role="form">{% csrf_token %}
+          <form action="{% url 'main:wishlist_your_message' item.identifier %}" class="form-horizontal" method="post" role="form">{% csrf_token %}
           <input type="hidden" name="payment" value="">
           <div class="form-group">
             <label for="id_name" class="col-lg-4 control-label">Name:</label>
@@ -320,10 +324,13 @@ h2.days-left {
             </div>
           </div>
 
+          {% comment %}
           <div class="form-group credit-card" style="display:none">
             <a href="https://www.balancedpayments.com" target="_blank"><img src="{{ STATIC_URL }}main/images/balanced-cards.png" alt="Balanced Cards"></a>
             <a href="https://www.balancedpayments.com" target="_blank"><img src="{{ STATIC_URL }}main/images/balanced-payments.png" alt="Balanced Payments"></a>
           </div>
+          {% endcomment %}
+
         </form>
         {% else %}
         <p>No contributions can be made on Wish Lists that haven't yet been verified.</p>

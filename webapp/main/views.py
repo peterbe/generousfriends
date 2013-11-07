@@ -33,8 +33,6 @@ from . import forms
 from html2text import html2text
 
 
-
-
 def start(request):
     context = {}
     your_wishlist_identifier = request.get_signed_cookie(
@@ -281,8 +279,8 @@ def wishlist_home(request, identifier, fuzzy=False):
         request.session['visited_items'] = visited
 
     progress_amount, progress_percent = get_progress(item)
-    if not progress_percent:
-        progress_percent = .5
+    #if not progress_percent:
+    #    progress_percent = .5
 
     absolute_url = 'https://' if request.is_secure() else 'http://'
     absolute_url += RequestSite(request).domain
@@ -384,6 +382,7 @@ def get_fee_example(price):
     example['base_percentage'] = float(decimal.Decimal('100.') * example['base'] / example['total'])
 
     return example
+
 
 def _send_receipt(payment, request):
     protocol = 'https' if request.is_secure() else 'http'
