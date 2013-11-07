@@ -3,15 +3,12 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="author" content="Peter Bengtsson">
-    <meta name="description" content="Get What You Really Want For Christmas - Crowdfund your wish list">
+    <meta name="author" content="@peterbe">
+    <meta name="description" content="{{ PROJECT_STRAPLINE }}">
 
     <title>{% block document_title %}{{ PROJECT_TITLE }}{% endblock %}</title>
 
-    <!-- Bootstrap core CSS -->
     <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet">
-
-    <!-- Custom styles for this template -->
     <link href="{{ STATIC_URL }}main/css/main.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -44,7 +41,7 @@
       </div>
       {% endif %}
 
-    <div class="container">
+    <div class="{% block container_class %}container{% endblock %}">
       <div class="header">
         {% block header %}
         <ul class="nav nav-pills pull-right">

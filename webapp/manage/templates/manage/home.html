@@ -1,0 +1,40 @@
+{% extends "manage/base.html" %}
+{% load browserid %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ STATIC_URL }}signin/css/persona-buttons.css">
+{% browserid_css %}
+{% endblock %}
+
+{% block main %}
+{% browserid_info %}
+
+      <div class="jumbotron">
+        {% if request.user.is_authenticated %}
+        <h2>Your Are Signed In</h2>
+        <p>
+          {% browserid_logout text='Sign Out?' %}
+        </p>
+
+        <p>
+        {% if request.user.is_superuser %}
+          <a href="{% url 'manage:dashboard' %}">Dashboard</a>
+        {% else %}
+          You are NOT a superuser.
+        {% endif %}
+        </p>
+
+        {% else %}
+        <h2>Sign In using Persona&trade;</h2>
+        {% browserid_login text='Sign In' color='dark' %}
+        {% endif %}
+      </div>
+
+
+{% endblock %}
+
+
+{% block javascript %}
+<script src="{{ STATIC_URL }}assets/js/jquery-1.10.2.min.js"></script>
+{% browserid_js %}
+{% endblock %}
