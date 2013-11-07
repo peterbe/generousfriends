@@ -500,6 +500,14 @@ def wishlist_admin(request, identifier):
 
     items = models.Item.objects.filter(wishlist=wishlist).order_by('added')
     if not items:
+        if not request.GET.get('niceredirect'):
+            url = reverse('main:wishlist_admin', args=(wishlist.identifier,))
+            url += '?niceredirect=1'
+            context = {
+                'url': url
+            }
+            return render(request, 'main/wishlist_admin_redirect.html', context)
+
         information = scrape.scrape(wishlist.amazon_id)
         if information['name'] and not wishlist.name:
             wishlist.name = information['name']
@@ -603,11 +611,11 @@ def wishlist_verify(request, identifier):
     wishlist.save()
     if not before and item:
         _send_wishlist_created_email(item, request)
-
     if item:
         response = redirect('main:wishlist', item.identifier)
     else:
-        response = redirect('main:wishlist_admin', wishlist.identifier)
+        url = reverse('main:wishlist_admin', args=(wishlist.identifier,))
+        response = redirect(url)
     response.set_signed_cookie(
         'wishlist',
         wishlist.identifier,

@@ -1,0 +1,26 @@
+{% extends "main/base.html" %}
+{% load thumbnail %}
+
+{% block document_title %}Pulling down your Wish List from Amazon.com{% endblock %}
+
+{% block extra_head %}
+<style type="text/css">
+</style>
+{% endblock %}
+
+{% block main %}
+
+      <div class="jumbotron">
+        <h3>Preparing your Wish List...</h3>
+        <p><img src="{{ STATIC_URL }}main/images/spinner.gif" alt="Please wait"></p>
+      </div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+onload = function() {
+  location.href = '{{ url }}'
+};
+</script>
+{% endblock %}
