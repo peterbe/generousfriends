@@ -115,7 +115,7 @@ h2.days-left {
 
     <div class="row marketing" id="progress">
 
-      <div class="col-lg-10">
+      <div class="{% if first_payment %}col-lg-10{% else %}col-lg-12{% endif %}">
 
         <h4>Progress So Far <span class="price progress-amount">${{ progress_amount|floatformat:2 }}</span>
         out of <span class="price">${{ item.price|floatformat:2 }}</span></h4>
