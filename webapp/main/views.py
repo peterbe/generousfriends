@@ -734,6 +734,7 @@ def _send_unable_to_scrape_error(email, name, request):
     base_url = '%s://%s' % (protocol, RequestSite(request).domain)
 
     subject = 'Your Wish List could unfortunately not be processed'
+    print repr(subject), "to", (name, email)
     context = {
         'base_url': base_url,
         'subject': subject,
@@ -759,6 +760,7 @@ def _send_unable_to_scrape_error(email, name, request):
     )
     email.attach_alternative(html_body, "text/html")
     email.send()
+    print "Sent an email to", email, "about being unable to scrape"
 
 
 def _send_wishlist_created_email(item, request):
