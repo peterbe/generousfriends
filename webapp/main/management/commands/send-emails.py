@@ -23,7 +23,7 @@ class Command(BaseCommand):
         base_url = '%s://%s' % (protocol, domainname)
 
         for payment in models.Payment.objects.filter(receipt_emailed__isnull=True):
-            print "Sending receipt for", repr(payment)
+            print "Sending receipt for", repr(payment), utils.now()
             sending.send_receipt(payment, base_url)
             payment.receipt_emailed = utils.now()
             payment.save()
@@ -37,7 +37,7 @@ class Command(BaseCommand):
             .filter(added__lt=time_ago)
         )
         for payment in qs:
-            print "Sending notification for", repr(payment)
+            print "Sending notification for", repr(payment), utils.now()
             sending.send_payment_notification(payment, base_url)
             payment.notification_emailed = utils.now()
             payment.save()
