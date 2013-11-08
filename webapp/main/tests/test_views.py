@@ -115,6 +115,17 @@ class TestViews(TestCase):
         # Go there
         response = self.client.get(admin_url)
         eq_(response.status_code, 200)
+        # but note that this takes use to a page the redirects
+        #print response.content
+        ok_('Preparing your Wish List' in response.content)
+        # there's a piece of javascript in there that redirects too...
+        admin_url_nice = reverse('main:wishlist_admin', args=(wishlist.identifier,))
+        admin_url_nice += '?niceredirect=1'
+        ok_(admin_url_nice in response.content)
+        # Now pretend we're following the redirect in client-side
+        response = self.client.get(admin_url_nice)
+        eq_(response.status_code, 200)
+
         ok_('A Nice Thing' in response.content)
         ok_('A More Expensive Thing' in response.content)
         eq_(

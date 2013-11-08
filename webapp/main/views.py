@@ -1,5 +1,4 @@
 import json
-import time
 import os
 import decimal
 import datetime
@@ -8,7 +7,6 @@ from StringIO import StringIO
 
 import balanced
 import requests
-import premailer
 
 from django import http
 from django.core.urlresolvers import reverse
@@ -17,11 +15,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import RequestSite
 from django.conf import settings
-from django.template.loader import render_to_string
-from django.core.mail import EmailMultiAlternatives
 from django.core.files import File
 from django.db import transaction
-from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
@@ -29,8 +24,7 @@ from . import scrape
 from . import models
 from . import utils
 from . import forms
-
-from html2text import html2text
+from . import sending
 
 
 def start(request):
@@ -153,17 +147,6 @@ def wishlist_start(request):
     return render(request, 'main/wishlist_start.html', context)
 
 
-def get_progress(item):
-    goal_amount = item.price
-    sum_ = (
-        models.Payment.objects.filter(item=item)
-        .aggregate(Sum('amount'))
-    )
-    amount = sum_['amount__sum'] or decimal.Decimal('0')
-    percent = int(100 * float(amount / goal_amount))
-    return amount, percent
-
-
 @utils.json_view
 def wishlist_home(request, identifier, fuzzy=False):
     try:
@@ -225,7 +208,7 @@ def wishlist_home(request, identifier, fuzzy=False):
                 balanced_hash=form.cleaned_data.get('hash'),
                 balanced_id=form.cleaned_data.get('id'),
             )
-            progress_amount, progress_percent = get_progress(item)
+            progress_amount, progress_percent = item.get_progress()
             data = {
                 'amount': float(amount),
                 'actual_amount': float(actual_amount),
@@ -261,8 +244,9 @@ def wishlist_home(request, identifier, fuzzy=False):
                     secure=request.is_secure(),
                     httponly=True
                 )
-                _send_receipt(payment, request)
-                #_send_payment_notification(payment, request)
+                sending.send_receipt(payment, request)
+                payment.receipt_emailed = utils.now()
+                payment.save()
             return response
         else:
             return {'error': form.errors}
@@ -278,7 +262,7 @@ def wishlist_home(request, identifier, fuzzy=False):
         visited.append(item.identifier)
         request.session['visited_items'] = visited
 
-    progress_amount, progress_percent = get_progress(item)
+    progress_amount, progress_percent = item.get_progress()
     #if not progress_percent:
     #    progress_percent = .5
 
@@ -351,15 +335,6 @@ def wishlist_home(request, identifier, fuzzy=False):
     }
 
     return render(request, 'main/wishlist.html', context)
-    r.set_signed_cookie(
-        'contributions',
-        '1_4',
-        salt=settings.COOKIE_SALT,
-        max_age=60 * 60 * 24 * 300,
-        secure=request.is_secure(),
-        httponly=True
-    )
-    return r
 
 
 def get_fee_example(price):
@@ -383,82 +358,6 @@ def get_fee_example(price):
 
     return example
 
-
-def _send_receipt(payment, request):
-    protocol = 'https' if request.is_secure() else 'http'
-    base_url = '%s://%s' % (protocol, RequestSite(request).domain)
-    wishlist = payment.wishlist
-    item = payment.item
-    context = {
-        'wishlist': wishlist,
-        'item': item,
-        'payment': payment,
-        'base_url': base_url,
-        'url': reverse('main:wishlist', args=(item.identifier,)),
-        'PROJECT_TITLE': settings.PROJECT_TITLE,
-        'PROJECT_STRAPLINE': settings.PROJECT_STRAPLINE,
-    }
-    subject = (
-        "Receipt for your contribution to %s's Wish List"
-        % (wishlist.name or wishlist.email)
-    )
-    context['subject'] = subject
-    html_body = render_to_string('main/_receipt.html', context)
-    headers = {'Reply-To': payment.email}
-    html_body = premailer.transform(
-        html_body,
-        base_url=base_url
-    )
-    body = html2text(html_body)
-    email = EmailMultiAlternatives(
-        subject,
-        body,
-        settings.WEBMASTER_FROM,
-        [payment.email],
-        headers=headers,
-    )
-    email.attach_alternative(html_body, "text/html")
-    email.send()
-
-
-def _send_payment_notification(payment, request):
-    protocol = 'https' if request.is_secure() else 'http'
-    base_url = '%s://%s' % (protocol, RequestSite(request).domain)
-    wishlist = payment.wishlist
-    item = payment.item
-    context = {
-        'wishlist': wishlist,
-        'item': item,
-        'payment': payment,
-        'base_url': base_url,
-        'url': reverse('main:wishlist', args=(wishlist.identifier,)),
-        'PROJECT_TITLE': settings.PROJECT_TITLE,
-        'PROJECT_STRAPLINE': settings.PROJECT_STRAPLINE,
-    }
-    subject = "Yay! A contribution on your Wish List!"
-    context['subject'] = subject
-    progress_amount, progress_percent = get_progress(item)
-    context['progress_amount'] = progress_amount
-    context['progress_percent'] = progress_percent
-    context['progress_complete'] = progress_percent >= 100
-    context['amount_left'] = item.price - progress_amount
-    html_body = render_to_string('main/_notification.html', context)
-    headers = {'Reply-To': payment.email}
-    html_body = premailer.transform(
-        html_body,
-        base_url=base_url
-    )
-    body = html2text(html_body)
-    email = EmailMultiAlternatives(
-        subject,
-        body,
-        settings.WEBMASTER_FROM,
-        [wishlist.email],
-        headers=headers,
-    )
-    email.attach_alternative(html_body, "text/html")
-    email.send()
-    print "Sent payment notification to", wishlist.email
 
 
 @transaction.commit_on_success
@@ -493,7 +392,7 @@ def wishlist_admin(request, identifier):
             # great! we can say it's verified already!
             wishlist.verified = utils.now()
             wishlist.save()
-            _send_wishlist_created_email(item, request)
+            sending.send_wishlist_created_email(item, request)
 
         return redirect('main:wishlist', item.identifier)
 
@@ -564,47 +463,12 @@ def wishlist_your_name(request, identifier):
         wishlist.name = name
         wishlist.email = email
         wishlist.save()
-        _send_verification_email(wishlist, request)
+        sending.send_verification_email(wishlist, request)
         return redirect('main:wishlist', item.identifier)
     else:
         return http.HttpResponse('ERROR! %s' % form.errors)
 
 
-def _send_verification_email(wishlist, request):
-    protocol = 'https' if request.is_secure() else 'http'
-    base_url = '%s://%s' % (protocol, RequestSite(request).domain)
-
-    verification = models.Verification.objects.create(
-        wishlist=wishlist,
-        email=wishlist.email,
-    )
-    context = {
-        'wishlist': wishlist,
-        'base_url': base_url,
-        'url': reverse('main:wishlist_verify', args=(verification.identifier,)),
-        'PROJECT_TITLE': settings.PROJECT_TITLE,
-        'PROJECT_STRAPLINE': settings.PROJECT_STRAPLINE,
-    }
-    html_body = render_to_string('main/_verification.html', context)
-
-    html_body = premailer.transform(
-        html_body,
-        base_url=base_url
-    )
-    body = html2text(html_body)
-
-    headers = {'Reply-To': wishlist.email}
-    subject = 'Verify your Wish List please'
-    email = EmailMultiAlternatives(
-        subject,
-        body,
-        settings.WEBMASTER_FROM,
-        [wishlist.email],
-        headers=headers,
-    )
-    email.attach_alternative(html_body, "text/html")
-    email.send()
-    print "Sending %r from %s to %s" % (subject, settings.WEBMASTER_FROM, wishlist.email)
 
 
 def wishlist_verify(request, identifier):
@@ -617,7 +481,7 @@ def wishlist_verify(request, identifier):
     wishlist.verified = utils.now()
     wishlist.save()
     if not before and item:
-        _send_wishlist_created_email(item, request)
+        sending.send_wishlist_created_email(item, request)
     if item:
         response = redirect('main:wishlist', item.identifier)
     else:
@@ -644,7 +508,7 @@ def wishlist_taken(request, identifier):
         form = forms.TakenForm(request.POST, wishlist=wishlist)
         if form.is_valid():
             email = form.cleaned_data['email']
-            _send_verification_email(wishlist, request)
+            sending.send_verification_email(wishlist, request)
             url = reverse('main:wishlist_taken', args=(wishlist.identifier,))
             return redirect(url + '?email=%s' % email)
     else:
@@ -694,7 +558,7 @@ def inbound_email(request):
             try:
                 wishlist = models.Wishlist.objects.get(amazon_id=amazon_id)
                 print '\t\tAlready exists %r' % wishlist
-                _send_verification_email(wishlist, request)
+                sending.send_verification_email(wishlist, request)
                 print '\t\tSent verification email to %s' % wishlist.email
                 return http.HttpResponse('ok\n')
             except models.Wishlist.DoesNotExist:
@@ -717,84 +581,15 @@ def inbound_email(request):
             verified=utils.now()
         )
         print 'Created Wishlist %r' % wishlist
-        _send_verification_email(wishlist, request)
+        sending.send_verification_email(wishlist, request)
         print 'Sent verification email to %s' % wishlist.email
     else:
-        _send_unable_to_scrape_error(
+        sending.send_unable_to_scrape_error(
             structure['FromFull']['Email'],
             structure['FromFull']['Name'],
             request
         )
     return http.HttpResponse('ok\n')
-
-
-def _send_unable_to_scrape_error(email, name, request):
-    protocol = 'https' if request.is_secure() else 'http'
-    base_url = '%s://%s' % (protocol, RequestSite(request).domain)
-
-    subject = 'Your Wish List could unfortunately not be processed'
-    print repr(subject), "to", (name, email)
-    context = {
-        'base_url': base_url,
-        'subject': subject,
-        'name': name,
-        'PROJECT_TITLE': settings.PROJECT_TITLE,
-        'PROJECT_STRAPLINE': settings.PROJECT_STRAPLINE,
-    }
-    html_body = render_to_string('main/_unable_to_scrape_email.html', context)
-
-    html_body = premailer.transform(
-        html_body,
-        base_url=base_url
-    )
-    body = html2text(html_body)
-
-    headers = {'Reply-To': email}
-    email = EmailMultiAlternatives(
-        subject,
-        body,
-        settings.WEBMASTER_FROM,
-        [email],
-        headers=headers,
-    )
-    email.attach_alternative(html_body, "text/html")
-    email.send()
-    print "Sent an email to", email, "about being unable to scrape"
-
-
-def _send_wishlist_created_email(item, request):
-    protocol = 'https' if request.is_secure() else 'http'
-    base_url = '%s://%s' % (protocol, RequestSite(request).domain)
-
-    subject = 'Your Wish List Has Been Set Up!'
-    wishlist = item.wishlist
-    context = {
-        'wishlist': wishlist,
-        'item': item,
-        'base_url': base_url,
-        'url': reverse('main:wishlist', args=(item.identifier,)),
-        'subject': subject,
-        'PROJECT_TITLE': settings.PROJECT_TITLE,
-        'PROJECT_STRAPLINE': settings.PROJECT_STRAPLINE,
-    }
-    html_body = render_to_string('main/_welcome_email.html', context)
-
-    html_body = premailer.transform(
-        html_body,
-        base_url=base_url
-    )
-    body = html2text(html_body)
-
-    headers = {'Reply-To': wishlist.email}
-    email = EmailMultiAlternatives(
-        subject,
-        body,
-        settings.WEBMASTER_FROM,
-        [wishlist.email],
-        headers=headers,
-    )
-    email.attach_alternative(html_body, "text/html")
-    email.send()
 
 
 @require_POST
@@ -816,7 +611,9 @@ def wishlist_your_message(request, identifier):
         payment.save()
     else:
         print "No name or message left this time"
-    _send_payment_notification(payment, request)
+    sending.send_payment_notification(payment, request)
+    payment.notification_emailed = utils.now()
+    payment.save()
 
     response = utils.json_response(True)
     if name:

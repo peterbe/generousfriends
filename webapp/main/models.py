@@ -1,5 +1,6 @@
+import decimal
+
 from django.dispatch import receiver
-from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Sum
 
@@ -9,7 +10,8 @@ from . import utils
 
 
 class Wishlist(models.Model):
-    identifier = models.CharField(max_length=8, default=utils.identifier_maker(8))
+    identifier = models.CharField(max_length=8,
+                                  default=utils.identifier_maker(8))
     amazon_id = models.CharField(max_length=20, db_index=True, unique=True)
     verified = models.DateTimeField(null=True)
     email = models.EmailField(null=True)
@@ -23,7 +25,12 @@ class Wishlist(models.Model):
         return self.identifier
 
     def __repr__(self):
-        return '<%s: %s (%s)>' % (self.__class__.__name__, self.identifier, self.amazon_id)
+        return (
+            '<%s: %s (%s)>' % (
+                self.__class__.__name__,
+                self.identifier, self.amazon_id
+            )
+        )
 
     @property
     def verification_email_sent(self):
@@ -44,7 +51,8 @@ class Wishlist(models.Model):
 
 
 class Item(models.Model):
-    identifier = models.CharField(max_length=8, default=utils.identifier_maker(8))
+    identifier = models.CharField(max_length=8,
+                                  default=utils.identifier_maker(8))
     wishlist = models.ForeignKey(Wishlist)
     title = models.CharField(max_length=200)
     url = models.URLField()
@@ -71,6 +79,17 @@ class Item(models.Model):
     def affiliates_url_or_url(self):
         return self.affiliates_url or self.url
 
+    def get_progress(self):
+        goal_amount = self.price
+        sum_ = (
+            Payment.objects.filter(item=self)
+            .aggregate(Sum('amount'))
+        )
+        amount = sum_['amount__sum'] or decimal.Decimal('0')
+        percent = int(100 * float(amount / goal_amount))
+        return amount, percent
+
+
 
 class Payment(models.Model):
     wishlist = models.ForeignKey(Wishlist)
@@ -86,7 +105,8 @@ class Payment(models.Model):
     hide_message = models.BooleanField(default=False)
     balanced_hash = models.CharField(max_length=200, null=True)
     balanced_id = models.CharField(max_length=200, null=True)
-    #emailed = models.DateTimeField(null=True)
+    receipt_emailed = models.DateTimeField(null=True)
+    notification_emailed = models.DateTimeField(null=True)
     added = models.DateTimeField(default=utils.now)
     modified = models.DateTimeField(default=utils.now)
 
@@ -98,7 +118,8 @@ class Payment(models.Model):
 class Verification(models.Model):
     wishlist = models.ForeignKey(Wishlist)
     email = models.EmailField()
-    identifier = models.CharField(max_length=16, default=utils.identifier_maker(16))
+    identifier = models.CharField(max_length=16,
+                                  default=utils.identifier_maker(16))
     added = models.DateTimeField(default=utils.now)
 
 
