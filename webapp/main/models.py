@@ -110,9 +110,21 @@ class Payment(models.Model):
     added = models.DateTimeField(default=utils.now)
     modified = models.DateTimeField(default=utils.now)
 
+    def __repr__(self):
+        return (
+            '<%s: $%.2f by %s on %s>' % (
+                self.__class__.__name__,
+                self.amount,
+                self.email,
+                self.item.identifier
+            )
+        )
+
     @property
     def actual_fee(self):
         return self.actual_amount - self.amount
+
+
 
 
 class Verification(models.Model):
