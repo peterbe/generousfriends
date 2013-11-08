@@ -3,6 +3,7 @@
 {% block document_title %}Management {{ PROJECT_TITLE }}{% endblock %}
 {% block header %}
         <ul class="nav nav-pills pull-right">
+          <li><a href="{% url 'manage:dashboard' %}">Dashboard</a></li>
           <li><a href="/">Exit</a></li>
         </ul>
         <h3 class="text-muted"><a href="{% url 'manage:home' %}">Management</a></h3>
