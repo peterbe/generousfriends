@@ -86,6 +86,7 @@ class Payment(models.Model):
     hide_message = models.BooleanField(default=False)
     balanced_hash = models.CharField(max_length=200, null=True)
     balanced_id = models.CharField(max_length=200, null=True)
+    #emailed = models.DateTimeField(null=True)
     added = models.DateTimeField(default=utils.now)
     modified = models.DateTimeField(default=utils.now)
 
