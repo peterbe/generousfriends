@@ -308,7 +308,7 @@ def wishlist_home(request, identifier, fuzzy=False):
     days_left = None
     if contributions:
         first_payment, = contributions[:1]
-        days_left = (utils.now() - first_payment.added).days
+        days_left = 30 - (utils.now() - first_payment.added).days
     else:
         first_payment = None
 
