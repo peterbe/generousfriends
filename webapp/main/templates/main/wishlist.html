@@ -185,7 +185,6 @@ h2.days-left {
 
       </div>
 
-
       <div class="col-lg-12">
 
         <div id="thank-you">
@@ -324,13 +323,6 @@ h2.days-left {
             </div>
           </div>
 
-          {% comment %}
-          <div class="form-group credit-card" style="display:none">
-            <a href="https://www.balancedpayments.com" target="_blank"><img src="{{ STATIC_URL }}main/images/balanced-cards.png" alt="Balanced Cards"></a>
-            <a href="https://www.balancedpayments.com" target="_blank"><img src="{{ STATIC_URL }}main/images/balanced-payments.png" alt="Balanced Payments"></a>
-          </div>
-          {% endcomment %}
-
         </form>
         {% else %}
         <p>No contributions can be made on Wish Lists that haven't yet been verified.</p>
@@ -435,13 +427,13 @@ h2.days-left {
 {% endblock %}
 
 {% block javascript %}
+{{ block.super }}
 {% if not yours %}
 <script type="text/javascript" src="https://js.balancedpayments.com/v1/balanced.js"></script>
 <script type="text/javascript">
   balanced.init('{{ balanced_marketplace_uri }}');
 </script>
 {% endif %}
-<script src="{{ STATIC_URL }}assets/js/jquery-1.10.2.min.js"></script>
 <script src="{{ STATIC_URL }}main/js/wishlist.js"></script>
 <script async src="{{ STATIC_URL }}assets/js/bootstrap.modal.min.js"></script>
 {% endblock %}

@@ -18,9 +18,10 @@
 {% endblock %}
 
 {% block javascript %}
+{{ block.super }}
 <script>
 onload = function() {
-  location.href = '{{ url }}'
+  location.href = '{{ url }}';
 };
 </script>
 {% endblock %}

@@ -68,7 +68,7 @@
 {% endblock %}
 
 {% block javascript %}
-<script src="{{ STATIC_URL }}assets/js/jquery-1.10.2.min.js"></script>
+{{ block.super }}
 <script src="{{ STATIC_URL }}assets/js/jquery.prettyPhoto.min.js"></script>
 <script src="{{ STATIC_URL }}main/js/start.js"></script>
 <script>

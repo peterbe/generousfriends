@@ -42,6 +42,9 @@
       {% endif %}
 
     <div class="{% block container_class %}container{% endblock %}">
+
+      {% include "main/_nav.html" %}
+      <!--
       <div class="header">
         {% block header %}
         <ul class="nav nav-pills pull-right">
@@ -52,6 +55,7 @@
         <h3 class="text-muted"><a href="/">{{ PROJECT_TITLE }}</a></h3>
         {% endblock %}
       </div>
+      -->
 
       {% block main %}
       {% endblock %}
@@ -69,9 +73,12 @@
     </div> <!-- /container -->
 
 
-    {% block javascript %}
-    {% endblock %}
-{% if not DEBUG %}
+{% block javascript %}
+<script src="{{ STATIC_URL }}assets/js/jquery-1.10.2.min.js"></script>
+<script async src="{{ STATIC_URL }}assets/js/bootstrap.collapse.min.js"></script>
+{% endblock %}
+
+{% if USE_USERSNAP %}
 <script type="text/javascript">
    var _usersnapconfig = {
        apiKey: '00a4a00e-d49b-4955-a4f7-dbf0087f8faf',
