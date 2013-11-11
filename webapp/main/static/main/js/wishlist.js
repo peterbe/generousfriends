@@ -236,5 +236,10 @@ $(function() {
 
   _hide_news(3);
 
+  $('a.terms-modal').click(function() {
+    $('#terms').modal({
+       remote: true
+    });
+  });
 
 });

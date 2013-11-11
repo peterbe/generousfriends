@@ -151,9 +151,10 @@ h2.days-left {
         <h3>Contributions made so far</h3>
         {% for payment in contributions %}
         <div class="contribution">
-        <h4>From
+        <h4>{{ forloop.counter }}. From
           {% if payment.name and not payment.hide_name %}{{ payment.name }}{% else %}Anonymous{% endif %}
-          <span class="price">${{ payment.amount|floatformat:2 }}</span></h4>
+          <span class="price">${{ payment.amount|floatformat:2 }}</span>
+	  </h4>
         </h4>
         {% if payment.message and not payment.hide_message %}
         <blockquote>
@@ -322,6 +323,11 @@ h2.days-left {
               <span class="please-wait">Please wait...</span>
             </div>
           </div>
+          <div class="form-group credit-card" style="display:none">
+	    <p>By submitting this form you agree to the
+	    <a href="{% url 'main:terms' %}" class="terms-modal"
+              data-toggle="modal" data-target="#terms">Terms of Use</a></p>
+	  </div>
 
         </form>
         {% else %}
@@ -423,6 +429,26 @@ h2.days-left {
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
   </div><!-- /.modal -->
+
+
+  <!-- Modal (days-left) -->
+  <div class="modal fade" id="terms" tabindex="-1" role="dialog" aria-labelledby="terms" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Terms of Use</h4>
+        </div>
+        <div class="modal-body">
+	  {% include "main/_terms.html" %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
 
 {% endblock %}
 

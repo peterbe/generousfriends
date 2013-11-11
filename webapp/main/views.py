@@ -530,8 +530,12 @@ def about(request):
     return render(request, 'main/about.html')
 
 
-def help(request):
+def help_page(request):
     return render(request, 'main/help.html')
+
+
+def terms(request):
+    return render(request, 'main/terms.html')
 
 
 @csrf_exempt
