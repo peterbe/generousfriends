@@ -44,7 +44,7 @@ def start(request):
             elif item.wishlist.verified:
                 item.yours = False
                 visited_items.append(item)
-        except models.Wishlist.DoesNotExist:
+        except models.Item.DoesNotExist:
             continue
     context['visited_items'] = visited_items
     return render(request, 'main/start.html', context)
