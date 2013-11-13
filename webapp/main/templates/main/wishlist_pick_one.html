@@ -1,0 +1,49 @@
+{% extends "main/base.html" %}
+{% load thumbnail %}
+
+{% block document_title %}Pick which item you want the most{% endblock %}
+
+{% block extra_head %}
+<style type="text/css">
+.item {
+    margin-bottom: 20px;
+}
+.item img {
+    float: right;
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+</style>
+{% endblock %}
+
+{% block main %}
+
+      <div class="jumbotron">
+        <h3>Pick the <i>one</i> item you want the most</h3>
+
+      </div>
+
+      <div class="row marketing">
+        <div class="col-lg-12">
+        <form action="." method="post">{% csrf_token %}
+        {% for item in items %}
+
+        <div class="item clearfix">
+          {% if item.picture %}
+            {% thumbnail item.picture "100x100" as thumb %}
+            <a href="{{ item.affiliates_url_or_url }}" target="_blank"><img src="{{ thumb.url }}" width="{{ thumb.width }}" height="{{ item.height }}" alt="{{ item.title }}"></a>
+            {% endthumbnail %}
+          {% else %}
+            <a href="{{ item.affiliates_url_or_url }}" target="_blank"><img src="{{ STATIC_URL }}main/images/no-available-image-100x100.png" alt="No Image Available"></a>
+          {% endif %}
+          <h4>{{ item.title }}</h4>
+          <h4 class="price">${{ item.price|floatformat:2 }}</h4>
+          <button type="submit" name="item" value="{{ item.identifier }}" class="btn btn-primary">Pick this one</button>
+        </div>
+        {% endfor %}
+        </form>
+        </div>
+
+      </div>
+
+{% endblock %}

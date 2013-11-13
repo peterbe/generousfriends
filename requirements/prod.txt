@@ -10,3 +10,4 @@ balanced==0.11.14
 premailer==1.13
 python-postmark-inbound==0.1.1
 South==0.8.2
+django-bootstrap-form==3.0

@@ -9,13 +9,15 @@
         <div class="col-lg-12">
           <h3>Go back to...</h3>
           {% for item in visited_items %}
-          <h4><a href="{% url 'main:wishlist' item.identifier %}">
+          <h5><a href="{% url 'main:wishlist' item.identifier %}">
           {% if item.yours %}
             Your
           {% else %}
             {% if item.wishlist.name %}{{ item.wishlist.name }}{% else %}{{ item.wishlist.email }}{% endif %}'s
           {% endif %} Wish List
-          </a></h4>
+          </a> -
+          {{ item.title }}
+          </h5>
           {% endfor %}
         </div>
       </div>
@@ -41,8 +43,23 @@
           <p>When the total of the item you chose is collected (within 30 days) <b>Wish List Granted will
 	  buy the item and ship it to you for free</b>.</p>
         </div>
-
       </div>
+
+      {% if sample_item %}
+      <div class="row marketing">
+        <h3>Want to see an example?</h3>
+        <p>
+          {% if sample_item.wishlist.name %}
+            <b>{{ sample_item.wishlist.name }}</b>
+          {% else %}
+          This user
+          {% endif %}
+          wishes to have a
+          <b><a href="{% url 'main:wishlist' sample_item.identifier %}"
+             title="{{ sample_item.title }}">{{ sample_item.title }}</a></b>
+        </p>
+      </div>
+      {% endif %}
 
 
 {% endblock %}

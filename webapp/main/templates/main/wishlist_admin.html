@@ -1,7 +1,8 @@
 {% extends "main/base.html" %}
 {% load thumbnail %}
+{% load bootstrap %}
 
-{% block document_title %}Pick which item you want the most{% endblock %}
+{% block document_title %}Administer Your Wish List{% endblock %}
 
 {% block extra_head %}
 <style type="text/css">
@@ -18,32 +19,79 @@
 
 {% block main %}
 
-      <div class="jumbotron">
-        <h3>Pick the <i>one</i> item you want the most</h3>
+    {% if msg %}
+    <div class="row marketing">
+        <div class="form-error alert alert-success alert-dismissable">
+        <h4>{{ msg }}</h4>
+        </div>
+    </div>
+    {% endif %}
 
-      </div>
-
-      <div class="row marketing">
-        <div class="col-lg-12">
+    <div class="row marketing">
+      <div class="col-lg-12">
+        <h3>Administer Your Wish List</h3>
         <form action="." method="post">{% csrf_token %}
-        {% for item in items %}
+        {{ form|bootstrap }}
+        <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+      </div>
+    </div>
 
+    <div class="row">
+      <div class="col-lg-12">
+      <h3>You have the following Wish List Items set up</h3>
+
+        {% for item, payments in items %}
         <div class="item clearfix">
           {% if item.picture %}
             {% thumbnail item.picture "100x100" as thumb %}
-            <a href="{{ item.affiliates_url_or_url }}" target="_blank"><img src="{{ thumb.url }}" width="{{ thumb.width }}" height="{{ item.height }}" alt="{{ item.title }}"></a>
+            <a href="{% url 'main:wishlist' item.identifier %}"><img src="{{ thumb.url }}" width="{{ thumb.width }}" height="{{ item.height }}" alt="{{ item.title }}"></a>
             {% endthumbnail %}
           {% else %}
-            <a href="{{ item.affiliates_url_or_url }}" target="_blank"><img src="{{ STATIC_URL }}main/images/no-available-image-100x100.png" alt="No Image Available"></a>
+            <a href="{% url 'main:wishlist' item.identifier %}"><img src="{{ STATIC_URL }}main/images/no-available-image-100x100.png" alt="No Image Available"></a>
           {% endif %}
-          <h4>{{ item.title }}</h4>
+          <h4><a href="{% url 'main:wishlist' item.identifier %}">{{ item.title }}</a></h4>
+          <a href="{{ item.affiliates_url_or_url }}" target="_blank">On Amazon.com</a>
           <h4 class="price">${{ item.price|floatformat:2 }}</h4>
-          <button type="submit" name="item" value="{{ item.identifier }}" class="btn btn-primary">Pick this one</button>
+          <h4>Status:
+            {% if item.fulfilled %}
+              <i>Fulfilled!</i>
+            {% else %}
+              {% with progress_percent=item.progress_percent %}
+              {% if progress_percent >= 100 %}
+              <i>Complete!!</i> (expect an email from us shortly)
+              {% else %}
+                {% with payments_count=payments.count %}
+                {% if payments_count %}
+                  <i>{{ payments_count }} contribution{{ payments_count|pluralize }}
+                  totalling <span class="price">{{ progress_percent }}%</span> of the total price
+                  </i>
+                  {% with amount_remaining=item.amount_remaining %}
+                  <br>
+                  <a href="{% url 'main:wishlist' item.identifier %}?amount={{ amount_remaining|floatformat:2 }}#pay">Pay the remaining
+                  <span class="price">${{ amount_remaining|floatformat:2 }}</span> yourself</a>
+                  {% endwith %}
+                {% else %}
+                  <i>No contributions made yet</i>
+                {% endif %}
+                {% endwith %}
+              {% endif %}
+              {% endwith %}
+            {% endif %}
+          </h4>
+
+          {% if item.fulfilled_notes %}
+          <p>
+            <b>Fulfillment Notes:</b><br>
+            {{ item.fulfilled_notes }}
+          </p>
+          {% endif %}
+
+          {#<button type="submit" name="item" value="{{ item.identifier }}" class="btn btn-primary">Pick this one</button> #}
         </div>
         {% endfor %}
-        </form>
-        </div>
 
       </div>
+    </div>
 
 {% endblock %}

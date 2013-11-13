@@ -47,6 +47,15 @@ def start(request):
         except models.Item.DoesNotExist:
             continue
     context['visited_items'] = visited_items
+    context['sample_item'] = None
+    qs = (
+        models.Item.objects
+        .filter(wishlist__public=True)
+        .exclude(wishlist__name='')
+        .order_by('?')
+    )
+    for item in qs[:1]:
+        context['sample_item'] = item
     return render(request, 'main/start.html', context)
 
 
@@ -113,7 +122,7 @@ def wishlist_start(request):
                     wishlist.email = email
                     wishlist.save()
 
-                admin_url = reverse('main:wishlist_admin', args=(wishlist.identifier,))
+                admin_url = reverse('main:wishlist_pick_one', args=(wishlist.identifier,))
                 data = {'redirect': admin_url}
                 response = utils.json_response(data)
                 response.set_signed_cookie(
@@ -174,7 +183,7 @@ def wishlist_home(request, identifier, fuzzy=False):
     if not item:
         item = wishlist.get_preferred_item()
         if not item:
-            return redirect('main:wishlist_admin', wishlist.identifier)
+            return redirect('main:wishlist_pick_one', wishlist.identifier)
         return redirect('main:wishlist', item.identifier)
 
     if request.method == 'POST' and 'uri' in request.POST:
@@ -215,6 +224,7 @@ def wishlist_home(request, identifier, fuzzy=False):
                 'progress_amount': progress_amount,
                 'progress_percent': progress_percent,
                 'payment_id': payment.pk,
+                'show_show_your_message': payment.email != item.email,
             }
             response = utils.json_response(data)
             contribution_item = '%s_%s' % (item.pk, payment.pk)
@@ -251,11 +261,20 @@ def wishlist_home(request, identifier, fuzzy=False):
         else:
             return {'error': form.errors}
 
-    cookie_identifier = request.get_signed_cookie('wishlist', None, salt=settings.COOKIE_SALT)
+    cookie_identifier = request.get_signed_cookie(
+        'wishlist', None, salt=settings.COOKIE_SALT
+    )
 
+    amount_remaining = None
     yours = cookie_identifier == wishlist.identifier
     if request.GET.get('preview'):
         yours = False
+    elif yours and request.GET.get('amount'):
+        try:
+            amount_remaining = decimal.Decimal(request.GET.get('amount'))
+            yours = False
+        except decimal.InvalidOperation:
+            return http.HttpResponse('Invalid amount')
 
     visited = request.session.get('visited_items', [])
     if item.identifier not in visited:
@@ -305,12 +324,17 @@ def wishlist_home(request, identifier, fuzzy=False):
         .order_by('added')
     )
 
+    first_payment = None
     days_left = None
+    show_days_left = True
     if contributions:
         first_payment, = contributions[:1]
         days_left = 30 - (utils.now() - first_payment.added).days
+        show_days_left = True
+        if progress_percent >= 100:
+            show_days_left = False
     else:
-        first_payment = None
+        show_days_left = False
 
     context = {
         'wishlist': wishlist,
@@ -332,6 +356,7 @@ def wishlist_home(request, identifier, fuzzy=False):
         'BALANCED_DEBUG': settings.BALANCED_DEBUG,
         'days_left': days_left,
         'first_payment': first_payment,
+        'amount_remaining': amount_remaining,
     }
 
     return render(request, 'main/wishlist.html', context)
@@ -359,13 +384,11 @@ def get_fee_example(price):
     return example
 
 
-
 @transaction.commit_on_success
-def wishlist_admin(request, identifier):
+def wishlist_pick_one(request, identifier):
     wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
-    try:
-        cookie_identifier = request.get_signed_cookie('wishlist', salt=settings.COOKIE_SALT)
-    except KeyError:
+    cookie_identifier = request.get_signed_cookie('wishlist', None, salt=settings.COOKIE_SALT)
+    if not cookie_identifier:
         return http.HttpResponse('Not your Wish List')
     if cookie_identifier != wishlist.identifier:
         raise NotImplementedError
@@ -400,12 +423,12 @@ def wishlist_admin(request, identifier):
     items_scraped = None
     if not items:
         if not request.GET.get('niceredirect'):
-            url = reverse('main:wishlist_admin', args=(wishlist.identifier,))
+            url = reverse('main:wishlist_pick_one', args=(wishlist.identifier,))
             url += '?niceredirect=1'
             context = {
                 'url': url
             }
-            return render(request, 'main/wishlist_admin_redirect.html', context)
+            return render(request, 'main/wishlist_pick_one_redirect.html', context)
 
         print "SCRAPING", wishlist.amazon_id
         information = scrape.scrape(wishlist.amazon_id)
@@ -439,7 +462,7 @@ def wishlist_admin(request, identifier):
         'wishlist': wishlist,
         #'items_scraped': items_scraped,
     }
-    return render(request, 'main/wishlist_admin.html', context)
+    return render(request, 'main/wishlist_pick_one.html', context)
 
 
 @transaction.commit_on_success
@@ -485,7 +508,7 @@ def wishlist_verify(request, identifier):
     if item:
         response = redirect('main:wishlist', item.identifier)
     else:
-        url = reverse('main:wishlist_admin', args=(wishlist.identifier,))
+        url = reverse('main:wishlist_pick_one', args=(wishlist.identifier,))
         response = redirect(url)
     response.set_signed_cookie(
         'wishlist',
@@ -630,3 +653,60 @@ def wishlist_your_message(request, identifier):
             httponly=True
         )
     return response
+
+
+
+def your_admin(request):
+    context = {}
+    cookie_identifier = request.get_signed_cookie(
+        'wishlist', None, salt=settings.COOKIE_SALT
+    )
+
+    context['your_wishlist'] = None
+    if cookie_identifier:
+        try:
+            wishlist = models.Wishlist.objects.get(identifier=identifier)
+            context['your_wishlist'] = wishlist
+        except models.Wishlist.DoesNotExist:
+            pass
+
+    return render(request, 'main/your_admin.html', context)
+
+
+@transaction.commit_on_success
+def wishlist_admin(request, identifier):
+    context = {}
+    wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
+    cookie_identifier = request.get_signed_cookie('wishlist', None, salt=settings.COOKIE_SALT)
+    if not cookie_identifier:
+        return http.HttpResponse('Not your Wish List')
+    if cookie_identifier != wishlist.identifier:
+        return http.HttpResponse('Not your Wish List')
+
+    context['wishlist'] = wishlist
+    if request.method == 'POST':
+        form = forms.WishlistAdminForm(request.POST, instance=wishlist)
+        if form.is_valid():
+            form.save()
+            url = reverse('main:wishlist_admin', args=(wishlist.identifier,))
+            url += '?msg=Changes+saved'
+            return redirect(url)
+    else:
+        form = forms.WishlistAdminForm(instance=wishlist)
+    form.fields['name'].label = 'Your Name'
+    form.fields['public'].help_text = (
+        'If you make your list public, it can be randomly shown on the '
+        'home page as an example.'
+    )
+    context['form'] = form
+    context['msg'] = request.GET.get('msg')
+    items = (
+        models.Item.objects
+        .filter(wishlist=wishlist, preference__gt=0)
+        .order_by('preference')
+    )
+    context['items'] = [
+        (x, models.Payment.objects.filter(item=x))
+        for x in items
+    ]
+    return render(request, 'main/wishlist_admin.html', context)

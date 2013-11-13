@@ -18,6 +18,7 @@ class Wishlist(models.Model):
     name = models.CharField(max_length=100)
     mugshot = ImageField(upload_to=utils.upload_path('mugshot'))
     address = models.TextField(null=True)
+    public = models.BooleanField(default=False)
     added = models.DateTimeField(default=utils.now)
     modified = models.DateTimeField(default=utils.now)
 
@@ -60,6 +61,8 @@ class Item(models.Model):
     price = models.DecimalField(max_digits=5, decimal_places=2)
     picture = ImageField(upload_to=utils.upload_path('pictures'))
     preference = models.IntegerField(default=0)
+    fulfilled = models.BooleanField(default=False)
+    fulfilled_notes = models.TextField(null=True)
     added = models.DateTimeField(default=utils.now)
     modified = models.DateTimeField(default=utils.now)
 
@@ -89,6 +92,14 @@ class Item(models.Model):
         percent = int(100 * float(amount / goal_amount))
         return amount, percent
 
+    @property
+    def progress_percent(self):
+        return self.get_progress()[1]
+
+    @property
+    def amount_remaining(self):
+        amount, __ = self.get_progress()
+        return self.price - amount
 
 
 class Payment(models.Model):

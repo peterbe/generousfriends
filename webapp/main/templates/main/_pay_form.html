@@ -1,0 +1,87 @@
+        <a name="pay"></a>
+        <form class="form-horizontal pay" method="post" role="form">{% csrf_token %}
+          {% if your_contributions %}
+          <h4>Make Another Contribution</h4>
+          {% else %}
+          <h3>Make a Contribution</h3>
+          {% endif %}
+          <div class="other-error has-error">
+            <h4>Some other error occurred</h4>
+            <p>Your payment could not be processed at this time.</p>
+            <p>Please try again a little later.</p>
+          </div>
+          <div class="form-group">
+            <label for="id_amount" class="col-lg-4 control-label">Amount:</label>
+            <div class="col-lg-6">
+              <input type="text" id="id_amount" name="amount" class="form-control" placeholder="e.g. $15"
+              {% if amount_remaining %}value="{{ amount_remaining|floatformat:2 }}"{% endif %}>
+              + {{ PAYMENT_TRANSACTION_PERCENTAGE }}% + ${{ PAYMENT_TRANSACTION_AMOUNT|floatformat:2 }} transaction fee [<a data-toggle="modal" href="#transaction-fee">tell me more</a>]
+              <span class="help-block"></span>
+            </div>
+          </div>
+          <div class="form-group credit-card" style="display:none">
+
+            <div class="form-group">
+              <label for="id_email" class="col-lg-4 control-label">Your Email:</label>
+              <div class="col-lg-6">
+                <input type="text" id="id_email" name="email" class="form-control" placeholder="your@email.com"
+                 value="{% if email %}{{ email }}{% endif %}">
+                <span class="help-block"><!--So you can get a receipt and if something happens with the payment--></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_card_number" class="col-lg-4 control-label">Card Number:</label>
+              <div class="col-lg-6">
+                <input type="text" id="id_card_number" name="card_number" class="form-control" placeholder="1234 1234 1234 1234">
+                <span class="help-block"></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_expiration_month" class="col-lg-4 control-label">Expiration Date (Month):</label>
+              <div class="col-lg-2">
+                <input type="text" id="id_expiration_month" name="expiration_month" class="form-control" placeholder="month">
+                <span class="help-block"></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_expiration_year" class="col-lg-4 control-label">Expiration Date (Year):</label>
+              <div class="col-lg-2">
+                <input type="text" id="id_expiration_year" name="expiration_year" class="form-control" placeholder="year">
+                <span class="help-block"></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_security_code" class="col-lg-4 control-label">Security Code (CSC):</label>
+              <div class="col-lg-2">
+                <input type="text" id="id_security_code" name="security_code" class="form-control" placeholder="123">
+                <span class="help-block"></span>
+              </div>
+            </div>
+
+        {% if BALANCED_DEBUG %}
+        <div class="form-error alert alert-info alert-dismissable">
+          <p><b>Note!</b></p>
+          <p>All payments are currently in <strong>TEST MODE</strong>.</p>
+          <p>This message will go away when payments are for real.</p>
+        </div>
+        {% endif %}
+
+          </div>
+          <div class="form-group credit-card" style="display:none">
+            <div class="col-lg-offset-2 col-lg-10">
+              <button type="submit" class="btn btn-default btn-primary">Submit Your Contribution</button>
+              <img src="{{ STATIC_URL }}main/images/spinner.gif" alt="Please wait" class="please-wait">
+              <span class="please-wait">Please wait...</span>
+            </div>
+          </div>
+          <div class="form-group credit-card" style="display:none">
+	    <p>By submitting this form you agree to the
+	    <a href="{% url 'main:terms' %}" class="terms-modal"
+              data-toggle="modal" data-target="#terms">Terms of Use</a></p>
+	  </div>
+
+        </form>

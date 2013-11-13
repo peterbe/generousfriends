@@ -3,7 +3,9 @@ import decimal
 
 from django import forms
 
+from . import models
 from . import utils
+
 
 WISHLIST_ID_REGEX = re.compile('^[0-9A-Z]{10,15}$')
 
@@ -68,3 +70,10 @@ class TakenForm(forms.Form):
         if value.lower().strip() != self.wishlist.email.lower().strip():
             raise forms.ValidationError('Not the same email address')
         return value
+
+
+class WishlistAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = models.Wishlist
+        fields = ('name', 'public')

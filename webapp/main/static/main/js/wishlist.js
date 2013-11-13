@@ -54,6 +54,8 @@ function handleBalancedCallback(response, form) {
         $('.thank-you .actual-amount').text('$' + response.actual_amount.toFixed(2));
         if (response.progress_percent >= 100.) {
           $('.thank-you .not-yet-met').hide();
+          $('#progress .progress').removeClass('col-lg-10').addClass('col-lg-12');
+          $('#progress .days-left').remove();
         }
         setTimeout(function() {
           $('.progress .progress-bar').css('width', response.progress_percent + '%');
@@ -62,8 +64,10 @@ function handleBalancedCallback(response, form) {
         }, 2 * 1000);
 
         $('#thank-you').show().addClass('new');
-        $('#your-message').show().addClass('new');
-        $('#your-message input[name="payment"]').val(response.payment_id);
+        if (response.show_your_message) {
+          $('#your-message').show().addClass('new');
+          $('#your-message input[name="payment"]').val(response.payment_id);
+        }
         _hide_news(1);
       }
     });

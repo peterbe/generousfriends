@@ -125,6 +125,7 @@ INSTALLED_APPS = (
     'webapp.manage',
     'django_browserid',
     'sorl.thumbnail',
+    'bootstrapform',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:

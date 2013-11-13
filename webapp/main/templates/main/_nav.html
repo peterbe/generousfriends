@@ -13,8 +13,11 @@
   <!-- Collect the nav links, forms, and other content for toggling -->
   <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
     <ul class="nav navbar-nav navbar-right">
-          <li><a href="{% url 'main:about' %}">About This Site</a></li>
-          <li><a href="{% url 'main:help' %}">Help</a></li>
+      {% if your_wishlist %}
+      <li><a href="{% url 'main:wishlist_admin' your_wishlist.identifier %}" title="Administer your Wish List">Admin</a></li>
+      {% endif %}
+      <li><a href="{% url 'main:about' %}">About This Site</a></li>
+      <li><a href="{% url 'main:help' %}">Help</a></li>
     </ul>
   </div><!-- /.navbar-collapse -->
 </nav>
