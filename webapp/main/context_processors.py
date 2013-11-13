@@ -8,9 +8,16 @@ def base(request):
     context['PROJECT_TITLE'] = settings.PROJECT_TITLE
     context['PROJECT_STRAPLINE'] = settings.PROJECT_STRAPLINE
     context['USE_USERSNAP'] = not settings.DEBUG
+
+    context['MOBILE'] = False
     user_agent = request.META.get('HTTP_USER_AGENT', '')
-    if 'iPhone' in user_agent and 'Safari' in user_agent:
-        context['USE_USERSNAP'] = False
+    if (
+        ('iPhone' in user_agent and 'Safari' in user_agent)
+        or
+        ('android' in user_agent.lower() and 'AppleWebKit' in user_agent)
+    ):
+        context['MOBILE'] = True
+    context['USE_USERSNAP'] = not context['MOBILE']
 
     context['your_wishlists'] = None
     cookie_identifier = request.get_signed_cookie(

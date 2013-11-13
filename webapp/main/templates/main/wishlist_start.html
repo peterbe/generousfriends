@@ -4,6 +4,9 @@
 
 {% block extra_head %}
 <link href="{{ STATIC_URL }}assets/css/prettyPhoto.css" rel="stylesheet">
+<style>
+.instruction { padding: 15px; }
+</style>
 {% endblock %}
 
 {% block main %}
@@ -39,23 +42,26 @@
         </div>
     </div>
 
-      <div class="row marketing">
-
-        <div class="col-lg-12">
-	  <p style="float:right">
-	    <a href="http://www.youtube.com/watch?v=CTZ8in6u_Oc" rel="prettyPhoto" title="Video Tutorial -  How to find your Amazon Wish List URL"
-	    ><img src="{{ STATIC_URL }}main/images/youtube-howto-200px.png" alt="YouTube" width="200"></a><br>
-	    <a href="http://www.youtube.com/watch?v=CTZ8in6u_Oc" rel="prettyPhoto" title="Video Tutorial -  How to find your Amazon Wish List URL"
-	     >Watch how-to video</a>
-	    <br>
-	    <br>
-	    <a href="http://www.youtube.com/watch?v=e1Bdm_ZortE" rel="prettyPhoto" title="Video Tutorial -  How to find to email in your Wish List"
-	    ><img src="{{ STATIC_URL }}main/images/youtube-howto-2-197px.png" alt="YouTube" width="197"></a><br>
-	    <a href="http://www.youtube.com/watch?v=e1Bdm_ZortE" rel="prettyPhoto" title="Video Tutorial - How to find to email in your Wish List"
-	     >How-to on emailing it in</a>
-	  </p>
+      <div class="row instructions">
 
           <h2>Instructions</h2>
+
+      <ul class="nav nav-tabs nav-justified">
+        <li {% if not MOBILE %}class="active"{% endif %}><a href="#by-url-web">By URL (Web)</a></li>
+        <li><a href="#by-email-web">By Email (Web)</a></li>
+        <li {% if MOBILE %}class="active"{% endif %}><a href="#by-email-mobile">By Email (Mobile)</a></li>
+      </ul>
+
+        <div id="by-url-web" {% if MOBILE %}style="display:none"{% endif %} class="instruction">
+
+	  <p style="text-align:center">
+            <a href="http://www.youtube.com/watch?v=CTZ8in6u_Oc" rel="prettyPhoto" title="Video Tutorial -  How to find your Amazon Wish List URL"
+	     >Watch how-to video</a><br>
+	    <a href="http://www.youtube.com/watch?v=CTZ8in6u_Oc" rel="prettyPhoto" title="Video Tutorial -  How to find your Amazon Wish List URL"
+	    ><img src="{{ STATIC_URL }}main/images/youtube-howto-200px.png" alt="YouTube" width="200"></a><br>
+
+          </p>
+
           <h4>Go to your account on <a href="http://www.amazon.com" target="_blank">Amazon.com&trade;</a><br>
           Click on <b>Wish List</b> in the upper right-hand corner</h4>
           <p>
@@ -70,7 +76,27 @@
           <img src="{{ STATIC_URL }}main/images/url.png" alt="How to get to your Wish List">
           </p>
           <h4>Paste that (or just the Wish List ID) into the form above here on this page.</h4>
+
+
         </div>
+
+        <div id="by-email-web" style="display:none" class="instruction">
+          <p>
+	    <a href="http://www.youtube.com/watch?v=e1Bdm_ZortE" rel="prettyPhoto" title="Video Tutorial -  How to find to email in your Wish List"
+	    ><img src="{{ STATIC_URL }}main/images/youtube-howto-2-197px.png" alt="YouTube" width="197"></a><br>
+	    <a href="http://www.youtube.com/watch?v=e1Bdm_ZortE" rel="prettyPhoto" title="Video Tutorial - How to find to email in your Wish List"
+	     >How-to on emailing it in</a>
+	  </p>
+
+        </div>
+
+        <div id="by-email-mobile" {% if not MOBILE %}style="display:none"{% endif %} class="instruction">
+          <p>
+            Go to <a href="{% url 'main:instructions_mobile' %}">Instructions for Mobile</a>
+            for a step-by-step guide.
+          </p>
+        </div>
+
 
       </div>
 
@@ -85,6 +111,16 @@ $(function() {
   $("a[rel^='prettyPhoto']").prettyPhoto({
     social_tools: ''
   });
+
+  $('.instructions .nav a').click(function() {
+    var id = $(this).attr('href');
+    $('.instruction').not(id).hide();
+    $(id).fadeIn(400);
+    var nav = $('li.active', $(this).closest('.nav')).removeClass('active');
+    $(this).closest('li').addClass('active');
+  });
+
 });
+
 </script>
 {% endblock %}

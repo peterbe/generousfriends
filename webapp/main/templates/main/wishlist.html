@@ -151,11 +151,10 @@ h2.days-left {
         <h4>{{ forloop.counter }}. From
           {% if payment.name and not payment.hide_name %}{{ payment.name }}{% else %}Anonymous{% endif %}
           <span class="price">${{ payment.amount|floatformat:2 }}</span>
-	  </h4>
         </h4>
         {% if payment.message and not payment.hide_message %}
         <blockquote>
-          <p>{{ payment.message|linebreaks }}</p>
+          {{ payment.message|linebreaks }}
         </blockquote>
         {% endif %}
         </div>

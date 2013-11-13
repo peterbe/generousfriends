@@ -1,0 +1,83 @@
+{% extends "main/base.html" %}
+
+{% block document_title %}Instructions for Mobile{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+<style>
+.instructions .step {
+    margin-bottom: 40px;
+}
+.instructions img {
+    width: 100%;
+    border: 4px solid #ccc;
+    border-radius: 4px;
+}
+</style>
+{% endblock %}
+
+
+{% block main %}
+
+      <div class="row instructions">
+          <h2>Instructions for Mobile</h2>
+
+          <p class="lead">The following step-by-step instructions are for setting up your Wish List
+          on a iPhone by email. It will look different but should work very similarly on Android
+          and any other smart phones.</p>
+
+<div class="step">
+<h4>1. Go to <a href="http://www.amazon.com" target="_blank">www.amazon.com</a></h4>
+<p>You might need to sign in first to see your Wish List</p>
+<img src="{{ STATIC_URL }}main/images/instructions/mobile/photo1.png" alt="Amazon.com home page">
+</div>
+
+<div class="step">
+<h4>2. Click the "Share List" button</h4>
+<p>Your list must be made public. If it's not you can't share it and there
+should be instructions there to change your list to being public.</p>
+<img src="{{ STATIC_URL }}main/images/instructions/mobile/photo2.png" alt="Your Amazon.com Wish list page">
+</div>
+
+
+<div class="step">
+<h4>3. Click to share by "Email"</h4>
+<img src="{{ STATIC_URL }}main/images/instructions/mobile/photo3.png" alt="Options how to share">
+</div>
+
+<div class="step">
+<h4>4. Type in <code>mail@inbound.wishlistgranted.com</code></h4>
+<p>After you have typed in the email address, note that you might need to scroll down
+to see the "Share via email" button.</p>
+<img src="{{ STATIC_URL }}main/images/instructions/mobile/photo4.png" alt="Entering the email address">
+</div>
+
+<div class="step">
+<h4>5. Check your email, click verification link</h4>
+<p>It may take a couple of minutes to receive an email about the verification link.
+It is sent to email address you're signed in to Amazon.com with.</p>
+<img src="{{ STATIC_URL }}main/images/instructions/mobile/photo5.png" alt="Email with verification link">
+</div>
+
+<div class="step">
+<h4>6. Pick your most preferred item on your Wish List</h4>
+<p>Hopefully all items from your Wish List are there.</p>
+<img src="{{ STATIC_URL }}main/images/instructions/mobile/photo6.png" alt="Email with verification link">
+</div>
+
+<div class="step">
+<h4>7. Your Wish List is ready to be shared with friends and family</h4>
+<img src="{{ STATIC_URL }}main/images/instructions/mobile/photo7.png" alt="Your finished Wish List">
+</div>
+
+<p>
+  Go back to <a href="{% url 'main:wishlist_start' %}">the Start Page</a>.
+</p>
+
+<p>
+  Go to <a href="http://www.amazon.com" target="_blank">Amazon.com&trade;</a> and get started.
+</p>
+
+      </div>
+
+{% endblock %}

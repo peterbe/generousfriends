@@ -561,6 +561,10 @@ def terms(request):
     return render(request, 'main/terms.html')
 
 
+def instructions_mobile(request):
+    return render(request, 'main/instructions_mobile.html')
+
+
 @csrf_exempt
 @transaction.commit_on_success
 def inbound_email(request):
