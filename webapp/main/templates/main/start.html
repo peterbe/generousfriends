@@ -2,6 +2,16 @@
 
 {% block document_title %}{{ PROJECT_STRAPLINE }}{% endblock %}
 
+
+{% block extra_head %}
+<style>
+.steps li {
+    margin: 35px 10px;
+}
+</style>
+{% endblock %}
+
+
 {% block main %}
 
 {% if visited_items %}
@@ -31,16 +41,17 @@
         <p><a class="btn btn-lg btn-success" href="{% url "main:wishlist_start" %}">Set up your Wish List</a></p>
       </div>
 
-      <div class="row marketing">
-          <h3>1</h3>
-          <p>You publish your <b>Amazon&trade; Wish List</b> here, pick the one item want the most.</p>
+      <div class="row marketing steps">
 
-          <h3>2</h3>
-          <p>Verify your list by email and then <b>share the link</b> to your Wish List with friends and family.</p>
+         <ol>
+	   <li>You publish your <b>Amazon&trade; Wish List</b> here, pick the one item want the most.</li>
 
-          <h3>3</h3>
-          <p>When the total of the item you chose is collected (within 30 days) <b>Wish List Granted will
-	  buy the item and ship it to you for free</b>.</p>
+	   <li>Verify your list by email and then <b>share the link</b> to your Wish List with friends and family.</li>
+
+	   <li>When the total of the item you chose is collected (within 30 days) <b>Wish List Granted will
+	  buy the item and ship it to you for free</b>.</li>
+
+	 </ol>
       </div>
 
       {% if sample_item %}

@@ -50,10 +50,10 @@ function handleBalancedCallback(response, form) {
         $('#id_expiration_year').val('');
         $('#id_security_code').val('');
 
-        $('.thank-you .amount').text('$' + response.amount.toFixed(2));
-        $('.thank-you .actual-amount').text('$' + response.actual_amount.toFixed(2));
+        $('#thank-you .amount').text('$' + response.amount.toFixed(2));
+        $('#thank-you .actual-amount').text('$' + response.actual_amount.toFixed(2));
         if (response.progress_percent >= 100.) {
-          $('.thank-you .not-yet-met').hide();
+          $('#thank-you .not-yet-met').hide();
           $('#progress .progress').removeClass('col-lg-10').addClass('col-lg-12');
           $('#progress .days-left').remove();
         }
@@ -64,9 +64,12 @@ function handleBalancedCallback(response, form) {
         }, 2 * 1000);
 
         $('#thank-you').show().addClass('new');
+        console.log(response);
         if (response.show_your_message) {
           $('#your-message').show().addClass('new');
           $('#your-message input[name="payment"]').val(response.payment_id);
+        } else {
+          $('#thank-you .start-your-own').hide();
         }
         _hide_news(1);
       }

@@ -6,6 +6,26 @@
 <link href="{{ STATIC_URL }}assets/css/prettyPhoto.css" rel="stylesheet">
 <style>
 .instruction { padding: 15px; }
+span.email {
+    font-weight: bold;
+    font-size: 80%;
+}
+p.email-instructions {
+    margin-top: 10px;
+}
+.jumbotron {
+    padding: 20px;
+}
+
+.instructions .step {
+    margin-bottom: 40px;
+}
+.instructions .step img {
+    width: 100%;
+    border: 3px solid #ccc;
+    border-radius: 4px;
+}
+
 </style>
 {% endblock %}
 
@@ -30,6 +50,11 @@
               <span class="sr-only">Processing processing processing</span>
           </div>
         </div>
+
+	<p class="email-instructions">
+	Or, go to your <a href="http://www.amazon.com/gp/registry/wishlist/" target="_blank">www.amazon.com Wish List</a>
+	and Share it by email with <span class="email">mail@inbound.wishlistgranted.com</span>
+	</p>
         </form>
 
       </div>
@@ -42,7 +67,7 @@
         </div>
     </div>
 
-      <div class="row instructions">
+      <div class="row marketing instructions">
 
           <h2>Instructions</h2>
 
@@ -55,9 +80,9 @@
         <div id="by-url-web" {% if MOBILE %}style="display:none"{% endif %} class="instruction">
 
 	  <p style="text-align:center">
-            <a href="http://www.youtube.com/watch?v=CTZ8in6u_Oc" rel="prettyPhoto" title="Video Tutorial -  How to find your Amazon Wish List URL"
+            <a href="http://www.youtube.com/watch?v=CTZ8in6u_Oc" {% if not MOBILE %}rel="prettyPhoto"{% endif %} title="Video Tutorial -  How to find your Amazon Wish List URL"
 	     >Watch how-to video</a><br>
-	    <a href="http://www.youtube.com/watch?v=CTZ8in6u_Oc" rel="prettyPhoto" title="Video Tutorial -  How to find your Amazon Wish List URL"
+	    <a href="http://www.youtube.com/watch?v=CTZ8in6u_Oc" {% if not MOBILE %}rel="prettyPhoto"{% endif %} title="Video Tutorial -  How to find your Amazon Wish List URL"
 	    ><img src="{{ STATIC_URL }}main/images/youtube-howto-200px.png" alt="YouTube" width="200"></a><br>
 
           </p>
@@ -82,20 +107,67 @@
 
         <div id="by-email-web" style="display:none" class="instruction">
           <p>
-	    <a href="http://www.youtube.com/watch?v=e1Bdm_ZortE" rel="prettyPhoto" title="Video Tutorial -  How to find to email in your Wish List"
+	    <a href="http://www.youtube.com/watch?v=e1Bdm_ZortE"
+	    {% if not MOBILE %}rel="prettyPhoto"{% endif %}
+	    title="Video Tutorial -  How to find to email in your Wish List"
 	    ><img src="{{ STATIC_URL }}main/images/youtube-howto-2-197px.png" alt="YouTube" width="197"></a><br>
-	    <a href="http://www.youtube.com/watch?v=e1Bdm_ZortE" rel="prettyPhoto" title="Video Tutorial - How to find to email in your Wish List"
+	    <a href="http://www.youtube.com/watch?v=e1Bdm_ZortE"
+	    {% if not MOBILE %}rel="prettyPhoto"{% endif %}
+             title="Video Tutorial - How to find to email in your Wish List"
 	     >How-to on emailing it in</a>
 	  </p>
 
         </div>
 
         <div id="by-email-mobile" {% if not MOBILE %}style="display:none"{% endif %} class="instruction">
-          <p>
-            Go to <a href="{% url 'main:instructions_mobile' %}">Instructions for Mobile</a>
-            for a step-by-step guide.
-          </p>
-        </div>
+
+          <p class="lead">The following step-by-step instructions are for setting up your Wish List
+          on a iPhone by email. It will look different but should work very similarly on Android
+          and any other smart phones.</p>
+
+<div class="step">
+<h4>1. Go to <a href="http://www.amazon.com" target="_blank">www.amazon.com</a></h4>
+<p>You might need to sign in first to see your Wish List</p>
+<img src="{{ STATIC_URL }}main/images/instructions/mobile/photo1.png" alt="Amazon.com home page">
+</div>
+
+<div class="step">
+<h4>2. Click the "Share List" button</h4>
+<p>Your list must be made public. If it's not you can't share it and there
+should be instructions there to change your list to being public.</p>
+<img src="{{ STATIC_URL }}main/images/instructions/mobile/photo2.png" alt="Your Amazon.com Wish list page">
+</div>
+
+
+<div class="step">
+<h4>3. Click to share by "Email"</h4>
+<img src="{{ STATIC_URL }}main/images/instructions/mobile/photo3.png" alt="Options how to share">
+</div>
+
+<div class="step">
+<h4>4. Type in <code>mail@inbound.wishlistgranted.com</code></h4>
+<p>After you have typed in the email address, note that you might need to scroll down
+to see the "Share via email" button.</p>
+<img src="{{ STATIC_URL }}main/images/instructions/mobile/photo4.png" alt="Entering the email address">
+</div>
+
+<div class="step">
+<h4>5. Check your email, click verification link</h4>
+<p>It may take a couple of minutes to receive an email about the verification link.
+It is sent to email address you're signed in to Amazon.com with.</p>
+<img src="{{ STATIC_URL }}main/images/instructions/mobile/photo5.png" alt="Email with verification link">
+</div>
+
+<div class="step">
+<h4>6. Pick your most preferred item on your Wish List</h4>
+<p>Hopefully all items from your Wish List are there.</p>
+<img src="{{ STATIC_URL }}main/images/instructions/mobile/photo6.png" alt="Email with verification link">
+</div>
+
+<div class="step">
+<h4>7. Your Wish List is ready to be shared with friends and family</h4>
+<img src="{{ STATIC_URL }}main/images/instructions/mobile/photo7.png" alt="Your finished Wish List">
+</div>
 
 
       </div>

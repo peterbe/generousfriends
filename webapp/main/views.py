@@ -224,7 +224,7 @@ def wishlist_home(request, identifier, fuzzy=False):
                 'progress_amount': progress_amount,
                 'progress_percent': progress_percent,
                 'payment_id': payment.pk,
-                'show_show_your_message': payment.email != item.email,
+                'show_your_message': payment.email != item.wishlist.email,
             }
             response = utils.json_response(data)
             contribution_item = '%s_%s' % (item.pk, payment.pk)
@@ -267,6 +267,11 @@ def wishlist_home(request, identifier, fuzzy=False):
 
     amount_remaining = None
     yours = cookie_identifier == wishlist.identifier
+    if yours:
+        email = wishlist.email
+    else:
+        email = request.get_signed_cookie('email', None, salt=settings.COOKIE_SALT)
+
     if request.GET.get('preview'):
         yours = False
     elif yours and request.GET.get('amount'):
@@ -311,12 +316,10 @@ def wishlist_home(request, identifier, fuzzy=False):
             continue
         try:
             _payment = models.Payment.objects.get(pk=payment_pk)
-        except models.Item.DoesNotExist:
+        except models.Payment.DoesNotExist:
             continue
         contribution_items.append(_payment)
     your_contributions = contribution_items
-
-    email = request.get_signed_cookie('email', None, salt=settings.COOKIE_SALT)
 
     contributions = (
         models.Payment.objects
@@ -330,7 +333,6 @@ def wishlist_home(request, identifier, fuzzy=False):
     if contributions:
         first_payment, = contributions[:1]
         days_left = 30 - (utils.now() - first_payment.added).days
-        show_days_left = True
         if progress_percent >= 100:
             show_days_left = False
     else:
@@ -357,6 +359,8 @@ def wishlist_home(request, identifier, fuzzy=False):
         'days_left': days_left,
         'first_payment': first_payment,
         'amount_remaining': amount_remaining,
+        'your_contributions': your_contributions,
+        'show_days_left': show_days_left,
     }
 
     return render(request, 'main/wishlist.html', context)

@@ -17,7 +17,7 @@ def base(request):
         ('android' in user_agent.lower() and 'AppleWebKit' in user_agent)
     ):
         context['MOBILE'] = True
-    context['USE_USERSNAP'] = not context['MOBILE']
+    context['USE_USERSNAP'] = not context['MOBILE'] and not context['DEBUG']
 
     context['your_wishlists'] = None
     cookie_identifier = request.get_signed_cookie(
