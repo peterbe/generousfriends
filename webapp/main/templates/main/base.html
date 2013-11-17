@@ -49,8 +49,9 @@
       {% endif %}
 
     <div class="{% block container_class %}container{% endblock %}">
-
+      {% block header %}
       {% include "main/_nav.html" %}
+      {% endblock %}
 
       {% block main %}
       {% endblock %}

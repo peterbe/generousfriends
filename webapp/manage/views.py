@@ -33,7 +33,23 @@ def home(request):
 @superuser_required
 def dashboard(request):
     context = {}
+    context['wishlists'] = models.Wishlist.objects.all()
+    context['payments'] = models.Payment.objects.all()
     return render(request, 'manage/dashboard.html', context)
+
+
+@superuser_required
+def wishlists(request):
+    context = {}
+    context['wishlists'] = models.Wishlist.objects.all()
+    return render(request, 'manage/wishlists.html', context)
+
+
+@superuser_required
+def payments(request):
+    context = {}
+    context['payments'] = models.Payment.objects.all()
+    return render(request, 'manage/payments.html', context)
 
 
 @superuser_required
@@ -88,6 +104,34 @@ def wishlists_data(request):
 
 
 @superuser_required
+@utils.json_view
+def payments_data(request):
+    context = {
+        'payments': []
+    }
+    qs = models.Payment.objects.all()
+    for payment in qs.select_related('item', 'wishlist').order_by('-added'):
+        _item = {
+            'manage_url': reverse('manage:item_data', args=(payment.item.identifier,)),
+            'title': payment.item.title,
+            'identifier': payment.item.identifier,
+        }
+        row = {
+            'item': _item,
+            'amount': payment.amount,
+            'actual_amount': payment.actual_amount,
+            'name': payment.name,
+            'email': payment.email,
+            'message': payment.message,
+            'receipt_emailed': payment.receipt_emailed,
+            'notification_emailed': payment.notification_emailed,
+            'added': payment.added,
+        }
+        context['payments'].append(row)
+    return context
+
+
+@superuser_required
 def wishlist_data(request, identifier):
     context = {}
     wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
@@ -104,3 +148,12 @@ def wishlist_data(request, identifier):
         )
     context['items_preferred'] = items_preferred
     return render(request, 'manage/wishlist.html', context)
+
+
+@superuser_required
+def item_data(request, identifier):
+    context = {}
+    item = get_object_or_404(models.Item, identifier=identifier)
+    context['item'] = item
+    raise NotImplementedError
+    return render(request, 'manage/item.html', context)

@@ -1,0 +1,35 @@
+{% extends "manage/base.html" %}
+
+{% block extra_head %}
+{% endblock %}
+
+{% block main %}
+
+<h3>Wish Lists</h3>
+<table class="table table-condensed table-bordered" id="wishlists"
+  data-dataurl="{% url 'manage:wishlists_data' %}">
+  <thead>
+    <tr>
+      <th>Identifier</th>
+      <th>Status</th>
+      <th>Email</th>
+      <th>Modified</th>
+      <th>Price</th>
+      <th>Total Amount</th>
+      <th>Actual Amount</th>
+      <th>Days Left</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+
+</table>
+
+{% endblock %}
+
+
+{% block javascript %}
+{{ block.super }}
+<script src="{{ STATIC_URL }}manage/js/dashboard.js"></script>
+<script src="{{ STATIC_URL }}manage/js/wishlists.js"></script>
+{% endblock %}

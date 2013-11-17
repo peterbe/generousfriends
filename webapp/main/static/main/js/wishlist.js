@@ -23,7 +23,6 @@ function handleBalancedCallback(response, form) {
     data.csrfmiddlewaretoken = $('input[name="csrfmiddlewaretoken"]', form).val();
     data.uri = response.data.uri;
     data.amount = $('#id_amount').val();
-    data.id = response.data.id;
     data.hash = response.data.hash;
     data.email = $('#id_email').val();
     var req = $.post($(form).attr('action'), data);

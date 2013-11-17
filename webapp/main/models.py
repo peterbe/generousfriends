@@ -114,8 +114,9 @@ class Payment(models.Model):
     hide_name = models.BooleanField(default=False)
     message = models.TextField(null=True)
     hide_message = models.BooleanField(default=False)
+    # this default was only necessary for South migrations
+    balanced_uri = models.CharField(max_length=255, default='')
     balanced_hash = models.CharField(max_length=200, null=True)
-    balanced_id = models.CharField(max_length=200, null=True)
     receipt_emailed = models.DateTimeField(null=True)
     notification_emailed = models.DateTimeField(null=True)
     added = models.DateTimeField(default=utils.now)

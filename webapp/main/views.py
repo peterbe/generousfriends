@@ -216,7 +216,7 @@ def wishlist_home(request, identifier, fuzzy=False):
                 amount=amount,
                 actual_amount=actual_amount,
                 balanced_hash=form.cleaned_data.get('hash'),
-                balanced_id=form.cleaned_data.get('id'),
+                balanced_uri=form.cleaned_data['uri'],
             )
             progress_amount, progress_percent = item.get_progress()
             data = {

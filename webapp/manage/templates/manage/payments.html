@@ -1,0 +1,36 @@
+{% extends "manage/base.html" %}
+
+{% block extra_head %}
+{% endblock %}
+
+{% block main %}
+
+<h3>Payments</h3>
+<table class="table table-condensed table-bordered" id="payments"
+  data-dataurl="{% url 'manage:payments_data' %}">
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Amount</th>
+      <th>Actual Amount</th>
+      <th>Email</th>
+      <th>Name</th>
+      <th>Message</th>
+      <th>Receipt sent</th>
+      <th>Notification sent</th>
+      <th>Added</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+
+</table>
+
+{% endblock %}
+
+
+{% block javascript %}
+{{ block.super }}
+<script src="{{ STATIC_URL }}manage/js/dashboard.js"></script>
+<script src="{{ STATIC_URL }}manage/js/payments.js"></script>
+{% endblock %}

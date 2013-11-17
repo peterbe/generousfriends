@@ -53,7 +53,7 @@ class PaymentForm(BaseForm):
     uri = forms.CharField()
     amount = forms.CharField()
     hash = forms.CharField(required=False)
-    id = forms.CharField(required=False)
+    uri = forms.CharField()
     email = forms.EmailField()
 
     def __init__(self, *args, **kwargs):

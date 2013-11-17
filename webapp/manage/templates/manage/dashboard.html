@@ -1,32 +1,13 @@
 {% extends "manage/base.html" %}
 
-
 {% block extra_head %}
 {% endblock %}
 
 {% block main %}
 
-<table class="table table-condensed table-bordered" id="wishlists"
-  data-dataurl="{% url 'manage:wishlists_data' %}">
-  <thead>
-    <tr>
-      <th>Identifier</th>
-      <th>Status</th>
-      <th>Email</th>
-      <th>Modified</th>
-      <th>Price</th>
-      <th>Total Amount</th>
-      <th>Actual Amount</th>
-      <th>Days Left</th>
-    </tr>
-  </thead>
-  <tbody>
-  </tbody>
-
-</table>
-
+<h3><a href="{% url 'manage:wishlists' %}">Wish Lists</a> ({{ wishlists.count }})</h3>
+<h3><a href="{% url 'manage:payments' %}">Payments</a> ({{ payments.count }})</h3>
 {% endblock %}
-
 
 {% block javascript %}
 {{ block.super }}
