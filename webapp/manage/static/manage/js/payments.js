@@ -9,7 +9,10 @@ function load_payments() {
                 .append($('<a>')
                         .attr('href', row.item.manage_url)
                         .attr('title', row.item.title)
-                        .text(row.item.identifier)));
+                        .text(row.item.identifier))
+                .append($('<span>')
+                        .addClass('price')
+                        .text(' ($' + row.item.price.toFixed(2) + ')')));
       tr.append($('<td>').addClass('price').text('$' + row.amount.toFixed(2)));
       tr.append($('<td>').addClass('price').text('$' + row.actual_amount.toFixed(2)));
       tr.append($('<td>').text(row.email));

@@ -110,11 +110,12 @@ def payments_data(request):
         'payments': []
     }
     qs = models.Payment.objects.all()
-    for payment in qs.select_related('item', 'wishlist').order_by('-added'):
+    for payment in qs.select_related('item').order_by('-added'):
         _item = {
             'manage_url': reverse('manage:item_data', args=(payment.item.identifier,)),
             'title': payment.item.title,
             'identifier': payment.item.identifier,
+            'price': payment.item.price,
         }
         row = {
             'item': _item,
