@@ -72,6 +72,13 @@ h2.days-left {
     text-align: center;
     margin-top: 0;
 }
+
+/* Desktops and laptops ----------- */
+@media only screen and (min-width : 1224px) {
+    .days-left-outer {
+        float: right;
+    }
+}
 </style>
 {% if yours %}
 <style type="text/css">
@@ -129,7 +136,12 @@ input.share-url {
 
     <div class="row marketing" id="progress">
 
-      <div>
+        {% if show_days_left %}
+        <h4 class="days-left-outer">
+          Days left<a data-toggle="modal" href="#days-left">?</a>:
+          <span class="days-left">{{ days_left }}</span>
+        </h4>
+        {% endif %}
 
         <h4>Progress So Far <span class="price progress-amount">${{ progress_amount|floatformat:2 }}</span>
         out of <span class="price">${{ item.price|floatformat:2 }}</span></h4>
@@ -142,15 +154,6 @@ input.share-url {
           </div>
         </div>
 
-      </div>
-
-      {% if show_days_left %}
-      <div>
-        <h4>Days left<a data-toggle="modal" href="#days-left">?</a></h4>
-        <h2 class="days-left">{{ days_left }}</h2>
-      </div>
-      {% endif %}
-
     </div><!-- /#progress -->
 
     {% if yours %}
@@ -159,52 +162,14 @@ input.share-url {
     </div>
     {% endif %}
 
-    <div class="row marketing" id="contributions">
+    <div class="row marketing">
 
-      {% if yours %}
-
-        {% if contributions %}
-        <div class="contributions">
-          <h3>Contributions made so far</h3>
-          {% for payment in contributions %}
-          <div class="contribution">
-          <h4>{{ forloop.counter }}. From
-            {% if payment.email == wishlist.email %}
-             you yourself!
-            {% else %}
-              {% if payment.name and not payment.hide_name %}
-                {{ payment.name }}
-              {% elif payment.email and not payment.hide_email %}
-                {{ payment.email }}
-              {% else %}
-                Anonymous
-              {% endif %}
-            {% endif %}
-            <span class="price">${{ payment.amount|floatformat:2 }}</span>
-          </h4>
-          {% if payment.message and not payment.hide_message %}
-          <blockquote>
-            {{ payment.message|linebreaks }}
-          </blockquote>
-          {% endif %}
-          </div>
-          {% endfor %}
-        </div>
+      {% if wishlist.verified %}
+        {% if not progress_complete %}
+          {% include "main/_pay_form.html" %}
         {% endif %}
-
       {% else %}
-
-
-        {% if your_contributions %}
-          <div class="your-contribution">
-            <h3>You're a good person!</h3>
-            {% for payment in your_contributions %}
-            <h4>Thank you for your contribution of
-              <span class="price">${{ payment.amount|floatformat:2 }}</span>.</h4>
-            {% endfor %}
-          </div>
-        {% endif %}
-
+        <p>No contributions can be made on Wish Lists that haven't yet been verified.</p>
       {% endif %}
 
     </div>
@@ -271,14 +236,53 @@ input.share-url {
       </div><!-- /#your-message -->
     </div>
 
-    <div class="row marketing">
 
-      {% if wishlist.verified %}
-        {% if not progress_complete %}
-          {% include "main/_pay_form.html" %}
+    <div class="row marketing" id="contributions">
+
+      {% if yours %}
+
+        {% if contributions %}
+        <div class="contributions">
+          <h3>Contributions made so far</h3>
+          {% for payment in contributions %}
+          <div class="contribution">
+          <h4>{{ forloop.counter }}. From
+            {% if payment.email == wishlist.email %}
+             you yourself!
+            {% else %}
+              {% if payment.name and not payment.hide_name %}
+                {{ payment.name }}
+              {% elif payment.email and not payment.hide_email %}
+                {{ payment.email }}
+              {% else %}
+                Anonymous
+              {% endif %}
+            {% endif %}
+            <span class="price">${{ payment.amount|floatformat:2 }}</span>
+          </h4>
+          {% if payment.message and not payment.hide_message %}
+          <blockquote>
+            {{ payment.message|linebreaks }}
+          </blockquote>
+          {% endif %}
+          </div>
+          {% endfor %}
+        </div>
         {% endif %}
+
       {% else %}
-        <p>No contributions can be made on Wish Lists that haven't yet been verified.</p>
+
+
+        {% if your_contributions %}
+          <div class="your-contribution">
+            <h3>You're a good person!</h3>
+            {% for payment in your_contributions %}
+            <h4>Thank you for your contribution of
+              <span class="price">${{ payment.amount|floatformat:2 }}</span>.</h4>
+            {% endfor %}
+          </div>
+        {% endif %}
+
       {% endif %}
 
     </div>
