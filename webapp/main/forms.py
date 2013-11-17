@@ -115,3 +115,18 @@ class ShareByEmailForm(BaseForm):
         #print "OUTPUT"
         #print emails
         return emails
+
+
+class FindWishlistForm(BaseForm):
+
+    email = forms.CharField()
+
+    def clean_email(self):
+        value = self.cleaned_data['email']
+        email = address.parse(value)
+        if not email:
+            raise forms.ValidationError("Not a valid email address")
+        email = unicode(email)
+        for w in models.Wishlist.objects.filter(email__iexact=email):
+            return w.email
+        raise forms.ValidationError("No Wish List set up with that address")

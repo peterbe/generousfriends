@@ -9,7 +9,12 @@ p.the-url a { font-size: 120%; font-weight: bold; }
 
 {% block content %}
 <h3>Hi, {% if wishlist.name %}{{ wishlist.name }}{% endif %}</h3>
+
+{% if wishlist.verified %}
+<p class="lead">Click this link to administer your Wish List</p>
+{% else %}
 <p class="lead">Please verify your Wish List</p>
+{% endif %}
 
 <p class="the-url">
 <a href="{{ base_url }}{{ url }}">{{ base_url }}{{ url }}</a><br>

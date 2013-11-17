@@ -3,6 +3,7 @@ import os
 import decimal
 import datetime
 import hashlib
+import urllib
 from StringIO import StringIO
 
 import balanced
@@ -739,3 +740,22 @@ def wishlist_share_by_email(request, identifier):
         return {'emails': [unicode(x) for x in emails]}
     else:
         return {'error': form.error}
+
+
+def find_wishlist(request):
+    context = {}
+    context['sent_to'] = request.GET.get('sent_to')
+    if request.method == 'POST':
+        form = forms.FindWishlistForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            wishlist = models.Wishlist.objects.get(email=email)
+            sending.send_verification_email(wishlist, request)
+            url = reverse('main:find_wishlist')
+            url += '?' + urllib.urlencode({'sent_to': wishlist.email})
+            return redirect(url)
+    else:
+        form = forms.FindWishlistForm()
+    context['form'] = form
+    context['WEBMASTER_FROM'] = settings.WEBMASTER_FROM
+    return render(request, 'main/find_wishlist.html', context)

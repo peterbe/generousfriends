@@ -25,9 +25,6 @@ urlpatterns = patterns(
     url(r'^help/$',
         views.help_page,
         name='help'),
-    url(r'^instructions/mobile/$',
-        views.instructions_mobile,
-        name='instructions_mobile'),
     url(r'^inboundemail/$',
         views.inbound_email,
         name='inbound_email'),
@@ -56,5 +53,8 @@ urlpatterns = patterns(
     url(r'^(?P<identifier>[a-f0-9]{8})/share-by-email/$',
         views.wishlist_share_by_email,
         name='wishlist_share_by_email'),
+    url(r'^find/$',
+        views.find_wishlist,
+        name='find_wishlist'),
 
  )
