@@ -9,16 +9,20 @@ This is what I want the most
 {% endif %}
 {% endblock %}
 
-{% block extra_head %}
+{% block opengraph %}
+<meta property="og:site_name" content="{{ PROJECT_TITLE }}">
 {% if wishlist.verified %}
 <meta property="og:title" content="This is what {{ wishlist.name_or_email }} wants the most: {{ item.title }}">
-<meta property="og:description" content="{{ PROJECT_STRAPLINE }}">
+<meta property="og:description" content="{{ item.title }}">
 {% thumbnail item.picture "200x200" as thumb %}
 <meta property="og:image" content="{{ thumb.url }}">
 <meta property="og:image:width" content="{{ thumb.width }}">
 <meta property="og:image:height" content="{{ thumb.height }}">
 {% endthumbnail %}
 {% endif %}
+{% endblock %}
+
+{% block extra_head %}
 <style type="text/css">
 .please-wait,
 .credit-card,
@@ -69,6 +73,16 @@ h2.days-left {
     margin-top: 0;
 }
 </style>
+{% if yours %}
+<style type="text/css">
+input.share-url {
+    font-size: 22px;
+}
+.share-options li.active a {
+    font-weight: bold;
+}
+</style>
+{% endif %}
 {% endblock %}
 
 {% block main %}
@@ -115,7 +129,7 @@ h2.days-left {
 
     <div class="row marketing" id="progress">
 
-      <div class="{% if show_days_left %}col-lg-10{% else %}col-lg-12{% endif %}">
+      <div>
 
         <h4>Progress So Far <span class="price progress-amount">${{ progress_amount|floatformat:2 }}</span>
         out of <span class="price">${{ item.price|floatformat:2 }}</span></h4>
@@ -131,7 +145,7 @@ h2.days-left {
       </div>
 
       {% if show_days_left %}
-      <div class="col-lg-2 days-left">
+      <div>
         <h4>Days left<a data-toggle="modal" href="#days-left">?</a></h4>
         <h2 class="days-left">{{ days_left }}</h2>
       </div>
@@ -391,4 +405,9 @@ h2.days-left {
 </script>
 <script src="{{ STATIC_URL }}main/js/wishlist.js"></script>
 <script async src="{{ STATIC_URL }}assets/js/bootstrap.modal.min.js"></script>
+{% if yours %}
+<script src="{{ STATIC_URL }}main/js/sharing.js"></script>
+<div id="fb-root"></div>
+<script async id="facebook-jssdk" src="//connect.facebook.net/en_US/all.js#xfbml=1&appId=234777400018127"></script>
+{% endif %}
 {% endblock %}

@@ -4,10 +4,71 @@
         <br>Or, at least,  a little bit generous.</p>
 
         <p><strong>URL to share:</strong></p>
-        <div class="well share">
-        <a href="{{ absolute_url }}">{{ absolute_url }}</a>
-        </div>
+
+        <p>
+        <input type="text" class="share-url form-control input-lg " value="{{ absolute_url }}"
+         data-original="{{ absolute_url }}"
+         >
+        </p>
 
         <p>This page will look different when they visit it,
         click here to <a href="?preview=1">Preview What Your Friends and Family see</a>.
         </p>
+
+      <ul class="nav nav-tabs nav-justified share-options">
+        <li><a href="#share-by-email">Share by Email</a></li>
+        <li><a href="#share-on-facebook">Share on Facebook</a></li>
+        <li><a href="#share-on-twitter">Share on Twitter</a></li>
+      </ul>
+
+      <div id="share-by-email" style="display:none" class="share-option">
+        <form action="{% url 'main:wishlist_share_by_email' item.identifier %}" method="post" role="form">{% csrf_token %}
+          <div class="form-group">
+            <label for="id_share_emails">Email addresses</label>
+            <span>Note! We will never store any of these.</span>
+            <p class="help-block">Enter one email per line or separate by a <code>;</code></p>
+            <textarea name="share_emails" id="id_share_emails" class="form-control"></textarea>
+            <p class="help-block" style="display:block">Enter one email per line or separate by a comma.</p>
+          </div>
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" name="send_copy" value="1" checked> Send a copy to yourself
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+
+        <div class="share-error alert alert-danger alert-dismissable" style="display:none">
+          <p><b>Error :(</b></p>
+          <p>Unfortunately we could not share your Wish List with what you entered.</p>
+          <p><b class="message"></b></p>
+          <p>Perhaps review what you entered or try again a little later.</p>
+        </div>
+
+        <div class="share-success alert alert-success alert-dismissable" style="display:none">
+          <p><b>Success!</b></p>
+          <p>Sharing by Email worked!</p>
+          <p class="emails"></p>
+        </div>
+
+      </div>
+
+
+      <div id="share-on-facebook" style="display:none" class="share-option">
+
+        <p>Click this button below</p>
+
+        <div class="fb-share-button" data-href="{{ absolute_url }}" data-width="100" data-type="button"></div>
+
+        <p>It won't install anything on your Facebook account. It just makes it easier to share this Wish List.</p>
+
+      </div>
+
+
+      <div id="share-on-twitter" style="display:none" class="share-option">
+        <p>Click this button below</p>
+
+        <a href="https://twitter.com/share" class="twitter-share-button" data-url="{{ absolute_url }}" data-via="WishListGranted" data-size="large" data-count="none">Tweet</a>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+      </div>

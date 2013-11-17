@@ -718,3 +718,24 @@ def wishlist_admin(request, identifier):
         for x in items
     ]
     return render(request, 'main/wishlist_admin.html', context)
+
+
+@require_POST
+@transaction.commit_on_success
+@utils.json_view
+def wishlist_share_by_email(request, identifier):
+    item = get_object_or_404(models.Item, identifier=identifier)
+    form = forms.ShareByEmailForm(request.POST)
+    if form.is_valid():
+        emails = form.cleaned_data['emails']
+        if not emails:
+            return {'error': "No valid email addresses in that input"}
+        if form.cleaned_data['send_copy']:
+            emails.append(item.wishlist.email)
+
+        for email in emails:
+            email = unicode(email)
+            sending.send_share(item, email, request)
+        return {'emails': [unicode(x) for x in emails]}
+    else:
+        return {'error': form.error}

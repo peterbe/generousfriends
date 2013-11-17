@@ -178,21 +178,4 @@ It is sent to email address you're signed in to Amazon.com with.</p>
 {{ block.super }}
 <script src="{{ STATIC_URL }}assets/js/jquery.prettyPhoto.min.js"></script>
 <script src="{{ STATIC_URL }}main/js/start.js"></script>
-<script>
-$(function() {
-  $("a[rel^='prettyPhoto']").prettyPhoto({
-    social_tools: ''
-  });
-
-  $('.instructions .nav a').click(function() {
-    var id = $(this).attr('href');
-    $('.instruction').not(id).hide();
-    $(id).fadeIn(400);
-    var nav = $('li.active', $(this).closest('.nav')).removeClass('active');
-    $(this).closest('li').addClass('active');
-  });
-
-});
-
-</script>
 {% endblock %}

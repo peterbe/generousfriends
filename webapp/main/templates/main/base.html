@@ -17,6 +17,12 @@
       <script src="{{ STATIC_URL }}/assets/js/html5shiv.js"></script>
       <script src="{{ STATIC_URL }}/assets/js/respond.min.js"></script>
     <![endif]-->
+
+    {% block opengraph %}
+    <meta property="og:site_name" content="{{ PROJECT_TITLE }}">
+    <meta property="og:description" content="{{ PROJECT_STRAPLINE }}">
+    {% endblock %}
+
     {% block extra_head %}
     {% endblock %}
 

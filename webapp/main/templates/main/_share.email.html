@@ -1,0 +1,26 @@
+{% extends "main/email_base.html" %}
+{% block document_title %}{{ subject }}{% endblock %}
+
+{% block extra_css %}
+p.the-url { text-align: center }
+p.the-url a { font-size: 130%; font-weight: bold; }
+{% endblock %}
+
+
+{% block content %}
+<h3>Hi,</h3>
+<p class="lead">I have set up a Wish List on <a href="{{ base_url }}">{{ PROJECT_TITLE }}</a>
+and now I have kindly invited you to have a look in case you want to make a small contribution. Hint hint :)</p>
+
+<p class="the-url">
+<a href="{{ base_url }}{{ url }}">{{ base_url }}{{ url }}</a><br>
+</p>
+
+<p>
+<b>From:</b>
+{% if wishlist.name %}
+{{ wishlist.name }}
+{% endif %}
+<a href="mailto:{{ wishlist.email }}">{{ wishlist.email }}</a>
+</p>
+{% endblock %}

@@ -114,7 +114,7 @@ _URL_RE = re.compile(r"""\b((?:([\w-]+):(/{1,3})|www[.])(?:(?:(?:[^\s&()]|&amp;|
 def find_urls(text):
     return list(set([x[0] for x in _URL_RE.findall(text)]))
 
-_WISHLIST_URL_ID_REGEX = re.compile('/([0-9A-Z]{10,15})/')
+_WISHLIST_URL_ID_REGEX = re.compile('/([0-9A-Z]{10,15})/?')
 
 def find_wishlist_amazon_id(text):
     for identifier in _WISHLIST_URL_ID_REGEX.findall(text):

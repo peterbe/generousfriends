@@ -52,4 +52,17 @@ $(function() {
   });
 
   $('form button[type="submit"]').removeAttr('disabled');
+
+  $("a[rel^='prettyPhoto']").prettyPhoto({
+    social_tools: ''
+  });
+
+  $('.instructions .nav a').click(function() {
+    var id = $(this).attr('href');
+    $('.instruction').not(id).hide();
+    $(id).fadeIn(400);
+    var nav = $('li.active', $(this).closest('.nav')).removeClass('active');
+    $(this).closest('li').addClass('active');
+  });
+
 });

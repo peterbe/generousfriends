@@ -53,4 +53,8 @@ urlpatterns = patterns(
         views.wishlist_home,
         {'fuzzy': True},
         name='wishlist_fuzzy'),
+    url(r'^(?P<identifier>[a-f0-9]{8})/share-by-email/$',
+        views.wishlist_share_by_email,
+        name='wishlist_share_by_email'),
+
  )

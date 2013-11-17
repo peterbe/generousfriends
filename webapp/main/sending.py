@@ -202,3 +202,41 @@ def send_wishlist_created_email(item, base_url):
     )
     email.attach_alternative(html_body, "text/html")
     email.send()
+
+
+def send_share(item, recipient, base_url):
+    base_url = _fix_base_url(base_url)
+    wishlist = item.wishlist
+
+    subject = "Invitation to contribute to my Wish List"
+    context = {
+        'wishlist': wishlist,
+        'item': item,
+        'base_url': base_url,
+        'url': reverse('main:wishlist', args=(item.identifier,)),
+        'subject': subject,
+        'PROJECT_TITLE': settings.PROJECT_TITLE,
+        'PROJECT_STRAPLINE': settings.PROJECT_STRAPLINE,
+    }
+    html_body = render_to_string('main/_share.email.html', context)
+
+    html_body = premailer.transform(
+        html_body,
+        base_url=base_url
+    )
+    body = html2text(html_body)
+
+    if wishlist.email != recipient:
+        headers = {'Reply-To': wishlist.email}
+    else:
+        headers = {}
+    print "RECIPIENT", repr(recipient), type(recipient)
+    email = EmailMultiAlternatives(
+        subject,
+        body,
+        settings.WEBMASTER_FROM,
+        [recipient],
+        headers=headers,
+    )
+    email.attach_alternative(html_body, "text/html")
+    email.send()

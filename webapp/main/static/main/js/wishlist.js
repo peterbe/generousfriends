@@ -226,6 +226,11 @@ $(function() {
       }
     });
   }
+
+  $('#id_amount').change(function() {
+    $(this).val($.trim($(this).val().replace('$', '')));
+  });
+
   $('#absolute_url').on('focus', function() {
     $(this).off('focus');
     $(this).select();
@@ -248,5 +253,6 @@ $(function() {
        remote: true
     });
   });
+
 
 });

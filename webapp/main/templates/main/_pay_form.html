@@ -11,10 +11,19 @@
             <p>Please try again a little later.</p>
           </div>
           <div class="form-group">
+
             <label for="id_amount" class="col-lg-4 control-label">Amount:</label>
             <div class="col-lg-6">
+              <div class="input-group">
+                <span class="input-group-addon">$</span>
+                <input type="text" id="id_amount" name="amount" class="form-control" placeholder="e.g. $15"
+              {% if amount_remaining %}value="{{ amount_remaining|floatformat:2 }}"{% endif %}>
+              </div>
+
+              <!--
               <input type="text" id="id_amount" name="amount" class="form-control" placeholder="e.g. $15"
               {% if amount_remaining %}value="{{ amount_remaining|floatformat:2 }}"{% endif %}>
+              -->
               + {{ PAYMENT_TRANSACTION_PERCENTAGE }}% + ${{ PAYMENT_TRANSACTION_AMOUNT|floatformat:2 }} transaction fee [<a data-toggle="modal" href="#transaction-fee">tell me more</a>]
               <span class="help-block"></span>
             </div>
