@@ -197,12 +197,6 @@ def wishlist_home(request, identifier, fuzzy=False):
                 amount * decimal.Decimal(settings.PAYMENT_TRANSACTION_PERCENTAGE / 100.0)
             )
 
-            balanced.configure(settings.BALANCED_API_KEY)
-            customer = balanced.Customer().save()
-            customer.add_card(form.cleaned_data['uri'])
-            customer.debit(amount=amount_cents)
-            #print dir(customer)
-
             payment = models.Payment.objects.create(
                 wishlist=wishlist,
                 item=item,
@@ -212,6 +206,22 @@ def wishlist_home(request, identifier, fuzzy=False):
                 balanced_hash=form.cleaned_data.get('hash'),
                 balanced_uri=form.cleaned_data['uri'],
             )
+
+            appears_on_statement_as = 'WishListGranted'
+            description = (
+                'wishlistgranted.com %s-%s'
+                % (item.identifier, payment.pk)
+            )
+            balanced.configure(settings.BALANCED_API_KEY)
+            customer = balanced.Customer().save()
+            customer.add_card(form.cleaned_data['uri'])
+            customer.debit(
+                amount=amount_cents,
+                appears_on_statement_as=appears_on_statement_as,
+                description=description,
+            )
+            #print dir(customer)
+
             progress_amount, progress_percent = item.get_progress()
             data = {
                 'amount': float(amount),

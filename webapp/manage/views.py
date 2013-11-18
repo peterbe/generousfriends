@@ -1,10 +1,14 @@
 from decimal import Decimal
 
+import balanced
+
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Sum
+from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.db import transaction
 
 from webapp.main import utils
 from webapp.main import models
@@ -156,6 +160,7 @@ def wishlist_data(request, identifier):
 
 
 @superuser_required
+@transaction.commit_on_success
 def payment_edit(request, id):
     context = {}
     payment = get_object_or_404(models.Payment, id=id)
@@ -163,8 +168,27 @@ def payment_edit(request, id):
         form = forms.PaymentEditForm(request.POST, instance=payment)
         form.fields['name'].required = False
         form.fields['message'].required = False
+        refund_amount_before = payment.refund_amount
         if form.is_valid():
+            refund_amount = form.cleaned_data['refund_amount']
             form.save()
+            refund_amount_after = payment.refund_amount
+            if refund_amount and refund_amount_after != refund_amount_before:
+                balanced.configure(settings.BALANCED_API_KEY)
+                debit = balanced.Debit.find(payment.balanced_uri)
+                description = form.cleaned_data.get('description')
+                if not description:
+                    description = 'Refund for %s' % payment.item.identifier
+                refund_cents = int(Decimal('100') * refund_amount_after)
+                print debit.refund(
+                    amount=refund_cents,
+                    description=description,
+                    meta={
+                        'payment.id': str(payment.pk),
+                        'item.identifier': payment.item.identifier,
+                    }
+                )
+                #raise Exception(refund_amount_after)
             return redirect('manage:payments')
     else:
         form = forms.PaymentEditForm(instance=payment)
