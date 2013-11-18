@@ -1,3 +1,5 @@
+* Optional postal_code on the payment form
+
 * Option to include a message in the email
 
 * Store the Balanced Hash in cache to prevent accidentally submitting

@@ -3,13 +3,18 @@
 {% block document_title %}Help{% endblock %}
 
 {% block main %}
-
-      <div class="row marketing">
+      <div class="row marketing" id="faq">
           <h1>Help &amp; Frequently Asked Questions</h1>
 
 	  <p>If you have any questions about how to use the site or any other
 	  suggestions for improvements don't hesitate to send an email to
 	  <a href="mailto:mail@wishlistgranted.com">mail@wishlistgranted.com</a></p>
+
+	  <h3>Table of Contents</h3>
+          <ul>
+          </ul>
+
+	  <p>&nbsp;</p>
 
 	  <h4>What happens after 30 days is up and the total price is not reached?</h4>
 	  <p>If only a relatively small amount is remaining, you can make a contribution
@@ -34,6 +39,11 @@
           <p>It's actually impossible. Because of privacy. The instructions might be complicated
           but this way your privacy is guraranteed.</p>
 
+	  <h4>What about the UK, France and Germany?</h4>
+	  <p>As soon as this proves to work successfully in the US, we'll expand to the other
+	  countries where Amazon&trade; operates.
+	  </p>
+
           <h4>How to find your Amazon Wish List</h4>
           <iframe
 	    width="560" height="315"
@@ -46,4 +56,19 @@
 
       </div>
 
+{% endblock %}
+
+{% block javascript %}
+{{ block.super }}
+<script src="{{ STATIC_URL }}assets/js/md5.js"></script>
+<script>
+$(function() {
+  var ul = $('#faq ul');
+  $('#faq h4').each(function() {
+    var h = md5($(this).text()).substring(0, 4);
+    ul.append($('<li>').append($('<a>').attr('href', '#' + h).text($(this).text())));
+    $(this).attr('id', h);
+  });
+});
+</script>
 {% endblock %}
