@@ -82,7 +82,7 @@ def send_payment_notification(payment, base_url):
     context['progress_percent'] = progress_percent
     context['progress_complete'] = progress_percent >= 100
     context['amount_left'] = item.price - progress_amount
-    html_body = render_to_string('main/_notification.html', context)
+    html_body = render_to_string('main/_notification.email.html', context)
     headers = {'Reply-To': payment.email}
     html_body = premailer.transform(
         html_body,

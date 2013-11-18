@@ -88,6 +88,9 @@ body {
     color: rgb(153, 0, 0);
 }
 
+.refunded {
+    text-decoration: line-through;
+}
 
 .footer img {
     padding-left: 15px;

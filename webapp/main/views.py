@@ -201,13 +201,7 @@ def wishlist_home(request, identifier, fuzzy=False):
             customer = balanced.Customer().save()
             customer.add_card(form.cleaned_data['uri'])
             customer.debit(amount=amount_cents)
-            print dir(customer)
-
-            #hold = balanced.Hold(
-            #    source_uri=form.cleaned_data['uri'],
-            #    amount=amount_cents,
-            #    description='Hold for %s (%s)' % (wishlist, item)
-            #)
+            #print dir(customer)
 
             payment = models.Payment.objects.create(
                 wishlist=wishlist,
@@ -288,8 +282,6 @@ def wishlist_home(request, identifier, fuzzy=False):
         request.session['visited_items'] = visited
 
     progress_amount, progress_percent = item.get_progress()
-    #if not progress_percent:
-    #    progress_percent = .5
 
     absolute_url = 'https://' if request.is_secure() else 'http://'
     absolute_url += RequestSite(request).domain
@@ -325,6 +317,7 @@ def wishlist_home(request, identifier, fuzzy=False):
     contributions = (
         models.Payment.objects
         .filter(wishlist=wishlist, item=item)
+        .exclude(declined=True)
         .order_by('added')
     )
 
@@ -348,7 +341,7 @@ def wishlist_home(request, identifier, fuzzy=False):
         'progress_amount': progress_amount,
         'progress_complete': progress_percent >= 100,
         'balanced_marketplace_uri': settings.BALANCED_MARKETPLACE_URI,
-        'payments': models.Payment.objects.filter(wishlist=wishlist).order_by('added'),
+        #'payments': models.Payment.objects.filter(wishlist=wishlist).order_by('added'),
         'WEBMASTER_FROM': settings.WEBMASTER_FROM,
         'contributions': contributions,
         'PAYMENT_TRANSACTION_PERCENTAGE': settings.PAYMENT_TRANSACTION_PERCENTAGE,

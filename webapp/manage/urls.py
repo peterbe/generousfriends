@@ -25,7 +25,10 @@ urlpatterns = patterns(
     url(r'^data/payments/data/$',
         views.payments_data,
         name='payments_data'),
-    url(r'^item/(?P<identifier>[a-f0-9]{8})/$',
-        views.item_data,
-        name='item_data'),
+    url(r'^data/payments/(?P<id>\d+)/$',
+        views.payment_edit,
+        name='payment_edit'),
+    #url(r'^item/(?P<identifier>[a-f0-9]{8})/$',
+    #    views.item_data,
+    #    name='item_data'),
 )

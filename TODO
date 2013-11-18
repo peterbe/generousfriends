@@ -1,3 +1,8 @@
+* Option to include a message in the email
+
+* Store the Balanced Hash in cache to prevent accidentally submitting
+  twice
+
 * Find out if I can refund less than I charged, if so, include that in
   the terms and conditions.
 

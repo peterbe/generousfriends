@@ -258,7 +258,11 @@ input.share-url {
                 Anonymous
               {% endif %}
             {% endif %}
-            <span class="price">${{ payment.amount|floatformat:2 }}</span>
+            <span class="price {% if payment.refund_amount %}refunded{% endif %}"
+             >${{ payment.amount|floatformat:2 }}</span>
+             {% if payment.refund_amount %}
+              (<span class="price">${{ payment.refund_amount|floatformat:2 }}</span> refunded)
+             {% endif %}
           </h4>
           {% if payment.message and not payment.hide_message %}
           <blockquote>

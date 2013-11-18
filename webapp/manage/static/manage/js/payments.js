@@ -5,6 +5,9 @@ function load_payments() {
     $.each(response.payments, function(i, row) {
       console.dir(row);
       var tr = $('<tr>');
+      if (row.declined) {
+        tr.addClass('declined');
+      }
       tr.append($('<td>')
                 .append($('<a>')
                         .attr('href', row.item.manage_url)
@@ -15,6 +18,11 @@ function load_payments() {
                         .text(' ($' + row.item.price.toFixed(2) + ')')));
       tr.append($('<td>').addClass('price').text('$' + row.amount.toFixed(2)));
       tr.append($('<td>').addClass('price').text('$' + row.actual_amount.toFixed(2)));
+      if (row.refund_amount) {
+        tr.append($('<td>').addClass('price').text('$' + row.refund_amount.toFixed(2)));
+      } else {
+        tr.append($('<td>').text('--'));
+      }
       tr.append($('<td>').text(row.email));
       if (row.name) {
         tr.append($('<td>').text(row.name));
@@ -39,6 +47,8 @@ function load_payments() {
         tr.append($('<td>').text('No!'));
       }
       tr.append($('<td>').text(moment(row.added).fromNow()));
+      tr.append($('<td>').append($('<a>').attr('href', row.url).text('Refund/Decline')));
+
       tr.appendTo($tbody);
     });
   });

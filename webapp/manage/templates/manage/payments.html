@@ -1,6 +1,12 @@
 {% extends "manage/base.html" %}
 
 {% block extra_head %}
+{{ block.super }}
+<style type="text/css">
+tr.declined td {
+    text-decoration: line-through;
+}
+</style>
 {% endblock %}
 
 {% block main %}
@@ -13,12 +19,14 @@
       <th>Item</th>
       <th>Amount</th>
       <th>Actual Amount</th>
+      <th>Refund Amount</th>
       <th>Email</th>
       <th>Name</th>
       <th>Message</th>
       <th>Receipt sent</th>
       <th>Notification sent</th>
       <th>Added</th>
+      <th>Action</th>
     </tr>
   </thead>
   <tbody>

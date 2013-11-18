@@ -85,10 +85,13 @@ class Item(models.Model):
     def get_progress(self):
         goal_amount = self.price
         sum_ = (
-            Payment.objects.filter(item=self)
-            .aggregate(Sum('amount'))
+            Payment.objects
+            .filter(item=self)
+            .exclude(declined=True)
+            .aggregate(Sum('amount'), Sum('refund_amount'))
         )
         amount = sum_['amount__sum'] or decimal.Decimal('0')
+        amount -= sum_['refund_amount__sum'] or decimal.Decimal('0')
         percent = int(100 * float(amount / goal_amount))
         return amount, percent
 
@@ -119,6 +122,9 @@ class Payment(models.Model):
     balanced_hash = models.CharField(max_length=200, null=True)
     receipt_emailed = models.DateTimeField(null=True)
     notification_emailed = models.DateTimeField(null=True)
+    refund_amount = models.DecimalField(max_digits=5, decimal_places=2,
+                                        default=decimal.Decimal('0.00'))
+    declined = models.BooleanField(default=False)
     added = models.DateTimeField(default=utils.now)
     modified = models.DateTimeField(default=utils.now)
 

@@ -1,0 +1,38 @@
+{% extends "manage/base.html" %}
+{% load bootstrap %}
+
+{% block extra_head %}
+{% endblock %}
+{% block container_class %}container{% endblock %}
+
+{% block main %}
+
+<dl class="dl-horizontal">
+  <dt>Item:</dt>
+  <dd><a href="{% url 'main:wishlist' payment.item.identifier %}">{{ payment.item.title }}</a>
+    by <b>{{ payment.item.wishlist.name }}</b>
+       <a href="mailto:{{ payment.item.wishlist.email }}">{{ payment.item.wishlist.email }}</a></dd>
+  <dt>Amount:</dt>
+  <dd class="price">${{ payment.amount|floatformat:2 }}</dd>
+  <dt>Actual Amount:</dt>
+  <dd class="price">${{ payment.actual_amount|floatformat:2 }}</dd>
+  <dt>Date:</dt>
+  <dd>{{ payment.added }}</dd>
+  <dt>Email:</dt>
+  <dd><a href="mailto:{{ payment.email }}">{{ payment.email }}</a></dd>
+  <dt>Balanced URI:</dt>
+  <dd><code>{{ payment.balanced_uri }}</code></dd>
+  <dt>Balanced Hash:</dt>
+  <dd><code>{{ payment.balanced_hash }}</code></dd>
+</dl>
+
+<form action="." method="post">{% csrf_token %}
+        {{ form|bootstrap }}
+        <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+<p>
+<b>NOTE:</b>
+Refund and Decline is not automated. When editing here make sure you know what the Marketplace says.
+</p>
+{% endblock %}

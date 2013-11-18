@@ -8,6 +8,7 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 
 from webapp.main import utils
 from webapp.main import models
+from . import forms
 
 
 def superuser_required(function=None, redirect_field_name=REDIRECT_FIELD_NAME, login_url=None):
@@ -112,15 +113,18 @@ def payments_data(request):
     qs = models.Payment.objects.all()
     for payment in qs.select_related('item').order_by('-added'):
         _item = {
-            'manage_url': reverse('manage:item_data', args=(payment.item.identifier,)),
+            'manage_url': reverse('manage:wishlist_data', args=(payment.item.wishlist.identifier,)),
             'title': payment.item.title,
             'identifier': payment.item.identifier,
             'price': payment.item.price,
         }
         row = {
+            'url': reverse('manage:payment_edit', args=(payment.id,)),
             'item': _item,
             'amount': payment.amount,
             'actual_amount': payment.actual_amount,
+            'refund_amount': payment.refund_amount,
+            'declined': payment.declined,
             'name': payment.name,
             'email': payment.email,
             'message': payment.message,
@@ -152,9 +156,19 @@ def wishlist_data(request, identifier):
 
 
 @superuser_required
-def item_data(request, identifier):
+def payment_edit(request, id):
     context = {}
-    item = get_object_or_404(models.Item, identifier=identifier)
-    context['item'] = item
-    raise NotImplementedError
-    return render(request, 'manage/item.html', context)
+    payment = get_object_or_404(models.Payment, id=id)
+    if request.method == 'POST':
+        form = forms.PaymentEditForm(request.POST, instance=payment)
+        form.fields['name'].required = False
+        form.fields['message'].required = False
+        if form.is_valid():
+            form.save()
+            return redirect('manage:payments')
+    else:
+        form = forms.PaymentEditForm(instance=payment)
+    form.fields['message'].widget.attrs['rows'] = 3
+    context['form'] = form
+    context['payment'] = payment
+    return render(request, 'manage/payment_edit.html', context)
