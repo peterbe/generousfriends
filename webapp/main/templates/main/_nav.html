@@ -7,7 +7,10 @@
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
     </button>
-    <h3 class="text-muted"><a href="/">{{ PROJECT_TITLE }}</a></h3>
+    <h3 class="text-muted">
+      <a href="/"><img src="{{ STATIC_URL }}icons/icon-48.png"></a>
+      <a href="/">{{ PROJECT_TITLE }}</a>
+    </h3>
   </div>
 
   <!-- Collect the nav links, forms, and other content for toggling -->
@@ -17,7 +20,6 @@
       {% if your_wishlist %}
       <li><a href="{% url 'main:wishlist_admin' your_wishlist.identifier %}" title="Administer your Wish List">Admin</a></li>
       {% endif %}
-      <li><a href="{% url 'main:about' %}">About This Site</a></li>
       <li><a href="{% url 'main:help' %}">Help</a></li>
     </ul>
     {% endblock %}

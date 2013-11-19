@@ -1,4 +1,14 @@
+* Change logo to
+  https://www.iconfinder.com/icons/91826/gift_icon#size=64
+
+* On the admin page, make it possible to start another list.
+
+* Implement http://www.peterbe.com/plog/cc-formatter
+
 * Optional postal_code on the payment form
+
+* Do refunds properly
+  https://github.com/balanced/balanced-python/issues/70#issuecomment-28732719
 
 * Option to include a message in the email
 
@@ -7,10 +17,6 @@
 
 * Find out if I can refund less than I charged, if so, include that in
   the terms and conditions.
-
-* Video instructions for mobile
-
-* http://firstopinion.github.io/formatter.js/demos.html
 
 -DONE-
 

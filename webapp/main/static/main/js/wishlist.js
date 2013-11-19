@@ -14,6 +14,22 @@ function _show_field_error($input, message) {
   $input.on('keypress', _repent);
 }
 
+function cc_format(value) {
+  // http://www.peterbe.com/plog/cc-formatter
+  var v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+  var matches = v.match(/\d{4,16}/g);
+  var match = matches && matches[0] || '';
+  var parts = [];
+  for (i=0, len=match.length; i<len; i+=4) {
+    parts.push(match.substring(i, i+4));
+  }
+  if (parts.length) {
+    return parts.join(' ');
+  } else {
+    return value;
+  }
+}
+
 function handleBalancedCallback(response, form) {
 
   switch (response.status) {
@@ -228,6 +244,10 @@ $(function() {
 
   $('#id_amount').change(function() {
     $(this).val($.trim($(this).val().replace('$', '')));
+  });
+
+  $('#id_card_number').on('input', function() {
+    $(this).val(cc_format($(this).val()));
   });
 
   $('#absolute_url').on('focus', function() {

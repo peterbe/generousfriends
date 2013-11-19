@@ -100,3 +100,10 @@ body {
     border:0px;
     background-color: #fff;
 }
+
+.navbar-header h3 {
+    margin-top: 0;
+}
+.navbar-header h3 img {
+    vertical-align: bottom;
+}

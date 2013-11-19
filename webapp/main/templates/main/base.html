@@ -18,8 +18,9 @@
       <script src="{{ STATIC_URL }}/assets/js/respond.min.js"></script>
     <![endif]-->
 
-    {% block opengraph %}
     <meta property="og:site_name" content="{{ PROJECT_TITLE }}">
+    <meta name="twitter:site" content="@WishListGranted">
+    {% block extra_opengraph %}
     <meta property="og:description" content="{{ PROJECT_STRAPLINE }}">
     {% endblock %}
 
@@ -63,8 +64,10 @@
 	  <a href="https://www.balancedpayments.com" target="_blank" title="Payments Secured by Balanced"><img src="{{ STATIC_URL }}main/images/balanced-payments.png" alt="Balanced Payments"></a>
 	</p>
         <p>&copy; Wish List Granted<br>
+	<a href="{% url 'main:about' %}">About This Site</a>
+	<br>
         <a href="{% url 'main:terms' %}">Terms of Use</a>
-        </p>
+       </p>
         {% endblock %}
       </div>
 

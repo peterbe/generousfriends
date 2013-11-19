@@ -5,12 +5,13 @@
 {% if yours %}
 This is what I want the most
 {% else %}
-  This is what {{ wishlist.name_or_email }} wants the most
+This is what {{ wishlist.name_or_email }} wants the most
 {% endif %}
 {% endblock %}
 
-{% block opengraph %}
+{% block extra_opengraph %}
 <meta property="og:site_name" content="{{ PROJECT_TITLE }}">
+<meta property="og:type" content="website">
 {% if wishlist.verified %}
 <meta property="og:title" content="This is what {{ wishlist.name_or_email }} wants the most: {{ item.title }}">
 <meta property="og:description" content="{{ item.title }}">
@@ -19,6 +20,9 @@ This is what I want the most
 <meta property="og:image:width" content="{{ thumb.width }}">
 <meta property="og:image:height" content="{{ thumb.height }}">
 {% endthumbnail %}
+{% if item %}
+<meta property="og:url" content="{{ absolute_url }}">
+{% endif %}
 {% endif %}
 {% endblock %}
 
