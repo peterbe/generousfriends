@@ -1,0 +1,38 @@
+{% extends "main/base.html" %}
+
+{% block document_title %}Rules{% endblock %}
+
+{% block main %}
+      <div class="row marketing" id="faq">
+          <h1>Rules</h1>
+
+          <h3>Basic Rules</h3>
+          <p>You share your Amazon.com Wish List with {{ PROJECT_TITLE }}. {{ PROJECT_TITLE }}
+          attempts to extract all items from it. <b>You pick one item</b> from the list and that
+          gives you a <b>unique page just for you for that item</b>. </p>
+          <p>Before your page is ready to be shared with the world you <b>need to verify</b> that
+          the <b>email address</b> you set it up with really is yours. All you need to do is click
+          a link in an email sent to you.</p>
+          <p>You are then responsible for sharing this page with your friends and family.
+          Hopefully your friends and family make contributions towards the total price of
+          the item you chose.</p>
+          <p>As soon as the first contribution is made, the clock starts ticking. If the total
+          price of the item is <i>not</i> reached within <b>30 days</b> all contributions made
+          so far are cancelled and contributors are fully refunded.</p>
+          <p>When the full price of the item is reached, {{ PROJECT_TITLE }} will contact you
+          and confirm your address and then simply buy the item from your Amazon Wish List.</p>
+
+          <h3>Fine Print Rules</h3>
+
+          <p>Items you choose must be over <span class="price">$10.00</span>.</p>
+
+          <p>{{ PROJECT_TITLE }} reserves the right to cancel any Wish Lists created without
+          <i>prior</i> notice. If doing so, all pending contributions will be fully refunded.</p>
+
+          <p>Only Wish Lists whose address is in the United States are allowed. Addresses
+          outside the United States may either be cancelled or you might need to pay additionally
+          for the shipping.</p>
+
+      </div>
+
+{% endblock %}

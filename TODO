@@ -1,9 +1,4 @@
-* Change logo to
-  https://www.iconfinder.com/icons/91826/gift_icon#size=64
-
 * On the admin page, make it possible to start another list.
-
-* Implement http://www.peterbe.com/plog/cc-formatter
 
 * Optional postal_code on the payment form
 
@@ -45,3 +40,8 @@
 * Rewrite 6 home page instructions into 3
 
 * Set up a new USAA Checking account to connect to Balanced Payments
+
+* Change logo to
+  https://www.iconfinder.com/icons/91826/gift_icon#size=64
+
+* Implement http://www.peterbe.com/plog/cc-formatter

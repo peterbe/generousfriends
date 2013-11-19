@@ -565,6 +565,10 @@ def help_page(request):
     return render(request, 'main/help.html')
 
 
+def rules(request):
+    return render(request, 'main/rules.html')
+
+
 def terms(request):
     return render(request, 'main/terms.html')
 
@@ -686,7 +690,7 @@ def your_admin(request):
 
 
 @transaction.commit_on_success
-def wishlist_admin(request, identifier):
+def wishlist_settings(request, identifier):
     context = {}
     wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
     cookie_identifier = request.get_signed_cookie('wishlist', None, salt=settings.COOKIE_SALT)
@@ -721,7 +725,7 @@ def wishlist_admin(request, identifier):
         (x, models.Payment.objects.filter(item=x))
         for x in items
     ]
-    return render(request, 'main/wishlist_admin.html', context)
+    return render(request, 'main/wishlist_settings.html', context)
 
 
 @require_POST

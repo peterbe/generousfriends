@@ -18,9 +18,10 @@
     {% block header_nav %}
     <ul class="nav navbar-nav navbar-right">
       {% if your_wishlist %}
-      <li><a href="{% url 'main:wishlist_admin' your_wishlist.identifier %}" title="Administer your Wish List">Admin</a></li>
+      <li><a href="{% url 'main:wishlist_settings' your_wishlist.identifier %}" title="Administer your Wish List"><i class="glyphicon glyphicon-cog"></i> Settings</a></li>
       {% endif %}
       <li><a href="{% url 'main:help' %}">Help</a></li>
+      <li><a href="{% url 'main:rules' %}">Rules</a></li>
     </ul>
     {% endblock %}
   </div><!-- /.navbar-collapse -->
