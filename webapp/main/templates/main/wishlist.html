@@ -15,7 +15,7 @@ This is what {{ wishlist.name_or_email }} wants the most
 {% if wishlist.verified %}
 <meta property="og:title" content="This is what {{ wishlist.name_or_email }} wants the most: {{ item.title }}">
 <meta property="og:description" content="{{ item.title }}">
-{% thumbnail item.picture "200x200" as thumb %}
+{% thumbnail item.picture "250x250" as thumb %}
 <meta property="og:image" content="{{ thumb.url }}">
 <meta property="og:image:width" content="{{ thumb.width }}">
 <meta property="og:image:height" content="{{ thumb.height }}">
@@ -128,7 +128,7 @@ input.share-url {
         {% else %}
           <h2>This is what <i>{{ wishlist.name_or_email }}</i> wants the most</h2>
         {% endif %}
-        {% thumbnail item.picture "200x200" as thumb %}
+        {% thumbnail item.picture "250x250" as thumb %}
         <a href="{{ item.affiliates_url_or_url }}" target="_blank"><img src="{{ thumb.url }}" width="{{ thumb.width }}" height="{{ thumb.height }}" alt="{{ item.title }}"></a>
         {% endthumbnail %}
         <h4>{{ item.title }}</h4>
