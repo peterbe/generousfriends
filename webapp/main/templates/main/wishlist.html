@@ -303,7 +303,7 @@ input.share-url {
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title">About the Transaction Fee</h4>
+          <h4 class="modal-title" id="about-transaction-fee">About the Transaction Fee</h4>
         </div>
         <div class="modal-body">
           <p>
@@ -360,7 +360,7 @@ input.share-url {
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title">About the Days Left</h4>
+          <h4 class="modal-title" id="about-days-left">About the Days Left</h4>
         </div>
         <div class="modal-body">
           <p>
@@ -390,12 +390,12 @@ input.share-url {
 
 
   <!-- Modal (days-left) -->
-  <div class="modal fade" id="terms" tabindex="-1" role="dialog" aria-labelledby="terms" aria-hidden="true">
+  <div class="modal fade" id="terms" tabindex="-1" role="dialog" aria-labelledby="terms-title" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title">Terms of Use</h4>
+          <h4 class="modal-title" id="terms-title">Terms of Use</h4>
         </div>
         <div class="modal-body">
 	  {% include "main/_terms.html" %}
