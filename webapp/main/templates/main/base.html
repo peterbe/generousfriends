@@ -4,7 +4,6 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="author" content="@peterbe">
     <meta name="description" content="{{ PROJECT_STRAPLINE }}">
 
     <title>{% block document_title %}{{ PROJECT_TITLE }}{% endblock %}</title>
@@ -15,11 +14,6 @@
     {% endcompress %}
     <link href="{{ STATIC_URL }}main/images/favicon.ico" rel="shortcut icon" type="image/x-icon">
 
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="{{ STATIC_URL }}/assets/js/html5shiv.js"></script>
-      <script src="{{ STATIC_URL }}/assets/js/respond.min.js"></script>
-    <![endif]-->
 
     <meta property="og:site_name" content="{{ PROJECT_TITLE }}">
     <meta name="twitter:site" content="@WishListGranted">
@@ -42,6 +36,11 @@
       body { padding-top:0; }
     </style>
     {% endif %}
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="{{ STATIC_URL }}/assets/js/html5shiv.js"></script>
+      <script src="{{ STATIC_URL }}/assets/js/respond.min.js"></script>
+    <![endif]-->
   </head>
 
   <body>
