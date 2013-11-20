@@ -1,6 +1,7 @@
 {% extends "main/base.html" %}
 {% load thumbnail %}
 {% load extras %}
+{% load compress %}
 
 {% block document_title %}
 {% if yours %}
@@ -416,7 +417,9 @@ input.share-url {
 <script type="text/javascript">
   balanced.init('{{ balanced_marketplace_uri }}');
 </script>
+{% compress js %}
 <script src="{{ STATIC_URL }}main/js/wishlist.js"></script>
+{% endcompress %}
 <script async src="{{ STATIC_URL }}assets/js/bootstrap.modal.min.js"></script>
 {% if yours %}
 <script src="{{ STATIC_URL }}main/js/sharing.js"></script>

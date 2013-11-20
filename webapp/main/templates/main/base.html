@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load compress %}
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -8,8 +9,10 @@
 
     <title>{% block document_title %}{{ PROJECT_TITLE }}{% endblock %}</title>
 
+    {% compress css %}
     <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet">
     <link href="{{ STATIC_URL }}main/css/main.css" rel="stylesheet">
+    {% endcompress %}
     <link href="{{ STATIC_URL }}main/images/favicon.ico" rel="shortcut icon" type="image/x-icon">
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
