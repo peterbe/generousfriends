@@ -25,7 +25,7 @@ class NotFoundError(Exception):
     pass
 
 
-def _download(url, cache_seconds=3600 * 20, binary=False):
+def _download(url, cache_seconds=3600 * 1, binary=False, force_refresh=False):
     key = hashlib.md5(url).hexdigest()
 
     if '.' in url and len(url.split('.')[-1]) < 5:
@@ -36,7 +36,7 @@ def _download(url, cache_seconds=3600 * 20, binary=False):
         root_dir(),
         key[:2], key[2:4], key[4:]
     )
-    if os.path.isfile(cache_file):
+    if not force_refresh and os.path.isfile(cache_file):
         age = time.time() - os.stat(cache_file)[stat.ST_MTIME]
         if age < cache_seconds:
             if binary:
@@ -78,14 +78,12 @@ def _parse_price(price):
         pass
 
 
-def scrape(wishlistid, shallow=False):
+def scrape(wishlistid, shallow=False, force_refresh=False):
     """
     if @shallow don't bother downloading the images
     """
     url = 'http://www.amazon.com/registry/wishlist/%s?layout=compact' % wishlistid
-    html = _download(url)
-    #print codecs.open('ashley.html', 'w', 'utf8').write(html)
-    #print url
+    html = _download(url, force_refresh=force_refresh)
     doc = PyQuery(html)
     items = []
     name = None

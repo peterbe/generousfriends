@@ -1,10 +1,17 @@
 {% extends "main/base.html" %}
 {% load thumbnail %}
 
-{% block document_title %}Pick which item you want the most{% endblock %}
+{% block document_title %}
+{% if active_items %}
+Pick another item you want the most
+{% else %}
+Pick the one item you want the most
+{% endif %}
+{% endblock %}
 
 {% block extra_head %}
 <style type="text/css">
+.please-wait { display: none; }
 .item {
     margin-bottom: 20px;
 }
@@ -13,18 +20,54 @@
     margin-left: 10px;
     margin-bottom: 10px;
 }
+.offer-refresh {
+    text-align: center;
+    margin: 30px;
+}
 </style>
 {% endblock %}
 
 {% block main %}
 
       <div class="jumbotron">
+        {% if active_items %}
+        <h3>Pick <i>another</i> item you want the most</h3>
+        {% else %}
         <h3>Pick the <i>one</i> item you want the most</h3>
-
+        {% endif %}
       </div>
 
+
+      {% if active_items %}
       <div class="row marketing">
-        <div class="col-lg-12">
+        <h4>You currently have</h4>
+        <ul>
+          {% for item in active_items %}
+          <li><a href="{% url 'main:wishlist' item.identifier %}">{{ item.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      {% if offer_refresh %}
+      <div class="row marketing offer-refresh">
+        <form class="refresh" action="." method="post">{% csrf_token %}
+          <h4>Don't see something you're looking for?</h4>
+          <button type="submit" name="refresh" class="btn btn-primary" value="1">Refresh Your Amazon Wish List</button><br>
+          <img src="{{ STATIC_URL }}main/images/spinner.gif" alt="Please wait" class="please-wait">
+          <span class="please-wait">Please wait...</span>
+        </form>
+
+        <div class="form-progress progress progress-striped active" style="display:none">
+          <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+              <span class="sr-only">Processing processing processing</span>
+          </div>
+        </div>
+
+      </div>
+      {% endif %}
+
+      <div class="row marketing">
         <form action="." method="post">{% csrf_token %}
         {% for item in items %}
 
@@ -42,8 +85,16 @@
         </div>
         {% endfor %}
         </form>
-        </div>
 
       </div>
 
+{% endblock %}
+
+
+
+{% block javascript %}
+{{ block.super }}
+{% if offer_refresh %}
+<script src="{{ STATIC_URL }}main/js/pick-another.js"></script>
+{% endif %}
 {% endblock %}

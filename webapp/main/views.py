@@ -20,6 +20,7 @@ from django.core.files import File
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.db.models import Max
 
 from . import scrape
 from . import models
@@ -400,9 +401,6 @@ def wishlist_pick_one(request, identifier):
         return http.HttpResponse('Not your Wish List')
     if cookie_identifier != wishlist.identifier:
         raise NotImplementedError
-    if request.user.is_authenticated() and not wishlist.user:
-        wishlist.user = request.user
-        wishlist.save()
 
     if request.method == 'POST':
         item_identifier = request.POST['item']
@@ -468,7 +466,103 @@ def wishlist_pick_one(request, identifier):
     context = {
         'items': items,
         'wishlist': wishlist,
-        #'items_scraped': items_scraped,
+        'offer_refresh': False,
+        'active_items': models.Item.objects.now(),
+    }
+    return render(request, 'main/wishlist_pick_one.html', context)
+
+
+@transaction.commit_on_success
+def wishlist_pick_another(request, identifier):
+    wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
+    cookie_identifier = request.get_signed_cookie('wishlist', None, salt=settings.COOKIE_SALT)
+    if not cookie_identifier:
+        return http.HttpResponse('Not your Wish List')
+    if cookie_identifier != wishlist.identifier:
+        raise NotImplementedError
+
+    if request.method == 'POST':
+        if request.POST.get('refresh'):
+            for x in models.Item.objects.filter(wishlist=wishlist, preference=0):
+                assert not models.Payment.objects.filter(item=x, wishlist=wishlist)
+                x.delete()
+            url = reverse('main:wishlist_pick_another', args=(wishlist.identifier,))
+            url += '?cleared=1'
+            return utils.json_response({'redirect': url})
+
+        item_identifier = request.POST['item']
+        item = get_object_or_404(
+            models.Item,
+            wishlist=wishlist,
+            identifier=item_identifier
+        )
+        max_preference = (
+            models.Item.objects
+            .filter(wishlist=wishlist)
+            .aggregate(Max('preference'))
+        )
+        max_preference = max_preference['preference__max']
+        item.preference = max_preference + 1
+        item.save()
+
+        # do I already know your name and email?
+        if wishlist.verified:
+            sending.send_wishlist_created_email(item, request)
+
+        return redirect('main:wishlist', item.identifier)
+
+    scraping_cache_key = 'scraping-%s' % wishlist.amazon_id
+
+    items = models.Item.objects.filter(wishlist=wishlist, preference=0).order_by('added')
+    active_items = models.Item.objects.filter(wishlist=wishlist).exclude(preference=0).order_by('added')
+
+    items_scraped = None
+    if not items:
+        if cache.get(scraping_cache_key):
+            return http.HttpResponse('Still working on %s' % wishlist.amazon_id)
+        print "SCRAPING", wishlist.amazon_id
+        cache.set(scraping_cache_key, 1, 60)
+        information = scrape.scrape(wishlist.amazon_id, force_refresh=True)
+
+        if information['name'] and not wishlist.name:
+            wishlist.name = information['name']
+            wishlist.save()
+        items_scraped = 0
+        for thing in information['items']:
+            if thing.get('picture'):
+                r = requests.get(thing['picture']['url'])
+                filename = os.path.basename(thing['picture']['url'])
+                content = File(StringIO(r.content), name=filename)
+            else:
+                content = None
+
+            if models.Item.objects.filter(wishlist=wishlist, title=thing['text']):
+                continue
+
+            item = models.Item.objects.create(
+                wishlist=wishlist,
+                title=thing['text'],
+                price=thing['price'],
+                url=thing['url'],
+                picture=content
+            )
+            items_scraped += 1
+
+        # try again
+        items = models.Item.objects.filter(wishlist=wishlist).order_by('added')
+
+    print "ITEMS_SCRAPED", items_scraped
+
+    if cache.get(scraping_cache_key):
+        offer_refresh = False
+    else:
+        offer_refresh = True
+
+    context = {
+        'items': items,
+        'wishlist': wishlist,
+        'offer_refresh': offer_refresh,
+        'active_items': active_items,
     }
     return render(request, 'main/wishlist_pick_one.html', context)
 

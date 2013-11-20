@@ -109,7 +109,7 @@ class TestViews(TestCase):
         structure = json.loads(response.content)
         ok_(structure['redirect'])
         wishlist, = models.Wishlist.objects.all()
-        admin_url = reverse('main:wishlist_admin', args=(wishlist.identifier,))
+        admin_url = reverse('main:wishlist_settings', args=(wishlist.identifier,))
         eq_(structure['redirect'], admin_url)
 
         # Go there
@@ -119,7 +119,7 @@ class TestViews(TestCase):
         #print response.content
         ok_('Preparing your Wish List' in response.content)
         # there's a piece of javascript in there that redirects too...
-        admin_url_nice = reverse('main:wishlist_admin', args=(wishlist.identifier,))
+        admin_url_nice = reverse('main:wishlist_settings', args=(wishlist.identifier,))
         admin_url_nice += '?niceredirect=1'
         ok_(admin_url_nice in response.content)
         # Now pretend we're following the redirect in client-side
@@ -276,7 +276,7 @@ class TestViews(TestCase):
         eq_(payment.wishlist, wishlist)
         ok_(payment.email)
         ok_(payment.balanced_hash)
-        ok_(payment.balanced_id)
+        ok_(payment.balanced_uri)
         ok_(not payment.name)
         ok_(not payment.message)
 
@@ -364,7 +364,7 @@ class TestViews(TestCase):
         eq_(response.status_code, 302)
         self.assertRedirects(
             response,
-            reverse('main:wishlist_admin', args=(wishlist.identifier,))
+            reverse('main:wishlist_settings', args=(wishlist.identifier,))
         )
         # reload and check that it's been verified
         wishlist = models.Wishlist.objects.get(pk=wishlist.pk)

@@ -7,12 +7,18 @@
 {% block extra_head %}
 <style type="text/css">
 .item {
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #efefef;
 }
 .item img {
     float: right;
     margin-left: 10px;
     margin-bottom: 10px;
+}
+.another {
+    margin: 60px;
+    text-align: center;
 }
 </style>
 {% endblock %}
@@ -21,7 +27,7 @@
 
     {% if msg %}
     <div class="row marketing">
-        <div class="form-error alert alert-success alert-dismissable">
+        <div class="alert alert-success alert-dismissable">
         <h4>{{ msg }}</h4>
         </div>
     </div>
@@ -37,8 +43,7 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-lg-12">
+    <div class="row marketing">
       <h3>You have the following Wish List Items set up</h3>
 
         {% for item, payments in items %}
@@ -91,7 +96,12 @@
         </div>
         {% endfor %}
 
-      </div>
+    </div>
+
+    <div class="row marketing another">
+      <p>
+        <a href="{% url 'main:wishlist_pick_another' wishlist.identifier %}" class="btn btn-primary">Set up another Wish List Item</a>
+      </p>
     </div>
 
 {% endblock %}

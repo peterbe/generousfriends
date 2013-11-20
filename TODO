@@ -1,3 +1,8 @@
+* Set up Google Analytics
+
+* Scrape analytics with
+  https://github.com/mozilla/kitsune/blob/master/kitsune/sumo/googleanalytics.py
+
 * On the admin page, make it possible to start another list.
 
 * Optional postal_code on the payment form
