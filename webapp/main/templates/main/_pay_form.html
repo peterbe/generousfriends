@@ -41,7 +41,8 @@
             <div class="form-group">
               <label for="id_card_number" class="col-lg-4 control-label">Card Number:</label>
               <div class="col-lg-6">
-                <input type="text" id="id_card_number" name="card_number" class="form-control" placeholder="1234 1234 1234 1234">
+                <input type="text" id="id_card_number" name="card_number" class="form-control" placeholder="1234 1234 1234 1234"
+                 data-android="{% if ANDROID %}true{% else %}false{% endif %}">
                 <span class="help-block"></span>
               </div>
             </div>

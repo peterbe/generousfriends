@@ -246,9 +246,19 @@ $(function() {
     $(this).val($.trim($(this).val().replace('$', '')));
   });
 
-  $('#id_card_number').on('input', function() {
-    $(this).val(cc_format($(this).val()));
-  });
+  /* There's a bug in Android phones that means that you can't
+   * edit the value whilst still in focus.
+   * Works on all other browsers though. */
+  var cc_input = $('#id_card_number');
+  if (cc_input.data('android')) {
+    cc_input.on('blur', function() {
+      cc_input.val(cc_format(cc_input.val()));
+    });
+  } else {
+    cc_input.on('input', function() {
+      cc_input.val(cc_format(cc_input.val()));
+    });
+  }
 
   $('#absolute_url').on('focus', function() {
     $(this).off('focus');

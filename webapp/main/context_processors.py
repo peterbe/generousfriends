@@ -10,7 +10,7 @@ def base(request):
     context['GOOGLE_ANALYTICS'] = settings.USE_GOOGLE_ANALYTICS
     context['USE_USERSNAP'] = not settings.DEBUG
 
-    context['MOBILE'] = False
+    context['MOBILE'] = context['ANDROID'] = False
     user_agent = request.META.get('HTTP_USER_AGENT', '')
     if (
         ('iPhone' in user_agent and 'Safari' in user_agent)
@@ -18,6 +18,8 @@ def base(request):
         ('android' in user_agent.lower() and 'AppleWebKit' in user_agent)
     ):
         context['MOBILE'] = True
+        if 'android' in user_agent.lower():
+            context['ANDROID'] = True
     context['USE_USERSNAP'] = not context['MOBILE'] and not context['DEBUG']
 
     context['your_wishlists'] = None
