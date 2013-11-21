@@ -12,7 +12,6 @@ This is what {{ wishlist.name_or_email }} wants the most
 {% endblock %}
 
 {% block extra_opengraph %}
-<meta property="og:site_name" content="{{ PROJECT_TITLE }}">
 <meta property="og:type" content="website">
 {% if wishlist.verified %}
 <meta property="og:title" content="This is what {{ wishlist.name_or_email }} wants the most: {{ item.title }}">
