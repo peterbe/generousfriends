@@ -21,6 +21,8 @@ def base(request):
         if 'android' in user_agent.lower():
             context['ANDROID'] = True
     context['USE_USERSNAP'] = not context['MOBILE'] and not context['DEBUG']
+    if '/manage/' in request.path_info:
+        context['USE_USERSNAP'] = False
 
     context['your_wishlists'] = None
     cookie_identifier = request.get_signed_cookie(
