@@ -798,7 +798,7 @@ def wishlist_settings(request, identifier):
         form = forms.WishlistAdminForm(request.POST, instance=wishlist)
         if form.is_valid():
             form.save()
-            url = reverse('main:wishlist_admin', args=(wishlist.identifier,))
+            url = reverse('main:wishlist_settings', args=(wishlist.identifier,))
             url += '?msg=Changes+saved'
             return redirect(url)
     else:
