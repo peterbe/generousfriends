@@ -52,8 +52,11 @@ def start(request):
     context['sample_item'] = None
     qs = (
         models.Item.objects
-        .filter(wishlist__public=True)
-        .exclude(wishlist__name='')
+        .filter(wishlist__public=True,
+                preference__gt=0,
+                complete=False)
+        .exclude(wishlist__name='',
+                 wishlist__verified__isnull=True)
         .order_by('?')
     )
     for item in qs[:1]:
@@ -197,31 +200,39 @@ def wishlist_home(request, identifier, fuzzy=False):
                 amount +
                 amount * decimal.Decimal(settings.PAYMENT_TRANSACTION_PERCENTAGE / 100.0)
             )
+            cache_key = 'create-payment-%s' % form.cleaned_data['uri']
+            if cache.get(cache_key):
+                # oh no! A double-submission!!
+                double_submission = True
+                from time import sleep
+                sleep(2)
+                payment = models.Payment.objects.get(balanced_uri=form.cleaned_data['uri'])
+            else:
+                cache.set(cache_key, 1, 60)
+                double_submission = False
+                payment = models.Payment.objects.create(
+                    wishlist=wishlist,
+                    item=item,
+                    email=form.cleaned_data['email'],
+                    amount=amount,
+                    actual_amount=actual_amount,
+                    balanced_hash=form.cleaned_data.get('hash'),
+                    balanced_uri=form.cleaned_data['uri'],
+                )
 
-            payment = models.Payment.objects.create(
-                wishlist=wishlist,
-                item=item,
-                email=form.cleaned_data['email'],
-                amount=amount,
-                actual_amount=actual_amount,
-                balanced_hash=form.cleaned_data.get('hash'),
-                balanced_uri=form.cleaned_data['uri'],
-            )
-
-            appears_on_statement_as = 'WishListGranted'
-            description = (
-                'wishlistgranted.com %s-%s'
-                % (item.identifier, payment.pk)
-            )
-            balanced.configure(settings.BALANCED_API_KEY)
-            customer = balanced.Customer().save()
-            customer.add_card(form.cleaned_data['uri'])
-            customer.debit(
-                amount=amount_cents,
-                appears_on_statement_as=appears_on_statement_as,
-                description=description,
-            )
-            #print dir(customer)
+                appears_on_statement_as = 'WishListGranted'
+                description = (
+                    'wishlistgranted.com %s-%s'
+                    % (item.identifier, payment.pk)
+                )
+                balanced.configure(settings.BALANCED_API_KEY)
+                customer = balanced.Customer().save()
+                customer.add_card(form.cleaned_data['uri'])
+                customer.debit(
+                    amount=amount_cents,
+                    appears_on_statement_as=appears_on_statement_as,
+                    description=description,
+                )
 
             progress_amount, progress_percent = item.get_progress()
             data = {
@@ -242,7 +253,8 @@ def wishlist_home(request, identifier, fuzzy=False):
             except KeyError:
                 past_contributions = ''
             past_contributions = past_contributions.split('|')
-            past_contributions.append(contribution_item)
+            if contribution_item not in past_contributions:
+                past_contributions.append(contribution_item)
             response.set_signed_cookie(
                 'contributions',
                 '|'.join(past_contributions),
@@ -260,9 +272,10 @@ def wishlist_home(request, identifier, fuzzy=False):
                     secure=request.is_secure(),
                     httponly=True
                 )
-                sending.send_receipt(payment, request)
-                payment.receipt_emailed = utils.now()
-                payment.save()
+                if not double_submission:
+                    sending.send_receipt(payment, request)
+                    payment.receipt_emailed = utils.now()
+                    payment.save()
             return response
         else:
             return {'error': form.errors}
@@ -427,6 +440,7 @@ def wishlist_pick_one(request, identifier):
 
     items = models.Item.objects.filter(wishlist=wishlist).order_by('added')
     items_scraped = None
+    items_skipped = []
     if not items:
         if not request.GET.get('niceredirect'):
             url = reverse('main:wishlist_pick_one', args=(wishlist.identifier,))
@@ -443,6 +457,10 @@ def wishlist_pick_one(request, identifier):
             wishlist.save()
         items_scraped = 0
         for thing in information['items']:
+            print repr(thing['price']), repr(thing['price'])
+            if thing['price'] < settings.MIN_ITEM_PRICE:
+                items_skipped.append(thing)
+                continue
             if thing.get('picture'):
                 r = requests.get(thing['picture']['url'])
                 filename = os.path.basename(thing['picture']['url'])
@@ -463,11 +481,13 @@ def wishlist_pick_one(request, identifier):
         items = models.Item.objects.filter(wishlist=wishlist).order_by('added')
 
     print "ITEMS_SCRAPED", items_scraped
+    print "ITEMS_SKIPPED", items_skipped
     context = {
         'items': items,
         'wishlist': wishlist,
         'offer_refresh': False,
-        'active_items': models.Item.objects.now(),
+        'active_items': models.Item.objects.none(),
+        'items_skipped': items_skipped,
     }
     return render(request, 'main/wishlist_pick_one.html', context)
 
@@ -563,6 +583,7 @@ def wishlist_pick_another(request, identifier):
         'wishlist': wishlist,
         'offer_refresh': offer_refresh,
         'active_items': active_items,
+        'items_skipped': None,
     }
     return render(request, 'main/wishlist_pick_one.html', context)
 

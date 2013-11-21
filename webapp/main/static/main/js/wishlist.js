@@ -226,7 +226,6 @@ $(function() {
       console.log('ERROR', response.error);
       console.log('DATA', response.data);
       handleBalancedCallback(response, form);
-
     });
     return false;
   });

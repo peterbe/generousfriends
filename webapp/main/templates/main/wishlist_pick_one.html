@@ -24,6 +24,10 @@ Pick the one item you want the most
     text-align: center;
     margin: 30px;
 }
+.skipped-items {
+    margin-top: 30px;
+    font-size:80%;
+}
 </style>
 {% endblock %}
 
@@ -87,6 +91,24 @@ Pick the one item you want the most
         </form>
 
       </div>
+
+      {% if items_skipped %}
+      <div class="row marketing skipped-items">
+        <p>
+        <b>Note!</b>
+        The following items had to be skipped:
+        </p>
+        <ul>
+          {% for thing in items_skipped %}
+          <li><a href="{{ thing.url }}">{{ thing.text }}</a>
+          <span class="price">${{ thing.price|floatformat:2 }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        <p>Perhaps <a href="{% url 'main:rules' %}">the Rules</a> can help.</p>
+      </div>
+      {% endif %}
+
 
 {% endblock %}
 

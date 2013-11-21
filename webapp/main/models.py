@@ -61,6 +61,7 @@ class Item(models.Model):
     price = models.DecimalField(max_digits=5, decimal_places=2)
     picture = ImageField(upload_to=utils.upload_path('pictures'))
     preference = models.IntegerField(default=0)
+    complete = models.BooleanField(default=False)
     fulfilled = models.BooleanField(default=False)
     fulfilled_notes = models.TextField(null=True)
     added = models.DateTimeField(default=utils.now)
@@ -80,7 +81,15 @@ class Item(models.Model):
 
     @property
     def affiliates_url_or_url(self):
-        return self.affiliates_url or self.url
+        if self.affiliates_url:
+            return self.affiliates_url
+        url = self.url
+        if '?' in url:
+            url += '&'
+        else:
+            url += '?'
+        url += 'tag=wislisgra-20'
+        return url
 
     def get_progress(self):
         goal_amount = self.price

@@ -24,8 +24,8 @@
       <div id="share-by-email" style="display:none" class="share-option">
         <form action="{% url 'main:wishlist_share_by_email' item.identifier %}" method="post" role="form">{% csrf_token %}
           <div class="form-group">
-            <label for="id_share_emails">Email addresses</label>
-            <span>Note! We will never store any of these.</span>
+            <label for="id_share_emails">Email addresses:</label>
+            <span style="font-size:80%">Note! We will never store any of these.</span>
             <p class="help-block">Enter one email per line or separate by a <code>;</code></p>
             <textarea name="share_emails" id="id_share_emails" class="form-control"></textarea>
             <p class="help-block" style="display:block">Enter one email per line or separate by a comma.</p>

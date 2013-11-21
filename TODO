@@ -1,7 +1,7 @@
+* Email to go out when the item is complete
+
 * Scrape analytics with
   https://github.com/mozilla/kitsune/blob/master/kitsune/sumo/googleanalytics.py
-
-* On the admin page, make it possible to start another list.
 
 * Optional postal_code on the payment form
 
@@ -9,9 +9,6 @@
   https://github.com/balanced/balanced-python/issues/70#issuecomment-28732719
 
 * Option to include a message in the email
-
-* Store the Balanced Hash in cache to prevent accidentally submitting
-  twice
 
 * Find out if I can refund less than I charged, if so, include that in
   the terms and conditions.
@@ -50,3 +47,8 @@
 * Implement http://www.peterbe.com/plog/cc-formatter
 
 * Set up Google Analytics
+
+* On the admin page, make it possible to start another list.
+
+* Store the Balanced Hash in cache to prevent accidentally submitting
+  twice
