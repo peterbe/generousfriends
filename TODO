@@ -1,5 +1,3 @@
-* Set up Google Analytics
-
 * Scrape analytics with
   https://github.com/mozilla/kitsune/blob/master/kitsune/sumo/googleanalytics.py
 
@@ -50,3 +48,5 @@
   https://www.iconfinder.com/icons/91826/gift_icon#size=64
 
 * Implement http://www.peterbe.com/plog/cc-formatter
+
+* Set up Google Analytics

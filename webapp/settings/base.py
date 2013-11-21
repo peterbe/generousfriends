@@ -212,3 +212,5 @@ PROJECT_TITLE = 'Wish List Granted'
 PROJECT_STRAPLINE = 'Get What You REALLY Want for Christmas'
 
 BALANCED_DEBUG = False
+
+USE_GOOGLE_ANALYTICS = False

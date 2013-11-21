@@ -7,6 +7,7 @@ def base(request):
     context['DEBUG'] = settings.DEBUG
     context['PROJECT_TITLE'] = settings.PROJECT_TITLE
     context['PROJECT_STRAPLINE'] = settings.PROJECT_STRAPLINE
+    context['GOOGLE_ANALYTICS'] = settings.USE_GOOGLE_ANALYTICS
     context['USE_USERSNAP'] = not settings.DEBUG
 
     context['MOBILE'] = False
