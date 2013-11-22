@@ -713,6 +713,7 @@ def inbound_email(request):
         json.dump(structure, f, indent=2)
 
     amazon_id = None
+    scrape_error = False
     for url in utils.find_urls(structure['TextBody']):
         amazon_id = utils.find_wishlist_amazon_id(url)
         if amazon_id:
@@ -725,17 +726,27 @@ def inbound_email(request):
                 return http.HttpResponse('ok\n')
             except models.Wishlist.DoesNotExist:
                 pass
+
+            found = {'items': []}
             # can it be scraped?
             try:
                 found = scrape.scrape(amazon_id, shallow=True)
                 print '\t\tWas able to scrape it'
+                if not found['items']:
+                    print "\t\t\tUnable to find any items for", repr(amazon_id)
             except scrape.NotFoundError:
                 amazon_id = None
                 print '\t\tWas NOT able to scrape it'
-            if not found['items']:
-                print "\t\tUnable to find any items for", repr(amazon_id)
+            except Exception:
+                import sys
+                import traceback
+                exc_info, exc_value, exc_tb = sys.exc_info()
+                print "Info", exc_info
+                print "Value", exc_value
+                #traceback.print_exc()
+                scrape_error = True
 
-    if amazon_id:
+    if amazon_id and found['items']:
         wishlist = models.Wishlist.objects.create(
             amazon_id=amazon_id,
             email=structure['FromFull']['Email'],

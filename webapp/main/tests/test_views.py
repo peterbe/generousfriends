@@ -10,6 +10,7 @@ from nose.tools import eq_, ok_
 from django.core import mail
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.core.cache import cache
 
 from django.test import TestCase
 
@@ -37,6 +38,7 @@ class TestViews(TestCase):
     def tearDown(self):
         super(TestViews, self).tearDown()
         shutil.rmtree(self.tempdir)
+        cache.clear()
 
     @mock.patch('requests.get')
     def test_basic_run(self, rget):
@@ -406,3 +408,25 @@ class TestViews(TestCase):
         # the actual amount is expected to have 2 decimal places
         eq_(structure['actual_amount'], 6.18)
         eq_('%.2f' % structure['actual_amount'], '6.18')
+
+    @mock.patch('requests.get')
+    def test_inbound_email_failing_gracefully(self, rget):
+
+        def mocked_get(url, **options):
+            raise Exception("Some trouble")
+
+        rget.side_effect = mocked_get
+
+        url = reverse('main:inbound_email')
+        json_file = os.path.join(_HERE, 'inbound-example.json')
+        json_content = open(json_file).read()
+        response = self.client.post(url, json_content, content_type="application/json")
+        eq_(response.status_code, 200)
+
+        # an email is sent to explain that it failed
+        email_sent = mail.outbox[-1]
+        eq_(email_sent.subject, 'Your Wish List could unfortunately not be processed')
+        start_url = reverse('main:wishlist_start')
+        ok_(start_url in email_sent.body)
+        help_url = reverse('main:help')
+        ok_(help_url in email_sent.body)

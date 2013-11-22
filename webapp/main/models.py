@@ -152,8 +152,6 @@ class Payment(models.Model):
         return self.actual_amount - self.amount
 
 
-
-
 class Verification(models.Model):
     wishlist = models.ForeignKey(Wishlist)
     email = models.EmailField()
