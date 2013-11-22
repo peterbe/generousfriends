@@ -198,14 +198,19 @@ def wishlist_home(request, identifier, fuzzy=False):
             amount_cents = int(amount * 100)
             actual_amount = (
                 amount +
+                settings.PAYMENT_TRANSACTION_AMOUNT +
                 amount * decimal.Decimal(settings.PAYMENT_TRANSACTION_PERCENTAGE / 100.0)
+            )
+            actual_amount = actual_amount.quantize(
+                decimal.Decimal('.01'),
+                rounding=decimal.ROUND_UP
             )
             cache_key = 'create-payment-%s' % form.cleaned_data['uri']
             if cache.get(cache_key):
                 # oh no! A double-submission!!
                 double_submission = True
                 from time import sleep
-                sleep(2)
+                sleep(1)
                 payment = models.Payment.objects.get(balanced_uri=form.cleaned_data['uri'])
             else:
                 cache.set(cache_key, 1, 60)
@@ -457,7 +462,6 @@ def wishlist_pick_one(request, identifier):
             wishlist.save()
         items_scraped = 0
         for thing in information['items']:
-            print repr(thing['price']), repr(thing['price'])
             if thing['price'] < settings.MIN_ITEM_PRICE:
                 items_skipped.append(thing)
                 continue

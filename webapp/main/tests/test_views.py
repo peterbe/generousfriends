@@ -109,7 +109,7 @@ class TestViews(TestCase):
         structure = json.loads(response.content)
         ok_(structure['redirect'])
         wishlist, = models.Wishlist.objects.all()
-        admin_url = reverse('main:wishlist_settings', args=(wishlist.identifier,))
+        admin_url = reverse('main:wishlist_pick_one', args=(wishlist.identifier,))
         eq_(structure['redirect'], admin_url)
 
         # Go there
@@ -119,11 +119,11 @@ class TestViews(TestCase):
         #print response.content
         ok_('Preparing your Wish List' in response.content)
         # there's a piece of javascript in there that redirects too...
-        admin_url_nice = reverse('main:wishlist_settings', args=(wishlist.identifier,))
-        admin_url_nice += '?niceredirect=1'
-        ok_(admin_url_nice in response.content)
+        pick_one_url_nice = reverse('main:wishlist_pick_one', args=(wishlist.identifier,))
+        pick_one_url_nice += '?niceredirect=1'
+        ok_(pick_one_url_nice in response.content)
         # Now pretend we're following the redirect in client-side
-        response = self.client.get(admin_url_nice)
+        response = self.client.get(pick_one_url_nice)
         eq_(response.status_code, 200)
 
         ok_('A Nice Thing' in response.content)
@@ -364,8 +364,45 @@ class TestViews(TestCase):
         eq_(response.status_code, 302)
         self.assertRedirects(
             response,
-            reverse('main:wishlist_settings', args=(wishlist.identifier,))
+            reverse('main:wishlist_pick_one', args=(wishlist.identifier,))
         )
         # reload and check that it's been verified
         wishlist = models.Wishlist.objects.get(pk=wishlist.pk)
         ok_(wishlist.verified)
+
+    @mock.patch('balanced.configure')
+    @mock.patch('balanced.Customer')
+    def test_total_price_email_rounding(self, mocked_balanced_customer, mocked_balanced_configure):
+
+        wishlist = models.Wishlist.objects.create(
+            amazon_id='abc123',
+            verified=utils.now(),
+            email='some@email.com',
+            name='Some Name',
+        )
+        item = models.Item.objects.create(
+            wishlist=wishlist,
+            title='Some Item',
+            url='http://amazon.com?f=123',
+            price=Decimal('69.99'),
+            preference=1
+        )
+        url = reverse('main:wishlist', args=(item.identifier,))
+        response = self.client.get(url)
+        eq_(response.status_code, 200)
+
+        data = {
+            'uri': 'SOME-URI',
+            'hash': 'hashahshashas',
+            'id': '999',
+            'email': 'normal@email.com',
+        }
+        response = self.client.post(url, dict(data, amount='5'))
+        eq_(response.status_code, 200)
+        structure = json.loads(response.content)
+        eq_(structure['amount'], 5.0)
+        eq_(structure['progress_amount'], 5.0)
+        eq_(structure['progress_percent'], 7)
+        # the actual amount is expected to have 2 decimal places
+        eq_(structure['actual_amount'], 6.18)
+        eq_('%.2f' % structure['actual_amount'], '6.18')
