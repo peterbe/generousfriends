@@ -123,7 +123,7 @@ def wishlists_data(request):
                     status = "PAYMENTS_STARTED"
                     first_payment, = payments.order_by('added')[:1]
                     days_left = 30 - (now - first_payment.added).days
-                    if total_amount > item.price:
+                    if total_amount >= item.price:
                         status = 'COMPLETE'
                         if item.fulfilled:
                             status = 'FULFILLED'
