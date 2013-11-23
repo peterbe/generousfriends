@@ -1,7 +1,15 @@
 {% extends "manage/base.html" %}
 
-
 {% block extra_head %}
+{{ block.super }}
+<style type="text/css">
+div.item, div.payment {
+    margin-left: 40px;
+}
+div.payment {
+    border-bottom: 1px solid #ccc;
+}
+</style>
 {% endblock %}
 
 {% block main %}
@@ -21,8 +29,9 @@
   <dd>{{ wishlist.modified }}</dd>
 </dl>
 
-<h3>Items</h3>
 {% for item, payments in items_preferred %}
+<div class="item">
+<h3><a href="{% url 'main:wishlist' item.identifier %}">{{ item.title }}</a></h3>
 <dl class="dl-horizontal">
   <dt>Identifier</dt>
   <dd><a href="{% url 'main:wishlist' item.identifier %}">{{ item.identifier }}</a></dd>
@@ -40,31 +49,39 @@
   <dd class="price">${{ item.price|floatformat:2 }}</dd>
   <dt>Preference</dt>
   <dd>{{ item.preference }}</dd>
+  <dt>Complete</dt>
+  <dd>{% if item.complete %}Yes!{% else %}No{% endif %}</dd>
 </dl>
 
-{% for payment in payments %}
-  {% ifchanged %}<h3>Payments for {{ payment.item.identifier }}</h3>{% endifchanged %}
-  <dl class="dl-horizontal">
-    <dt>Amount</dt>
-    <dd class="price">${{ payment.amount|floatformat:2 }}</dd>
-    <dt>Actual amount</dt>
-    <dd class="price">${{ payment.actual_amount|floatformat:2 }}</dd>
-    <dt>Email</dt>
-    <dd>{{ payment.email }}</dd>
-    <dt>Name</dt>
-    <dd>{{ payment.name }}</dd>
-    <dt>Message</dt>
-    <dd>{{ payment.message }}</dd>
-    <dt>Balanced ID</dt>
-    <dd>{{ payment.balanced_id }}</dd>
-    <dt>Balanced Hash</dt>
-    <dd>{{ payment.balanced_hash }}</dd>
-    <dt>Added</dt>
-    <dd>{{ payment.added }}</dd>
-    <dt>Modified</dt>
-    <dd>{{ payment.modified }}</dd>
-  </dl>
-{% endfor %}
+
+  {% for payment in payments %}
+    <div class="payment">
+    {% if forloop.first %}
+    <h3>Payments</h3>
+    {% endif %}
+    <dl class="dl-horizontal">
+      <dt>Amount</dt>
+      <dd class="price">${{ payment.amount|floatformat:2 }}</dd>
+      <dt>Actual amount</dt>
+      <dd class="price">${{ payment.actual_amount|floatformat:2 }}</dd>
+      <dt>Email</dt>
+      <dd>{{ payment.email }}</dd>
+      <dt>Name</dt>
+      <dd>{{ payment.name }}</dd>
+      <dt>Message</dt>
+      <dd>{{ payment.message }}</dd>
+      <dt>Balanced URI</dt>
+      <dd><a href="{{ payment.balanced_marketplace_url }}">{{ payment.balanced_uri }}</a></dd>
+      <!--<dt>Balanced Hash</dt>
+      <dd>{{ payment.balanced_hash }}</dd>-->
+      <dt>Added</dt>
+      <dd>{{ payment.added }}</dd>
+      <dt>Modified</dt>
+      <dd>{{ payment.modified }}</dd>
+    </dl>
+    </div>
+  {% endfor %}
+</div>
 {% endfor %}
 
 {% endblock %}

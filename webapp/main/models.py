@@ -151,6 +151,14 @@ class Payment(models.Model):
     def actual_fee(self):
         return self.actual_amount - self.amount
 
+    @property
+    def balanced_marketplace_url(self):
+        uri = self.balanced_uri
+        uri = uri.replace('/v1', '')
+        return (
+            'https://dashboard.balancedpayments.com/#%s' % uri
+        )
+
 
 class Verification(models.Model):
     wishlist = models.ForeignKey(Wishlist)
