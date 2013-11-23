@@ -64,6 +64,7 @@ class Item(models.Model):
     complete = models.BooleanField(default=False)
     fulfilled = models.BooleanField(default=False)
     fulfilled_notes = models.TextField(null=True)
+    congratulation_emailed = models.DateTimeField(null=True)
     added = models.DateTimeField(default=utils.now)
     modified = models.DateTimeField(default=utils.now)
 

@@ -36,8 +36,19 @@ class Command(BaseCommand):
             .filter(notification_emailed__isnull=True)
             .filter(added__lt=time_ago)
         )
-        for payment in qs:
+        items = []
+        for payment in qs.select_related('item'):
             print "Sending notification for", repr(payment), utils.now()
             sending.send_payment_notification(payment, base_url)
             payment.notification_emailed = utils.now()
             payment.save()
+            if payment.item not in items:
+                items.append(payment.item)
+
+        for item in items:
+            progress_amount, progress_percent = item.get_progress()
+            if progress_amount >= item.price:
+                sending.send_progress_congratulation(item, base_url)
+                print "Sending congratulation for", repr(item), utils.now()
+                item.congratulation_emailed= utils.now()
+                item.save()

@@ -248,6 +248,8 @@ def wishlist_home(request, identifier, fuzzy=False):
                 'payment_id': payment.pk,
                 'show_your_message': payment.email != item.wishlist.email,
             }
+            from pprint import pprint
+            pprint(data)
             response = utils.json_response(data)
             contribution_item = '%s_%s' % (item.pk, payment.pk)
             try:
@@ -787,6 +789,12 @@ def wishlist_your_message(request, identifier):
     sending.send_payment_notification(payment, request)
     payment.notification_emailed = utils.now()
     payment.save()
+
+    progress_amount, progress_percent = item.get_progress()
+    if progress_amount >= item.price:
+        sending.send_progress_congratulation(item, request)
+        item.congratulation_emailed= utils.now()
+        item.save()
 
     response = utils.json_response(True)
     if name:

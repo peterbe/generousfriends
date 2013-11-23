@@ -1,0 +1,18 @@
+{% extends "main/email_base.html" %}
+{% block document_title %}{{ subject }}{% endblock %}
+
+{% block content %}
+  <h2>Hurray!!</h2>
+  <h3>{{ subject }}</h3>
+  <p class="lead">The total amount (<span class="price">${{ item.price|floatformat:2 }}</span>
+  on your Wish List for
+  <a href="{{ base_url }}{{ url }}"><strong>{{ item.title }}</strong></a> has been reached!</p>
+
+  <p>As soon as all the payments have been cleared with the payment provider,
+  {{ PROJECT_TITLE }} will purchase the item for you and it will arrive at the address
+  you specified on your <a href="{{ amazon_wishlist_url }}">Amazon.com&trade; Wish List</a>.
+  </p>
+
+  <p>Revisit your Wish List here: <a href="{{ base_url }}{{ url }}">{{ base_url }}{{ url }}</a></p>
+
+{% endblock %}
