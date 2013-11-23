@@ -7,6 +7,59 @@
 
 <h3><a href="{% url 'manage:wishlists' %}">Wish Lists</a> ({{ wishlists.count }})</h3>
 <h3><a href="{% url 'manage:payments' %}">Payments</a> ({{ payments.count }})</h3>
+
+<table class="table table-condensed table-bordered"
+       id="dashboard-data" data-url="{% url 'manage:dashboard_data' %}">
+  <tr>
+    <th># Wish Lists</th>
+    <td id="count_wish_lists"></td>
+  </tr>
+  <tr>
+    <th># Verified Wish Lists</th>
+    <td id="count_verified_wish_lists"></td>
+  </tr>
+  <tr>
+    <th># Picked Items</th>
+    <td id="count_picked_items"></td>
+  </tr>
+  <tr>
+    <th># Complete Items</th>
+    <td id="count_complete_items"></td>
+  </tr>
+  <tr>
+    <th># Fulfilled Items</th>
+    <td id="count_fulfilled_items"></td>
+  </tr>
+  <tr>
+    <th>Total Priced Items</th>
+    <td id="total_priced_items" class="price"></td>
+  </tr>
+  <tr>
+    <th># Payments</th>
+    <td id="count_payments"></td>
+  </tr>
+  <tr>
+    <th>Total Amount</th>
+    <td id="total_amount" class="price"></td>
+  </tr>
+  <tr>
+    <th>Total Actual Amount</th>
+    <td id="total_actual_amount" class="price"></td>
+  </tr>
+  <tr>
+    <th>Total Profit</th>
+    <td id="total_profit" class="price"></td>
+  </tr>
+  <tr>
+    <th>Balanced Total Fees</th>
+    <td id="total_balanced_fees" class="price"></td>
+  </tr>
+  <tr>
+    <th>Total Profit (after Balanced)</th>
+    <td id="total_profit_after_balanced" class="price"></td>
+  </tr>
+</table>
+
 {% endblock %}
 
 {% block javascript %}

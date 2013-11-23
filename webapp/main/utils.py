@@ -7,6 +7,7 @@ import functools
 import unicodedata
 import json
 import uuid
+from decimal import Decimal, ROUND_UP
 
 from django import http
 from django.utils.timezone import utc
@@ -119,3 +120,8 @@ _WISHLIST_URL_ID_REGEX = re.compile('/([0-9A-Z]{10,15})/?')
 def find_wishlist_amazon_id(text):
     for identifier in _WISHLIST_URL_ID_REGEX.findall(text):
         return identifier
+
+
+def to_decimal(number):
+    number = Decimal(number)
+    return number.quantize(Decimal('.01'), rounding=ROUND_UP)

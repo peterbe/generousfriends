@@ -29,29 +29,36 @@ div.payment {
   <dd>{{ wishlist.modified }}</dd>
 </dl>
 
-{% for item, payments in items_preferred %}
+{% for item, info, payments in items_preferred %}
 <div class="item">
-<h3><a href="{% url 'main:wishlist' item.identifier %}">{{ item.title }}</a></h3>
+<h3><a href="{{ item.affiliates_url_or_url }}">{{ item.title }}</a></h3>
 <dl class="dl-horizontal">
   <dt>Identifier</dt>
   <dd><a href="{% url 'main:wishlist' item.identifier %}">{{ item.identifier }}</a></dd>
   <dt>Title</dt>
   <dd><a href="{{ item.url }}">{{ item.title }}</a></dd>
-  <dt>Affiliates URL</dt>
-  <dd>
-    {% if item.affiliates_url %}
-    <a href="{{ item.affiliates_url }}" target="_blank">{{ item.affiliates_url }}</a><br>
-    {% else %}
-    No affiliates URL
-    {% endif %}
-  </dd>
-  <dt>Price</dt>
-  <dd class="price">${{ item.price|floatformat:2 }}</dd>
   <dt>Preference</dt>
   <dd>{{ item.preference }}</dd>
   <dt>Complete</dt>
   <dd>{% if item.complete %}Yes!{% else %}No{% endif %}</dd>
+  <dt>Price</dt>
+  <dd class="price">${{ item.price|floatformat:2 }}</dd>
+  <dt>Collected</dt>
+  <dd class="price">${{ info.progress_amount|floatformat:2 }}</dd>
+  <dt>Remaining</dt>
+  <dd class="price">${{ info.remaining_amount|floatformat:2 }}</dd>
 </dl>
+
+      <div class="progress">
+        <div class="progress-bar progress-bar-success" style="width: {{ info.progress_percent }}%">
+          <span class="sr-only">{{ info.progress_percent }}%</span>
+          <span class="label">{{ info.progress_percent }}%</span>
+        </div>
+        <div class="progress-bar progress-bar-warning" style="width: {{ info.remaining_percent }}%">
+          <span class="sr-only">{{ info.remaining_percent }}% Complete (warning)</span>
+          <span class="label">{{ info.remaining_percent }}%</span>
+        </div>
+      </div>
 
 
   {% for payment in payments %}

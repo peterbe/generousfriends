@@ -44,6 +44,43 @@ def dashboard(request):
 
 
 @superuser_required
+@utils.json_view
+def dashboard_data(request):
+    context = {}
+    wishlists = models.Wishlist.objects.all()
+    context['count_wish_lists'] = wishlists.count()
+    context['count_verified_wish_lists'] = (
+        wishlists.filter(verified__isnull=False).count()
+    )
+    items = models.Item.objects.all()
+    context['count_picked_items'] = items.filter(preference__gt=0).count()
+    context['count_complete_items'] = (
+        items.filter(complete=True).count()
+    )
+    context['count_fulfilled_items'] = (
+        items.filter(fulfilled=True).count()
+    )
+    context['total_priced_items'] = (
+        items.aggregate(Sum('price'))['price__sum']
+    )
+    payments = models.Payment.objects.all()
+    context['count_payments'] = payments.count()
+    sums = payments.aggregate(Sum('amount'), Sum('actual_amount'))
+    context['total_amount'] = sums['amount__sum']
+    context['total_actual_amount'] = sums['actual_amount__sum']
+    context['total_profit'] = sums['actual_amount__sum'] - sums['amount__sum']
+    balanced_total_fees = (
+        float(sums['amount__sum']) * 0.029 +
+        context['count_payments'] * 0.3
+    )
+    context['total_balanced_fees'] = utils.to_decimal(balanced_total_fees)
+    context['total_profit_after_balanced'] = (
+        context['total_profit'] - context['total_balanced_fees']
+    )
+    return context
+
+
+@superuser_required
 def wishlists(request):
     context = {}
     context['wishlists'] = models.Wishlist.objects.all()
@@ -152,8 +189,14 @@ def wishlist_data(request, identifier):
     )
     items_preferred = []
     for item in _items_preferred:
+        progress_amount, progress_percent = item.get_progress()
+        info = {}
+        info['progress_amount'] = progress_amount
+        info['remaining_amount'] = item.price - progress_amount
+        info['progress_percent'] = progress_percent
+        info['remaining_percent'] = 100 - progress_percent
         items_preferred.append(
-            (item, models.Payment.objects.filter(item=item).order_by('added'))
+            (item, info, models.Payment.objects.filter(item=item).order_by('added'))
         )
     context['items_preferred'] = items_preferred
     return render(request, 'manage/wishlist.html', context)

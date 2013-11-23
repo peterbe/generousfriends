@@ -109,6 +109,10 @@ class Item(models.Model):
         return self.get_progress()[1]
 
     @property
+    def progress_amount(self):
+        return self.get_progress()[0]
+
+    @property
     def amount_remaining(self):
         amount, __ = self.get_progress()
         return self.price - amount
