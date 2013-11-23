@@ -70,8 +70,8 @@ def dashboard_data(request):
     context['total_actual_amount'] = sums['actual_amount__sum']
     context['total_profit'] = sums['actual_amount__sum'] - sums['amount__sum']
     balanced_total_fees = (
-        float(sums['amount__sum']) * 0.029 +
-        context['count_payments'] * 0.3
+        float(sums['amount__sum']) * (settings.BALANCED_TRANSACTION_PERCENTAGE / 100.0) +
+        context['count_payments'] * float(settings.BALANCED_TRANSACTION_AMOUNT)
     )
     context['total_balanced_fees'] = utils.to_decimal(balanced_total_fees)
     context['total_profit_after_balanced'] = (
