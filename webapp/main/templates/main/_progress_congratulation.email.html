@@ -4,7 +4,7 @@
 {% block content %}
   <h2>Hurray!!</h2>
   <h3>{{ subject }}</h3>
-  <p class="lead">The total amount (<span class="price">${{ item.price|floatformat:2 }}</span>
+  <p class="lead">The total amount (<span class="price">${{ item.price|floatformat:2 }}</span>)
   on your Wish List for
   <a href="{{ base_url }}{{ url }}"><strong>{{ item.title }}</strong></a> has been reached!</p>
 
