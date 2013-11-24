@@ -9,6 +9,8 @@
 
 <dl class="dl-horizontal">
   <dt>Item:</dt>
+  <dd><a href="{% url 'manage:wishlist_data' payment.item.wishlist.identifier %}#item-{{ payment.item.identifier }}">{{ payment.item.identifier }}</a></dd>
+  <dt>Item:</dt>
   <dd><a href="{% url 'main:wishlist' payment.item.identifier %}">{{ payment.item.title }}</a>
     by <b>{{ payment.item.wishlist.name }}</b>
        <a href="mailto:{{ payment.item.wishlist.email }}">{{ payment.item.wishlist.email }}</a></dd>

@@ -30,7 +30,7 @@ div.payment {
 </dl>
 
 {% for item, info, payments in items_preferred %}
-<div class="item">
+<div class="item" id="item-{{ item.identifier }}">
 <h3><a href="{{ item.affiliates_url_or_url }}">{{ item.title }}</a></h3>
 <dl class="dl-horizontal">
   <dt>Identifier</dt>

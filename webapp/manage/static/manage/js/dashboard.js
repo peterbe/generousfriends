@@ -13,4 +13,17 @@ $(function() {
       }
     });
   });
+
+  var $news = $('#news');
+  $.getJSON($news.data('url')).then(function(response) {
+    var tbody = $('tbody', $news);
+    $.each(response.newsitems, function(i, item) {
+      console.log(i, item);
+      $('<tr>')
+        .append($('<td>')
+                .append($('<a>').attr('href', item.url).text(item.description)))
+        .append($('<td>').text(moment(item.date).fromNow()))
+        .appendTo(tbody);
+    });
+  });
 });

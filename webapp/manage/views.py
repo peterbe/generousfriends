@@ -15,6 +15,13 @@ from webapp.main import models
 from . import forms
 
 
+def almost_equal(date1, date2):
+    """return true if the only difference between these two dates are
+    their microseconds."""
+    diff = abs(date1 - date2)
+    return not diff.seconds and not diff.days
+
+
 def superuser_required(function=None, redirect_field_name=REDIRECT_FIELD_NAME, login_url=None):
     """
     Decorator for views that checks that the user is logged in, redirecting
@@ -78,6 +85,88 @@ def dashboard_data(request):
         context['total_profit'] - context['total_balanced_fees']
     )
     return context
+
+
+@superuser_required
+@utils.json_view
+def dashboard_news(request):
+    MAX = 20
+
+    newsitems = []
+
+    for w in models.Wishlist.objects.all().order_by('-modified')[:MAX]:
+        if w.added == w.modified:
+            date = w.added
+            description = 'Wish List by %s %s' % (w.name, w.email)
+        else:
+            date = w.modified
+            description = 'Wish List updated'
+            extras = []
+            if almost_equal(w.modified, w.verified):
+                extras.append('verified!')
+            if w.name:
+                extras.append(w.name)
+            if w.email:
+                extras.append(w.email)
+            if extras:
+                description += ' (%s)' % (', '.join(extras))
+        newsitems.append({
+            'description': description,
+            'url': reverse('manage:wishlist_data', args=(w.identifier,)),
+            'date': date,
+        })
+
+    qs = (
+        models.Item.objects
+        .filter(preference__gt=0)
+        .select_related('wishlist')
+        .order_by('-modified')
+    )
+    for i in qs[:MAX]:
+        title = i.title
+        if len(title) > 60:
+            title = title[:57] + '...'
+        if i.added == i.modified:
+            date = i.added
+            description = 'Item created (%s) $%.2f' % (title, i.price)
+        else:
+            date = i.modified
+            description = 'Item update (%s) $%.2f' % (title, i.price)
+        url = reverse('manage:wishlist_data', args=(i.wishlist.identifier,))
+        url += '#item-%s' % i.identifier
+        newsitems.append({
+            'description': description,
+            'url': url,
+            'date': date,
+        })
+
+    qs = (
+        models.Payment.objects.all()
+        .select_related('item')
+        .order_by('-modified')
+    )
+    for p in qs[:MAX]:
+        url = reverse('manage:payment_edit', args=(p.id,))
+        if i.added == i.modified:
+            date = i.added
+            description = (
+                'Payment made %s $%.2f (actually $%.2f)'
+                % (p.email, p.amount, p.actual_amount)
+            )
+        else:
+            date = i.modified
+            description = (
+                'Payment updated %s $%.2f (actually $%.2f)'
+                % (p.name or p.email, p.amount, p.actual_amount)
+            )
+        newsitems.append({
+            'description': description,
+            'url': url,
+            'date': date,
+        })
+
+    newsitems.sort(key=lambda x:x['date'], reverse=True)
+    return {'newsitems': newsitems[:MAX]}
 
 
 @superuser_required
