@@ -61,6 +61,13 @@ def start(request):
     )
     for item in qs[:1]:
         context['sample_item'] = item
+
+    context['og_image_url'] = utils.full_absolute_url(
+        request,
+        settings.STATIC_URL + 'icons/icon-256.png'
+    )
+    context['og_image_width'] = 256
+    context['og_image_height'] = 256
     return render(request, 'main/start.html', context)
 
 

@@ -11,6 +11,25 @@ from decimal import Decimal, ROUND_UP
 
 from django import http
 from django.utils.timezone import utc
+from django.contrib.sites.models import RequestSite
+
+
+def full_absolute_url(request, url):
+    try:
+        if url.startswith('//'):
+            # just need the protocol
+            protocol = 'https' if request.is_secure() else 'http'
+            url = '%s:%s' % (protocol, url)
+        elif url.startswith('/'):
+            # need protocol and domain
+            protocol = 'https' if request.is_secure() else 'http'
+            domain = RequestSite(request).domain
+            url = '%s://%s%s' % (protocol, domain, url)
+    except Exception:
+        import sys
+        print sys.exc_info()
+    finally:
+        return url
 
 
 def identifier_maker(length):
