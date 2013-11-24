@@ -37,17 +37,18 @@ def start(request):
         salt=settings.COOKIE_SALT
     )
     visited_items = []
-    for identifier in request.session.get('visited_items', []):
-        try:
-            item = models.Item.objects.get(identifier=identifier)
-            if your_wishlist_identifier == item.wishlist.identifier:
-                item.yours = True
-                visited_items.append(item)
-            elif item.wishlist.verified:
-                item.yours = False
-                visited_items.append(item)
-        except models.Item.DoesNotExist:
-            continue
+    visited_identifiers = request.session.get('visited_items', [])
+    _items_qs = (
+        models.Item.objects.filter(identifier__in=visited_identifiers)
+        .select_related('wishlist')
+    )
+    for item in _items_qs:
+        if your_wishlist_identifier == item.wishlist.identifier:
+            item.yours = True
+            visited_items.append(item)
+        elif item.wishlist.verified:
+            item.yours = False
+            visited_items.append(item)
     context['visited_items'] = visited_items
     context['sample_item'] = None
     qs = (
@@ -171,7 +172,7 @@ def wishlist_start(request):
 @utils.json_view
 def wishlist_home(request, identifier, fuzzy=False):
     try:
-        item = models.Item.objects.get(identifier=identifier)
+        item = models.Item.objects.select_related('wishlist').get(identifier=identifier)
         wishlist = item.wishlist
     except models.Item.DoesNotExist:
         try:
@@ -337,17 +338,30 @@ def wishlist_home(request, identifier, fuzzy=False):
     except KeyError:
         your_contributions = []
     contribution_items = []
+
+    items_map = {}
+    item_pks = list(set([x.split('_')[0] for x in your_contributions]))
+    if item_pks:
+        items_map = dict(
+            (x.pk, x) for x in models.Item.objects.filter(id__in=item_pks)
+        )
+    payments_map = {}
+    payment_pks = list(set([x.split('_')[1] for x in your_contributions]))
+    if payment_pks:
+        payments_map = dict(
+            (x.pk, x) for x in models.Payment.objects.filter(id__in=payment_pks)
+        )
     for contribution in your_contributions:
         item_pk, payment_pk = contribution.split('_')
         try:
-            _item = models.Item.objects.get(pk=item_pk)
-        except models.Item.DoesNotExist:
+            _item = items_map[item_pk]
+        except KeyError:
             continue
         if _item != item:
             continue
         try:
-            _payment = models.Payment.objects.get(pk=payment_pk)
-        except models.Payment.DoesNotExist:
+            _payment = payments_map[payment_pk]
+        except KeyError:
             continue
         contribution_items.append(_payment)
     your_contributions = contribution_items
