@@ -488,6 +488,7 @@ def wishlist_pick_one(request, identifier):
         items_scraped = 0
         for thing in information['items']:
             if thing['price'] < settings.MIN_ITEM_PRICE:
+                thing['skip_reason'] = 'Below minimum price'
                 items_skipped.append(thing)
                 continue
             if thing.get('picture'):
@@ -505,6 +506,10 @@ def wishlist_pick_one(request, identifier):
                 picture=content
             )
             items_scraped += 1
+
+        for thing in information['externals']:
+            thing['skip_reason'] = 'Not sold by Amazon.com'
+            items_skipped.append(thing)
 
         # try again
         items = models.Item.objects.filter(wishlist=wishlist).order_by('added')

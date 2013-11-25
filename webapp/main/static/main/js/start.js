@@ -39,8 +39,15 @@ $(function() {
         }
       }
     });
-    req.fail(function() {
-      $('.form-error p').html('Sorry. Some unknown error happened on the server. Try again later.');
+    req.fail(function(jqXHR, textStatus, errorThrown ) {
+      //console.dir(jqXHR);
+      //console.log(textStatus);
+      //console.log(errorThrown);
+      if (errorThrown === 'Gateway Time-out') {
+        $('.form-error p').html("Sorry. This is taking too long. Perhaps something got stuck when downloading your Wish List. Try again in one minute.");
+      } else {
+        $('.form-error p').html('Sorry. Some unknown error happened on the server. Try again later.');
+      }
       $('.form-error').show(300);
     });
     req.always(function() {

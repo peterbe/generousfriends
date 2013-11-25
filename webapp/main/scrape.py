@@ -86,6 +86,7 @@ def scrape(wishlistid, shallow=False, force_refresh=False):
     html = _download(url, force_refresh=force_refresh)
     doc = PyQuery(html)
     items = []
+    externals = []
     name = None
     for profile_elem in doc('.profile-layout-aid-top'):
         for name_elem in doc('.stable', profile_elem):
@@ -109,6 +110,10 @@ def scrape(wishlistid, shallow=False, force_refresh=False):
                 'url': item_url,
                 'price': price
             }
+            if not item_url.startswith('http://www.amazon.com'):
+                print "\tSKIPPING", item_url
+                externals.append(item)
+                continue
             item_html = _download(item_url)
             item_doc = PyQuery(item_html)
             item_image_url = None
@@ -139,7 +144,11 @@ def scrape(wishlistid, shallow=False, force_refresh=False):
                         'size': img.size
                     }
             items.append(item)
-    return {'items': items, 'name': name}
+    return {
+        'items': items,
+        'name': name,
+        'externals': externals,
+    }
 
 
 if __name__ == '__main__':
