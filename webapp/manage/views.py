@@ -60,7 +60,8 @@ def dashboard_data(request):
         wishlists.filter(verified__isnull=False).count()
     )
     items = models.Item.objects.all()
-    context['count_picked_items'] = items.filter(preference__gt=0).count()
+    items = items.filter(preference__gt=0)
+    context['count_picked_items'] = items.count()
     context['count_complete_items'] = (
         items.filter(complete=True).count()
     )
