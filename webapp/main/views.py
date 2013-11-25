@@ -754,6 +754,11 @@ def inbound_email(request):
                 try:
                     wishlist = models.Wishlist.objects.get(amazon_id=amazon_id)
                     print >>log, '\t\tAlready exists %r' % wishlist
+                    if not wishlist.email:
+                        wishlist.email = structure['FromFull']['Email']
+                        if not wishlist.name and structure['FromFull']['Name']:
+                            wishlist.name = structure['FromFull']['Name']
+                        wishlist.save()
                     sending.send_verification_email(wishlist, request)
                     print >>log, '\t\tSent verification email to %s' % wishlist.email
                     return http.HttpResponse('ok\n')
