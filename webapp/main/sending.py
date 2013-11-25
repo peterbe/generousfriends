@@ -77,7 +77,7 @@ def send_payment_notification(payment, base_url):
         'item': item,
         'payment': payment,
         'base_url': base_url,
-        'url': reverse('main:wishlist', args=(wishlist.identifier,)),
+        'url': reverse('main:wishlist', args=(item.identifier,)),
     }
     subject = "Yay! A contribution on your Wish List!"
     context['subject'] = subject

@@ -5,6 +5,9 @@
   <h3>Good News!</h3>
   <p class="lead">A contribution of <strong class="price">${{ payment.amount|floatformat:2 }}</strong>
   has been made towards your Wish List item <a href="{{ base_url }}{{ url }}"><strong>{{ item.title }}</strong></a>.</p>
+{% ifequal payment.email wishlist.email %}
+  <p>The contribution was made by <strong>you yourself</strong>.</p>
+{% else %}
   {% if payment.name %}
     <p>The contribution was made by <strong>{{ payment.name }}</strong>.</p>
     {% if payment.message %}
@@ -19,6 +22,7 @@
       <p>The contribution was made by an <strong>anonymous friend</strong> who chose to not leave a message.</p>
     {% endif %}
   {% endif %}
+{% endifequal %}
 
 {% if progress_complete %}
   <h3>Congratulations! The full amount has now been met. Your wish is now granted!</h3>

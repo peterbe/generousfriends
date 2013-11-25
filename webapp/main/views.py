@@ -5,6 +5,8 @@ import datetime
 import hashlib
 import urllib
 from StringIO import StringIO
+import sys
+import traceback
 
 import balanced
 import requests
@@ -256,8 +258,8 @@ def wishlist_home(request, identifier, fuzzy=False):
                 'payment_id': payment.pk,
                 'show_your_message': payment.email != item.wishlist.email,
             }
-            from pprint import pprint
-            pprint(data)
+            #from pprint import pprint
+            #pprint(data)
             response = utils.json_response(data)
             contribution_item = '%s_%s' % (item.pk, payment.pk)
             try:
@@ -731,43 +733,50 @@ def inbound_email(request):
     utils.mkdir(save_dir)
     filename = '%s.json' % hashlib.md5(body).hexdigest()
     filepath = os.path.join(save_dir, filename)
+    log_filepath = filepath.replace('.json', '.log')
     with open(filepath, 'w') as f:
         print '\tDumping email to %s' % filepath
         json.dump(structure, f, indent=2)
 
-    amazon_id = None
-    scrape_error = False
-    for url in utils.find_urls(structure['TextBody']):
-        amazon_id = utils.find_wishlist_amazon_id(url)
-        if amazon_id:
-            print '\tFound amazon_id: %r' % amazon_id
-            try:
-                wishlist = models.Wishlist.objects.get(amazon_id=amazon_id)
-                print '\t\tAlready exists %r' % wishlist
-                sending.send_verification_email(wishlist, request)
-                print '\t\tSent verification email to %s' % wishlist.email
-                return http.HttpResponse('ok\n')
-            except models.Wishlist.DoesNotExist:
-                pass
 
-            found = {'items': []}
-            # can it be scraped?
-            try:
-                found = scrape.scrape(amazon_id, shallow=True)
-                print '\t\tWas able to scrape it'
-                if not found['items']:
-                    print "\t\t\tUnable to find any items for", repr(amazon_id)
-            except scrape.NotFoundError:
-                amazon_id = None
-                print '\t\tWas NOT able to scrape it'
-            except Exception:
-                import sys
-                import traceback
-                exc_info, exc_value, exc_tb = sys.exc_info()
-                print "Info", exc_info
-                print "Value", exc_value
-                #traceback.print_exc()
-                scrape_error = True
+    with open(log_filepath, 'w') as log:
+        amazon_id = None
+        scrape_error = False
+        for url in utils.find_urls(structure['TextBody']):
+            amazon_id = utils.find_wishlist_amazon_id(url)
+            if amazon_id:
+                print >>log, '\tFound amazon_id: %r' % amazon_id
+                try:
+                    wishlist = models.Wishlist.objects.get(amazon_id=amazon_id)
+                    print >>log, '\t\tAlready exists %r' % wishlist
+                    sending.send_verification_email(wishlist, request)
+                    print >>log, '\t\tSent verification email to %s' % wishlist.email
+                    return http.HttpResponse('ok\n')
+                except models.Wishlist.DoesNotExist:
+                    pass
+
+                found = {'items': []}
+                # can it be scraped?
+                try:
+                    found = scrape.scrape(amazon_id, shallow=True)
+                    print >>log, '\t\tWas able to scrape it'
+                    if not found['items']:
+                        print >>log, "\t\t\tUnable to find any items for", repr(amazon_id)
+                except scrape.NotFoundError as not_found_error:
+                    amazon_id = None
+                    print >>log, '\t\tWas NOT able to scrape it'
+                    exc_info, exc_value, exc_tb = sys.exc_info()
+                    print >>log, "Info", exc_info
+                    print >>log, "Value", exc_value
+                    traceback.print_exc(log)
+                except Exception:
+                    print >>log, '\t\tOther scraping error'
+                    exc_info, exc_value, exc_tb = sys.exc_info()
+                    print >>log, "Info", exc_info
+                    print >>log, "Value", exc_value
+                    traceback.print_exc(file=log)
+                    scrape_error = True
+    print "\tDumped all logging to", log_filepath
 
     if amazon_id and found['items']:
         wishlist = models.Wishlist.objects.create(
