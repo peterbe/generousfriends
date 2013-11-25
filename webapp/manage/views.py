@@ -102,7 +102,8 @@ def dashboard_news(request):
             date = w.modified
             description = 'Wish List updated'
             extras = []
-            if almost_equal(w.modified, w.verified):
+
+            if w.verified and almost_equal(w.modified, w.verified):
                 extras.append('verified!')
             if w.name:
                 extras.append(w.name)
