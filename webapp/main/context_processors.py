@@ -9,6 +9,8 @@ def base(request):
     context['PROJECT_STRAPLINE'] = settings.PROJECT_STRAPLINE
     context['GOOGLE_ANALYTICS'] = settings.USE_GOOGLE_ANALYTICS
     context['USE_USERSNAP'] = not settings.DEBUG
+    if '/manage/' in request.path_info:
+        context['GOOGLE_ANALYTICS'] = False
 
     context['MOBILE'] = context['ANDROID'] = False
     user_agent = request.META.get('HTTP_USER_AGENT', '')
