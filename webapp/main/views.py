@@ -22,7 +22,7 @@ from django.core.files import File
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.db.models import Max
+from django.db.models import Max, Sum
 
 from . import scrape
 from . import models
@@ -386,9 +386,19 @@ def wishlist_home(request, identifier, fuzzy=False):
     else:
         show_days_left = False
 
+    views = 0
+    if yours:
+        pageviews = (
+            models.Pageviews.objects.filter(item=item)
+            .aggregate(Sum('views'))
+        )
+        if pageviews:
+            views = pageviews['views__sum']
+
     context = {
         'wishlist': wishlist,
         'item': item,
+        'views': views,
         'yours': yours,
         'absolute_url': absolute_url,
         'progress_percent': progress_percent,

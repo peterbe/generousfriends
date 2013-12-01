@@ -174,9 +174,20 @@ class Verification(models.Model):
     added = models.DateTimeField(default=utils.now)
 
 
+class Pageviews(models.Model):
+    item = models.ForeignKey(Item)
+    views = models.IntegerField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+
+    added = models.DateTimeField(default=utils.now)
+    modified = models.DateTimeField(default=utils.now)
+
+
 @receiver(models.signals.pre_save, sender=Wishlist)
 @receiver(models.signals.pre_save, sender=Item)
 @receiver(models.signals.pre_save, sender=Payment)
+@receiver(models.signals.pre_save, sender=Pageviews)
 def update_modified(sender, instance, raw, *args, **kwargs):
     if raw:
         return

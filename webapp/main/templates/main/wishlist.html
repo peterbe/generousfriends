@@ -87,6 +87,9 @@ h2.days-left {
 </style>
 {% if yours %}
 <style type="text/css">
+#pageviews .views {
+    font-size: 160%;
+}
 input.share-url {
     font-size: 22px;
 }
@@ -296,6 +299,15 @@ input.share-url {
 
     </div>
 
+    {% if yours %}
+    <div class="row marketing" id="pageviews">
+      <h4>Number of pageviews this page has had:
+      <span class="views">{{ views }}<sup>*</sup></span>
+      </h4>
+      <p><sup>*</sup> This is updated one week at a time meaning that number takes time to
+      update. It also includes you yourself viewing your own Wish List.</p>
+    </div>
+    {% endif %}
 
   <!-- Modal (transaction-fee) -->
   <div class="modal fade" id="transaction-fee" tabindex="-1" role="dialog" aria-labelledby="about-transaction-fee" aria-hidden="true">

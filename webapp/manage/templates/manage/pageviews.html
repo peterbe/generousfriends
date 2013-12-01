@@ -1,0 +1,29 @@
+{% extends "manage/base.html" %}
+
+
+{% block main %}
+
+<h3>Pageviews</h3>
+<table class="table table-condensed table-bordered">
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Start Date</th>
+      <th>End Date</th>
+      <th>Views</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for record in pageviews %}
+    <tr>
+      <td><a href="{% url 'main:wishlist' record.item.identifier %}" title="{{ record.item.title }}">{{ record.item.identifier }}</td>
+      <td>{{ record.start_date }}</td>
+      <td>{{ record.end_date }}</td>
+      <td>{{ record.views }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+
+</table>
+
+{% endblock %}

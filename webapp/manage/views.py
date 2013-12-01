@@ -85,6 +85,10 @@ def dashboard_data(request):
     context['total_profit_after_balanced'] = (
         context['total_profit'] - context['total_balanced_fees']
     )
+    context['count_pageviews'] = (
+        models.Pageviews.objects.all()
+        .aggregate(Sum('views'))['views__sum']
+    )
     return context
 
 
@@ -334,3 +338,14 @@ def payment_edit(request, id):
     context['form'] = form
     context['payment'] = payment
     return render(request, 'manage/payment_edit.html', context)
+
+
+@superuser_required
+def pageviews(request):
+    context = {}
+    context['pageviews'] = (
+        models.Pageviews.objects.all()
+        .select_related('item')
+        .order_by('added')
+    )
+    return render(request, 'manage/pageviews.html', context)
