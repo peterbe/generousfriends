@@ -82,6 +82,7 @@ class Item(models.Model):
 
     @property
     def affiliates_url_or_url(self):
+        return self.url  # until the associates program accepts me again
         if self.affiliates_url:
             return self.affiliates_url
         url = self.url
