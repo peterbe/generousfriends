@@ -29,7 +29,7 @@ class Command(BaseCommand):
             models.Item.objects
             .filter(preference__gt=0)
             .exclude(wishlist__verified__isnull=True,
-                     complete__isnull=True,
+                     complete=True,
                      cancelled__isnull=False)
         )
 
