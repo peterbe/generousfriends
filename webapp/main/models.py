@@ -19,6 +19,7 @@ class Wishlist(models.Model):
     mugshot = ImageField(upload_to=utils.upload_path('mugshot'))
     address = models.TextField(null=True)
     public = models.BooleanField(default=False)
+    unsubscribe_reminders = models.BooleanField(default=False)
     added = models.DateTimeField(default=utils.now)
     modified = models.DateTimeField(default=utils.now)
 
@@ -199,6 +200,9 @@ class SentReminder(models.Model):
     subject = models.TextField()
     added = models.DateTimeField(default=utils.now)
     modified = models.DateTimeField(default=utils.now)
+
+    def __repr__(self):
+        return '<%s: to:%s>' % (self.__class__.__name__, self.to)
 
 
 @receiver(models.signals.pre_save, sender=Wishlist)

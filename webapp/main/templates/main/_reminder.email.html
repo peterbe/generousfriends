@@ -27,18 +27,23 @@ p.the-url a { font-size: 120%; font-weight: bold; }
 </table>
 
 
-<p style="margin-top:15px">
+<p style="margin-top:10px">
 To get more people to view your Wish List tell them to go to:
 </p>
 <p class="the-url">
 <a href="{{ base_url }}{% url 'main:wishlist' item.identifier %}">{{ base_url }}{% url 'main:wishlist' item.identifier %}</a>
 </p>
 
-<p style="margin-top:15px">To pay the remaining remaining amount yourself
+<p style="margin-top:10px;margin-top:15px">To pay the remaining remaining amount yourself
 <a href="{{ base_url }}{% url 'main:wishlist' item.identifier %}?amount={{ item.amount_remaining|floatformat:2 }}#pay"
 >contribute the remaining <span class="price">${{ item.amount_remaining|floatformat:2 }}</span></a> yourself.
 </p>
 
+
+<p>
+To unsubscribe from email reminders go to your
+<a href="{{ base_url }}{% url 'main:wishlist_settings' item.wishlist.identifier %}">Settings page</a>.
+</p>
 
 
   {% endfor %}

@@ -902,6 +902,12 @@ def wishlist_settings(request, identifier):
         'If you make your list public, it can be randomly shown on the '
         'home page as an example.'
     )
+    if models.SentReminder.objects.filter(to=wishlist.email).exists():
+        form.fields['unsubscribe_reminders'].help_text = (
+            "If you don't want email reminders about your progress, check this box."
+        )
+    else:
+        del form.fields['unsubscribe_reminders']
     context['form'] = form
     context['msg'] = request.GET.get('msg')
     items = (

@@ -98,7 +98,7 @@ class WishlistAdminForm(BaseModelForm):
 
     class Meta:
         model = models.Wishlist
-        fields = ('name', 'public')
+        fields = ('name', 'public', 'unsubscribe_reminders')
 
 
 class ShareByEmailForm(BaseForm):
