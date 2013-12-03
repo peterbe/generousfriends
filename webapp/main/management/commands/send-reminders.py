@@ -50,14 +50,13 @@ class Command(BaseCommand):
             for sent_reminder in sent_reminders:
                 age = utils.now() - sent_reminder.added
                 if age < delta:
-                    print "SKIP!"
                     _reminder_sent = True
             if _reminder_sent:
                 continue
-            # TEMPORARY
-            if item.wishlist.email not in ('cap441@gmail.com','mail@peterbe.com','ashleynbe@gmail.com'):
-                print "TEMPORARILY SKIPPING TO", item.wishlist.email
-                continue
+            ## TEMPORARY
+            #if item.wishlist.email not in ('cap441@gmail.com','mail@peterbe.com','ashleynbe@gmail.com'):
+            #    print "TEMPORARILY SKIPPING TO", item.wishlist.email
+            #    continue
             print item.id, repr(item), utils.now()-item.added
             #payments = models.Payment.objects.filter(item=item)
             wishlists[item.wishlist].append(item)
