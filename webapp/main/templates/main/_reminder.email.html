@@ -1,0 +1,44 @@
+{% extends "main/email_base.html" %}
+{% block document_title %}{{ subject }}{% endblock %}
+
+{% block extra_css %}
+p.the-url { text-align: center }
+p.the-url a { font-size: 120%; font-weight: bold; }
+{% endblock %}
+
+{% block content %}
+  <h2>{{ subject }}</h2>
+  {% for item in items %}
+    <h3><a href="{{ base_url }}{% url 'main:wishlist' item.identifier %}">{{ item.title }}</a></h3>
+
+<table>
+<tr>
+<td><strong>Contributions:</strong></td>
+<td><span class="price">${{ item.progress_amount|floatformat:2 }}</span></td>
+</tr>
+<tr>
+<td><strong>Remaining:</strong></td>
+<td><span class="price">${{ item.amount_remaining|floatformat:2 }}</span></td>
+</tr>
+<tr>
+<td><strong>Number of people viewing your Wish List:</strong></td>
+<td>{{ item.views }}</td>
+</tr>
+</table>
+
+<p>
+To get more people to view your Wish List tell them to go to:
+</p>
+<p class="the-url">
+<a href="{{ base_url }}{% url 'main:wishlist' item.identifier %}">{{ base_url }}{% url 'main:wishlist' item.identifier %}</a>
+</p>
+
+<p>To pay the remaining remaining amount yourself
+<a href="{{ base_url }}{% url 'main:wishlist' item.identifier %}?amount={{ item.amount_remaining|floatformat:2 }}#pay"
+>contribute the remaining <span class="price">${{ item.amount_remaining|floatformat:2 }}</span></a> yourself.
+</p>
+
+
+
+  {% endfor %}
+{% endblock %}

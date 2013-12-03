@@ -278,3 +278,41 @@ def send_progress_congratulation(item, base_url):
     )
     email.attach_alternative(html_body, "text/html")
     email.send()
+
+
+def send_reminder(items, base_url):
+    base_url = _fix_base_url(base_url)
+    wishlist = items[0].wishlist
+
+    subject = 'Progress on your Wish List'
+    context = {
+        'base_url': base_url,
+        'subject': subject,
+        'items': items,
+    }
+    html_body = render_to_string('main/_reminder.email.html', context)
+
+    html_body = premailer.transform(
+        html_body,
+        base_url=base_url
+    )
+    for item in items:
+        models.SentReminder.objects.create(
+            item=item,
+            body=html_body,
+            to=wishlist.email,
+            subject=subject
+        )
+    body = html2text(html_body)
+
+    headers = {}
+    email = EmailMultiAlternatives(
+        subject,
+        body,
+        settings.WEBMASTER_FROM,
+        [wishlist.email],
+        headers=headers,
+    )
+    email.attach_alternative(html_body, "text/html")
+    email.send()
+    print "Sent an email to", wishlist.email, "about progress"

@@ -64,6 +64,7 @@ class Item(models.Model):
     complete = models.BooleanField(default=False)
     fulfilled = models.BooleanField(default=False)
     fulfilled_notes = models.TextField(null=True)
+    cancelled = models.DateTimeField(null=True)
     congratulation_emailed = models.DateTimeField(null=True)
     added = models.DateTimeField(default=utils.now)
     modified = models.DateTimeField(default=utils.now)
@@ -118,6 +119,13 @@ class Item(models.Model):
     def amount_remaining(self):
         amount, __ = self.get_progress()
         return self.price - amount
+
+    @property
+    def views(self):
+        pageviews = Pageviews.objects.filter(item=self).aggregate(Sum('views'))
+        if pageviews:
+            return pageviews['views__sum']
+        return 0
 
 
 class Payment(models.Model):
@@ -184,10 +192,20 @@ class Pageviews(models.Model):
     modified = models.DateTimeField(default=utils.now)
 
 
+class SentReminder(models.Model):
+    item = models.ForeignKey(Item)
+    body = models.TextField()
+    to = models.EmailField()
+    subject = models.TextField()
+    added = models.DateTimeField(default=utils.now)
+    modified = models.DateTimeField(default=utils.now)
+
+
 @receiver(models.signals.pre_save, sender=Wishlist)
 @receiver(models.signals.pre_save, sender=Item)
 @receiver(models.signals.pre_save, sender=Payment)
 @receiver(models.signals.pre_save, sender=Pageviews)
+@receiver(models.signals.pre_save, sender=SentReminder)
 def update_modified(sender, instance, raw, *args, **kwargs):
     if raw:
         return
