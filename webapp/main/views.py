@@ -59,6 +59,7 @@ def start(request):
                 preference__gt=0,
                 complete=False)
         .exclude(wishlist__name='',
+                 closed=True,
                  wishlist__verified__isnull=True)
         .order_by('?')
     )
