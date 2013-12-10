@@ -1,9 +1,14 @@
 function load_wishlists() {
   var $wishlists = $('#wishlists');
-  $.getJSON($wishlists.data('dataurl'), function(response) {
+  var data = {};
+  if ($('#id_include_not_verified').prop('checked')) {
+    data.include_not_verified = true;
+  }
+  $.getJSON($wishlists.data('dataurl'), data, function(response) {
     var $tbody = $('tbody', $wishlists);
+    $('tr', $tbody).remove();
     $.each(response.wishlists, function(i, row) {
-      console.dir(row);
+      //console.dir(row);
       var tr = $('<tr>');
       tr.append($('<td>')
                 .append($('<a>').attr('href', row.url).text(row.identifier)));
@@ -39,4 +44,7 @@ function load_wishlists() {
 
 $(function() {
   load_wishlists();
+  $('#id_include_not_verified').change(function() {
+    load_wishlists();
+  });
 });

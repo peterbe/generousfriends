@@ -9,6 +9,9 @@ div.item, div.payment {
 div.payment {
     border-bottom: 1px solid #ccc;
 }
+.closed h3 {
+    text-decoration: line-through;
+}
 </style>
 {% endblock %}
 
@@ -30,13 +33,17 @@ div.payment {
 </dl>
 
 {% for item, info, payments in items_preferred %}
-<div class="item" id="item-{{ item.identifier }}">
+<div class="item {% if item.closed %}closed{% endif %}" id="item-{{ item.identifier }}">
 <h3><a href="{{ item.affiliates_url_or_url }}">{{ item.title }}</a></h3>
 <dl class="dl-horizontal">
   <dt>Identifier</dt>
   <dd><a href="{% url 'main:wishlist' item.identifier %}">{{ item.identifier }}</a></dd>
   <dt>Title</dt>
   <dd><a href="{{ item.url }}">{{ item.title }}</a></dd>
+  {% if item.closed %}
+  <dt>CLOSED</dt>
+  <dd><em>{% if item.closed_notes %}{{ item.closed_notes }}{% else %}no notes{% endif %}</em></dd>
+  {% endif %}
   <dt>Preference</dt>
   <dd>{{ item.preference }}</dd>
   <dt>Complete</dt>
@@ -56,7 +63,6 @@ div.payment {
         </div>
         <div class="progress-bar progress-bar-warning" style="width: {{ info.remaining_percent }}%">
           <span class="sr-only">{{ info.remaining_percent }}% Complete (warning)</span>
-          <span class="label">{{ info.remaining_percent }}%</span>
         </div>
       </div>
 

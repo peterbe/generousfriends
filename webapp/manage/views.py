@@ -195,7 +195,10 @@ def wishlists_data(request):
     context = {
         'wishlists': []
     }
-    for wishlist in models.Wishlist.objects.all().order_by('modified'):
+    qs = models.Wishlist.objects.all()
+    if not request.GET.get('include_not_verified', False):
+        qs = qs.exclude(verified__isnull=True)
+    for wishlist in qs.order_by('modified'):
         count_payments = price = None
         total_amount = total_actual_amount = days_left = None
         url = reverse('manage:wishlist_data', args=(wishlist.identifier,))
@@ -207,7 +210,9 @@ def wishlists_data(request):
         item = wishlist.get_preferred_item()
         if item:
             price = item.price
-            if wishlist.verified:
+            if item.closed:
+                status = "CLOSED"
+            elif wishlist.verified:
                 status = "VERIFIED_AND_PICKED"
                 payments = models.Payment.objects.filter(item=item)
                 count_payments = payments.count()
