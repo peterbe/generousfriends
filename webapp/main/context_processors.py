@@ -8,7 +8,7 @@ def base(request):
     context['PROJECT_TITLE'] = settings.PROJECT_TITLE
     context['PROJECT_STRAPLINE'] = settings.PROJECT_STRAPLINE
     context['GOOGLE_ANALYTICS'] = settings.USE_GOOGLE_ANALYTICS
-    context['USE_USERSNAP'] = not settings.DEBUG
+    context['USE_USERSNAP'] = False  #not settings.DEBUG
     if '/manage/' in request.path_info:
         context['GOOGLE_ANALYTICS'] = False
 
