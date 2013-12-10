@@ -30,6 +30,7 @@ class Command(BaseCommand):
             .filter(preference__gt=0)
             .exclude(wishlist__verified__isnull=True,
                      complete=True,
+                     closed=True,
                      cancelled__isnull=False)
         )
 
