@@ -20,6 +20,9 @@
     margin: 60px;
     text-align: center;
 }
+.closed h4 {
+    text-decoration: line-through;
+}
 </style>
 {% endblock %}
 
@@ -47,7 +50,7 @@
       <h3>You have the following Wish List Items set up</h3>
 
         {% for item, payments in items %}
-        <div class="item clearfix">
+        <div class="item clearfix {% if item.closed %}closed{% endif %}">
           {% if item.picture %}
             {% thumbnail item.picture "100x100" as thumb %}
             <a href="{% url 'main:wishlist' item.identifier %}"><img src="{{ thumb.url }}" width="{{ thumb.width }}" height="{{ item.height }}" alt="{{ item.title }}"></a>
@@ -85,6 +88,17 @@
             {% endif %}
           </h4>
 
+          {% if item.closed %}
+          <p>This item is currently closed. <a href="{% url 'main:close_item' item.identifier %}">Re-open?</a></p>
+          <p><em>{% if item.closed_noted %}{{ item.closed_notes }}{% else %}No notes.{% endif %}</em></p>
+          {% else %}
+            {% if not item.complete %}
+            <p style="font-size:80%">
+              Do you want to <a href="{% url 'main:close_item' item.identifier %}">Close this item</a>?
+            </p>
+            {% endif %}
+          {% endif %}
+
           {% if item.fulfilled_notes %}
           <p>
             <b>Fulfillment Notes:</b><br>
@@ -92,7 +106,6 @@
           </p>
           {% endif %}
 
-          {#<button type="submit" name="item" value="{{ item.identifier }}" class="btn btn-primary">Pick this one</button> #}
         </div>
         {% endfor %}
 

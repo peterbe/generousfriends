@@ -960,3 +960,30 @@ def find_wishlist(request):
     context['form'] = form
     context['WEBMASTER_FROM'] = settings.WEBMASTER_FROM
     return render(request, 'main/find_wishlist.html', context)
+
+
+@transaction.commit_on_success
+def close_item(request, identifier):
+    context = {}
+    item = get_object_or_404(models.Item, identifier=identifier)
+    # but can you edit it?
+    cookie_identifier = request.get_signed_cookie('wishlist', None, salt=settings.COOKIE_SALT)
+    if not cookie_identifier:
+        return http.HttpResponse('You need to prove that this is on your Wish List')
+    if cookie_identifier != item.wishlist.identifier:
+        return http.HttpResponse('Not your Wish List')
+
+    if request.method == 'POST':
+        form = forms.CloseItemForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            url = reverse('main:wishlist_settings', args=(item.wishlist.identifier,))
+            url += '?msg=Item+closed'
+            return redirect(url)
+    else:
+        form = forms.CloseItemForm(instance=item)
+
+    form.fields['closed_notes'].widget.attrs['rows'] = 2
+    context['item'] = item
+    context['form'] = form
+    return render(request, 'main/close_item.html', context)

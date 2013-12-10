@@ -165,16 +165,26 @@ input.share-url {
     </div><!-- /#progress -->
 
     {% if yours and wishlist.verified %}
+    {% if not item.closed %}
     <div class="row marketing">
       {% include "main/_begin_sharing.html" %}
     </div>
+    {% endif %}
     {% endif %}
 
     <div class="row marketing">
 
       {% if wishlist.verified %}
         {% if not progress_complete %}
-          {% include "main/_pay_form.html" %}
+          {% if item.closed %}
+            <p><strong>This Wish List item is current closed and can no longer accept contributions</strong></p>
+            {% if item.closed_notes %}
+            <p>Please see the following message about it being closed:</p>
+            <blockquote>{{ item.closed_notes }}</blockquote>
+            {% endif %}
+          {% else %}
+            {% include "main/_pay_form.html" %}
+          {% endif %}
         {% endif %}
       {% else %}
         <p>No contributions can be made on Wish Lists that haven't yet been verified.</p>

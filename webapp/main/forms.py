@@ -130,3 +130,10 @@ class FindWishlistForm(BaseForm):
         for w in models.Wishlist.objects.filter(email__iexact=email):
             return w.email
         raise forms.ValidationError("No Wish List set up with that address")
+
+
+class CloseItemForm(BaseModelForm):
+
+    class Meta:
+        model = models.Item
+        fields = ('closed', 'closed_notes')
