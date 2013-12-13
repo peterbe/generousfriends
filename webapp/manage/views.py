@@ -2,6 +2,7 @@ from decimal import Decimal
 
 import balanced
 
+from django import http
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
@@ -354,3 +355,20 @@ def pageviews(request):
         .order_by('added')
     )
     return render(request, 'manage/pageviews.html', context)
+
+
+@superuser_required
+def sent_reminders(request):
+    context = {}
+    context['sent_reminders'] = (
+        models.SentReminder.objects.all()
+        .select_related('item')
+        .order_by('-added')
+    )
+    return render(request, 'manage/sent_reminders.html', context)
+
+
+@superuser_required
+def sent_reminder_body(request, id):
+    sent_reminder = get_object_or_404(models.SentReminder, id=id)
+    return http.HttpResponse(sent_reminder.body)
