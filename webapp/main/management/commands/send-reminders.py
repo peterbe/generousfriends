@@ -42,6 +42,7 @@ class Command(BaseCommand):
 
         wishlists = defaultdict(list)
         for item in items:
+            assert item.wishlist.email, item
             # if it has a reminder sent in the last 10 days, skip it
             sent_reminders = (
                 models.SentReminder.objects
@@ -59,11 +60,12 @@ class Command(BaseCommand):
             #if item.wishlist.email not in ('cap441@gmail.com','mail@peterbe.com','ashleynbe@gmail.com'):
             #    print "TEMPORARILY SKIPPING TO", item.wishlist.email
             #    continue
+
             print item.id, repr(item), utils.now()-item.added
-            #payments = models.Payment.objects.filter(item=item)
             wishlists[item.wishlist].append(item)
 
         for wishlist, items in wishlists.items():
+            assert wishlist.email, wishlist
             print "WISHLIST"
             print repr(wishlist)
             print repr(wishlist.email)
