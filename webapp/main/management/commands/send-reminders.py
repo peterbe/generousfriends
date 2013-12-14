@@ -27,9 +27,9 @@ class Command(BaseCommand):
 
         items = (
             models.Item.objects
-            .filter(preference__gt=0)
+            .filter(preference__gt=0,
+                    wishlist__email__isnull=False)
             .exclude(wishlist__verified__isnull=True,
-                     wishlist__email__isnull=True,
                      complete=True,
                      closed=True,
                      cancelled__isnull=False)
@@ -39,7 +39,7 @@ class Command(BaseCommand):
         delta = datetime.timedelta(days=MIN_DAYS)
         then = utils.now() - delta
         items = items.filter(added__lt=then)
-
+        
         wishlists = defaultdict(list)
         for item in items:
             assert item.wishlist.email, item
@@ -66,10 +66,4 @@ class Command(BaseCommand):
 
         for wishlist, items in wishlists.items():
             assert wishlist.email, wishlist
-            print "WISHLIST"
-            print repr(wishlist)
-            print repr(wishlist.email)
-            print "ITEMS"
-            print items
-
-            #sending.send_reminder(items, base_url)
+            sending.send_reminder(items, base_url)
