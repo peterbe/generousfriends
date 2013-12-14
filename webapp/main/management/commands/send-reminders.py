@@ -64,4 +64,10 @@ class Command(BaseCommand):
             wishlists[item.wishlist].append(item)
 
         for wishlist, items in wishlists.items():
-            sending.send_reminder(items, base_url)
+            print "WISHLIST"
+            print repr(wishlist)
+            print repr(wishlist.email)
+            print "ITEMS"
+            print items
+
+            #sending.send_reminder(items, base_url)
