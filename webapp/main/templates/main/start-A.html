@@ -1,0 +1,84 @@
+{% extends "main/base.html" %}
+
+{% block document_title %}{{ PROJECT_STRAPLINE }}{% endblock %}
+
+{% block extra_opengraph %}
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ PROJECT_STRAPLINE }}">
+<meta property="og:description" content="Enter your Amazon™ Wish List here and your friends can contribute toward you getting what you really want.">
+<meta property="og:image" content="{{ og_image_url }}">
+<meta property="og:image:width" content="{{ og_image_width }}">
+<meta property="og:image:height" content="{{ og_image_height }}">
+{% endblock %}
+
+
+{% block extra_head %}
+<meta property="split" content="A">
+<style>
+.steps li {
+    margin: 35px 10px;
+}
+</style>
+{% endblock %}
+
+
+{% block main %}
+
+{% if visited_items %}
+      <div class="row marketing">
+        <div class="col-lg-12">
+          <h3>Go back to...</h3>
+          {% for item in visited_items %}
+          <h5><a href="{% url 'main:wishlist' item.identifier %}">
+          {% if item.yours %}
+            Your
+          {% else %}
+            {% if item.wishlist.name %}{{ item.wishlist.name }}{% else %}{{ item.wishlist.email }}{% endif %}'s
+          {% endif %} Wish List
+          </a> -
+          {{ item.title }}
+          </h5>
+          {% endfor %}
+        </div>
+      </div>
+
+{% endif %}
+
+      <div class="jumbotron">
+        <h1>{{ PROJECT_STRAPLINE }}</h1>
+        <p class="lead">Enter your Amazon&trade; Wish List here and your
+        friends can contribute toward you getting what you really want.</p>
+        <p><a class="btn btn-lg btn-success" href="{% url "main:wishlist_start" %}">Set up your Wish List</a></p>
+      </div>
+
+      <div class="row marketing steps">
+
+         <ol>
+	   <li>You publish your <b>Amazon&trade; Wish List</b> here, pick the one item want the most.</li>
+
+	   <li>Verify your list by email and then <b>share the link</b> to your Wish List with friends and family.</li>
+
+	   <li>When the total of the item you chose is collected (within 30 days) <b>Wish List Granted will
+	  buy the item and ship it to you for free</b>.</li>
+
+	 </ol>
+      </div>
+
+      {% if sample_item %}
+      <div class="row marketing">
+        <h3>Want to see an example?</h3>
+        <p>
+          {% if sample_item.wishlist.name %}
+            <b>{{ sample_item.wishlist.name }}</b>
+          {% else %}
+          This user
+          {% endif %}
+          wishes to have a
+          <b><a href="{% url 'main:wishlist' sample_item.identifier %}"
+             title="{{ sample_item.title }}">{{ sample_item.title }}</a></b>
+        </p>
+      </div>
+      {% endif %}
+
+
+{% endblock %}

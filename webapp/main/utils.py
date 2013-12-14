@@ -7,6 +7,7 @@ import functools
 import unicodedata
 import json
 import uuid
+import random
 from decimal import Decimal, ROUND_UP
 
 from django import http
@@ -144,3 +145,13 @@ def find_wishlist_amazon_id(text):
 def to_decimal(number):
     number = Decimal(number)
     return number.quantize(Decimal('.01'), rounding=ROUND_UP)
+
+
+def split_choice(choices, *clues):
+    clues = [x.strip() for x in clues if x and x.strip()]
+    checksum = ''.join(clues)
+    random.seed(checksum)
+    i = random.randint(0, len(choices) - 1)
+    choice = choices[i]
+    random.seed()  # restore
+    return choice

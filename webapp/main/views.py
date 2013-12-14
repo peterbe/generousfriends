@@ -72,12 +72,33 @@ def start(request):
     )
     context['og_image_width'] = 256
     context['og_image_height'] = 256
-    return render(request, 'main/start.html', context)
 
-
-@login_required
-def home(request):
-    pass
+    experiment_slug = 'start1213'
+    if your_wishlist_identifier or visited_items:
+        # people from before
+        experiment_slug = None
+        template_ = 'main/start.html'
+    else:
+        if request.session.get(experiment_slug):
+            template_ = request.session.get(experiment_slug)
+        else:
+            _choices = [
+                'main/start-A.html',
+                'main/start-B.html',
+            ]
+            template_ = utils.split_choice(
+                _choices,
+                request.META.get('HTTP_USER_AGENT'),
+                request.META.get('HTTP_ACCEPT_LANGUAGE'),
+                request.META.get('REMOTE_ADDR'),
+            )
+            request.session[experiment_slug] = template_
+            models.SplitExperiment.objects.create(
+                slug=experiment_slug,
+                template=template_,
+            )
+    context['experiment_slug'] = experiment_slug
+    return render(request, template_, context)
 
 
 def handler500(request):
@@ -170,6 +191,22 @@ def wishlist_start(request):
             return {'error': str(form.errors)}
     else:
         form = forms.WishlistIDForm()
+
+    experiment_slug = 'start1213'
+    if request.session.get(experiment_slug):
+        # yay! you started an experiment!
+        template_ = request.session.get(experiment_slug)
+        if not request.session.get(experiment_slug + 'complete'):
+            request.session[experiment_slug + 'complete'] = 1
+            try:
+                experiment = models.SplitExperiment.objects.get(
+                    slug=experiment_slug,
+                    template=template_
+                )
+                experiment.success += 1
+                experiment.save()
+            except models.SplitExperiment.DoesNotExist:
+                pass
     return render(request, 'main/wishlist_start.html', context)
 
 

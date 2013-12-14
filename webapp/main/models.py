@@ -208,6 +208,17 @@ class SentReminder(models.Model):
         return '<%s: to:%s>' % (self.__class__.__name__, self.to)
 
 
+class SplitExperiment(models.Model):
+    slug = models.SlugField()
+    template = models.CharField(max_length=100)
+    success = models.IntegerField(default=0)
+    #remote_addr = models.CharField(max_length=15)
+    #user_agent = models.TextField()
+
+    def __repr__(self):
+        return '<%s: (%s, %s, %d)>' % (self.__class__.__name__, self.slug, self.template, self.success)
+
+
 @receiver(models.signals.pre_save, sender=Wishlist)
 @receiver(models.signals.pre_save, sender=Item)
 @receiver(models.signals.pre_save, sender=Payment)
