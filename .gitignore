@@ -1,4 +1,4 @@
 .cache/
 webapp/media/
 webapp/settings/local.py
-static/
+/static/
