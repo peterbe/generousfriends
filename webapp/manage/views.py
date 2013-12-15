@@ -13,6 +13,7 @@ from django.db import transaction
 
 from webapp.main import utils
 from webapp.main import models
+from webapp.main import sending
 from . import forms
 
 
@@ -372,3 +373,26 @@ def sent_reminders(request):
 def sent_reminder_body(request, id):
     sent_reminder = get_object_or_404(models.SentReminder, id=id)
     return http.HttpResponse(sent_reminder.body)
+
+
+@superuser_required
+def send_instructions_shipping(request, identifier):
+    wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
+
+    # is there a complete item that hasn't been fulfilled?
+    item = None
+    qs = (
+        models.Item.objects
+        .filter(wishlist=wishlist)
+        .filter(complete=True)
+        .exclude(fulfilled=True)
+    )
+    for item in qs:
+        sending.send_instructions_shipping(item, request)
+        break
+    else:
+        item = None
+    url = reverse('manage:wishlist_data', args=(wishlist.identifier,))
+    if item:
+        url += '?msg=Shipping+instructions+sent'
+    return redirect(url)

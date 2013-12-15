@@ -1,0 +1,64 @@
+{% extends "main/base.html" %}
+
+{% block document_title %}Instructions setting up your Shipping Address{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+<style>
+.instructions .step {
+    margin-bottom: 40px;
+}
+.instructions img {
+    width: 100%;
+    border: 4px solid #ccc;
+    border-radius: 4px;
+}
+</style>
+{% endblock %}
+
+
+{% block main %}
+
+      <div class="row instructions">
+          <h2>Instructions setting up your Shipping Address</h2>
+
+          <p class="lead">By default your Amazon.com Wish List Shipping Address is probably
+          hidden. You need to select an address so <b>{{ PROJECT_TITLE }} can send your
+          finished item to you</b>.</p>
+
+<div class="step">
+<h4>1. Go to <a href="http://www.amazon.com" target="_blank">www.amazon.com</a></h4>
+<img src="{{ STATIC_URL }}main/images/instructions/shipping/1.png" alt="Amazon.com home page">
+</div>
+
+<div class="step">
+<h4>2. Click the "List Actions" tab</h4>
+<img src="{{ STATIC_URL }}main/images/instructions/shipping/2.png" alt="Click the List Actions tab">
+</div>
+
+
+<div class="step">
+<h4>3. Click the "Edit list profile" option</h4>
+<img src="{{ STATIC_URL }}main/images/instructions/shipping/3.png" alt='Click the "Edit list profile" option'>
+</div>
+
+<div class="step">
+<h4>4. Under "Ship-to address" select an address</h4>
+<p>This is where you select which address purchases off your Wish List should be sent to. <br>
+After selecting an address, scroll down and press the "Save" button</p>
+<img src="{{ STATIC_URL }}main/images/instructions/shipping/4.png" alt='Under "Ship-to address" select an address'>
+</div>
+
+<p>
+  Go to <a href="http://www.amazon.com" target="_blank">Amazon.com&trade;</a>.
+</p>
+
+
+<p>
+  Go back to <a href="/">the Home Page</a>.
+</p>
+
+
+      </div>
+
+{% endblock %}

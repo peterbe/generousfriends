@@ -737,6 +737,10 @@ def instructions_mobile(request):
     return render(request, 'main/instructions_mobile.html')
 
 
+def instructions_shipping_address(request):
+    return render(request, 'main/instructions_shipping_address.html')
+
+
 @csrf_exempt
 @transaction.commit_on_success
 def inbound_email(request):

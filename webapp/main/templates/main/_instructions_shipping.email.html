@@ -1,0 +1,26 @@
+{% extends "main/email_base.html" %}
+{% block document_title %}{{ subject }}{% endblock %}
+
+{% block extra_css %}
+p.the-url { text-align: center }
+p.the-url a { font-size: 120%; font-weight: bold; }
+{% endblock %}
+
+{% block content %}
+  <h2>{{ subject }}</h2>
+  <p>Congratulation on your
+  <a href="{{ base_url }}{% url 'main:wishlist' item.identifier %}">{{ item.title }}</a>
+  having been fully completed.</p>
+
+  <p>To be able to now ship this to you, you now need to select an address
+  that it can be shipped to.</p>
+
+  <p>The instructions can be found here:</p>
+
+  <p><a style="font-weight: bold"
+    href="{{ base_url }}{% url 'main:instructions_shipping_address' %}">{{ base_url }}{% url 'main:instructions_shipping_address' %}</a></p>
+
+  <p>{{ PROJECT_TITLE }} will later check that your Wish List, on amazon.com, has an address and
+  ship your item to that address.</p>
+
+{% endblock %}

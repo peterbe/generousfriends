@@ -97,6 +97,13 @@ div.payment {
 </div>
 {% endfor %}
 
+<div class="well">
+  <h4>Action Options</h4>
+  <form action="{% url 'manage:send_instructions_shipping' wishlist.identifier %}" method="post">{% csrf_token %}
+  <button class="btn btn-primary">Send Shipping Instructions</button>
+  </form>
+</div>
+
 {% endblock %}
 
 
