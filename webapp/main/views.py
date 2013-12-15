@@ -992,3 +992,7 @@ def close_item(request, identifier):
     context['item'] = item
     context['form'] = form
     return render(request, 'main/close_item.html', context)
+
+
+def debugger(request):
+    return http.HttpResponse('Your IP: %s\n' % request.META.get('REMOTE_ADDR'))

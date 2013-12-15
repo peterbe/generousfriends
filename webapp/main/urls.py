@@ -68,5 +68,8 @@ urlpatterns = patterns(
     url(r'^find/$',
         views.find_wishlist,
         name='find_wishlist'),
+    url(r'^debugger$',
+        views.debugger,
+        name='debugger'),
 
  )
