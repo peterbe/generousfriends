@@ -270,7 +270,11 @@ input.share-url {
 
         {% if contributions %}
         <div class="contributions">
-          <h3>Contributions made so far</h3>
+	  {% if item.complete %}
+            <h3>Contributions</h3>
+	  {% else %}
+            <h3>Contributions made so far</h3>
+	  {% endif %}
           {% for payment in contributions %}
           <div class="contribution">
           <h4>{{ forloop.counter }}. From
