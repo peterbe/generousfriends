@@ -36,7 +36,11 @@ div.payment {
 
 {% for item, info, payments in items_preferred %}
 <div class="item {% if item.closed %}closed{% endif %}" id="item-{{ item.identifier }}">
-<h3><a href="{{ item.affiliates_url_or_url }}">{{ item.title }}</a></h3>
+<h3><a href="{{ item.affiliates_url_or_url }}">{{ item.title }}</a>
+{% if item.fulfilled %}
+<span class="label label-success">Fulfilled!</span>
+{% endif %}
+</h3>
 <dl class="dl-horizontal">
   <dt>Identifier</dt>
   <dd><a href="{% url 'main:wishlist' item.identifier %}">{{ item.identifier }}</a></dd>
@@ -56,8 +60,15 @@ div.payment {
   <dd class="price">${{ info.progress_amount|floatformat:2 }}</dd>
   <dt>Remaining</dt>
   <dd class="price">${{ info.remaining_amount|floatformat:2 }}</dd>
+  {% if item.fulfilled %}
+  <dt>Fulfilled</dt>
+  <dd>Yes!</dd>
+  <dt>Fulfilled Notes</dt>
+  <dd>{{ item.fulfilled_notes | linebreaks }}</dd>
+  {% endif %}
 </dl>
 
+{% if not item.fulfilled %}
       <div class="progress">
         <div class="progress-bar progress-bar-success" style="width: {{ info.progress_percent }}%">
           <span class="sr-only">{{ info.progress_percent }}%</span>
@@ -67,6 +78,7 @@ div.payment {
           <span class="sr-only">{{ info.remaining_percent }}% Complete (warning)</span>
         </div>
       </div>
+{% endif %}
 
 
   {% for payment in payments %}
@@ -100,7 +112,7 @@ div.payment {
 {% endfor %}
 
 <div class="well">
-  <h4>Action Options</h4>
+  <h4>General Action Options</h4>
   <form action="{% url 'manage:send_instructions_shipping' wishlist.identifier %}" method="post">{% csrf_token %}
   <button class="btn btn-primary">Send Shipping Instructions</button>
   </form>
