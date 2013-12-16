@@ -162,13 +162,22 @@ input.share-url {
           </div>
         </div>
 
+	{% if item.fulfilled %}
+	<p style="text-align: center">
+	<img src="{{ STATIC_URL }}main/images/congratulations.gif" alt="Congratulations!!">
+	</p>
+	<h3>Congratulations! This item has been ordered and shipped to {{ wishlist.name_or_email }}</h3>
+	{% endif %}
+
     </div><!-- /#progress -->
 
     {% if yours and wishlist.verified %}
     {% if not item.closed %}
+    {% if not item.fulfilled %}
     <div class="row marketing">
       {% include "main/_begin_sharing.html" %}
     </div>
+    {% endif %}
     {% endif %}
     {% endif %}
 
