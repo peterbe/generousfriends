@@ -14,6 +14,7 @@ from django.db import transaction
 from webapp.main import utils
 from webapp.main import models
 from webapp.main import sending
+from webapp.main import scrape
 from . import forms
 
 
@@ -395,4 +396,22 @@ def send_instructions_shipping(request, identifier):
     url = reverse('manage:wishlist_data', args=(wishlist.identifier,))
     if item:
         url += '?msg=Shipping+instructions+sent'
+    return redirect(url)
+
+
+@superuser_required
+def refetch_ship_to(request, identifier):
+    wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
+    information = scrape.scrape(wishlist.amazon_id)
+    url = reverse('manage:wishlist_data', args=(wishlist.identifier,))
+    if information['ship_to']:
+        if wishlist.ship_to != information['ship_to']:
+            msg = 'Ship+to+updated!'
+            wishlist.ship_to = information['ship_to']
+            wishlist.save()
+        else:
+            msg = 'Ship+to+unchanged'
+    else:
+        msg = 'Ship+to+not+found'
+    url += '?msg=%s' % msg
     return redirect(url)

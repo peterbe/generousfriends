@@ -18,6 +18,7 @@ class Wishlist(models.Model):
     name = models.CharField(max_length=100)
     mugshot = ImageField(upload_to=utils.upload_path('mugshot'))
     address = models.TextField(null=True)
+    ship_to = models.TextField(null=True)
     public = models.BooleanField(default=False)
     unsubscribe_reminders = models.BooleanField(default=False)
     added = models.DateTimeField(default=utils.now)

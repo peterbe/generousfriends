@@ -128,6 +128,7 @@ def wishlist_start(request):
             if items:
                 wishlist = models.Wishlist.objects.create(
                     amazon_id=amazon_id,
+                    ship_to=items.get('ship_to'),
                 )
                 name = request.get_signed_cookie('name', None, salt=settings.COOKIE_SALT)
                 if name:
@@ -496,6 +497,9 @@ def wishlist_pick_one(request, identifier):
         if information['name'] and not wishlist.name:
             wishlist.name = information['name']
             wishlist.save()
+        if information['ship_to'] and not wishlist.ship_to:
+            wishlist.ship_to = information['ship_to']
+            wishlist.save()
         items_scraped = 0
         for thing in information['items']:
             if thing['price'] < settings.MIN_ITEM_PRICE:
@@ -592,6 +596,10 @@ def wishlist_pick_another(request, identifier):
         if information['name'] and not wishlist.name:
             wishlist.name = information['name']
             wishlist.save()
+        if information['ship_to'] and not wishlist.ship_to:
+            wishlist.ship_to = information['ship_to']
+            wishlist.save()
+
         items_scraped = 0
         for thing in information['items']:
             if thing.get('picture'):
@@ -808,6 +816,7 @@ def inbound_email(request):
             amazon_id=amazon_id,
             email=structure['FromFull']['Email'],
             name=structure['FromFull']['Name'],
+            ship_to=found.get('ship_to'),
             verified=utils.now()
         )
         print 'Created Wishlist %r' % wishlist

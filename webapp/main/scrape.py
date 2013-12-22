@@ -88,9 +88,16 @@ def scrape(wishlistid, shallow=False, force_refresh=False):
     items = []
     externals = []
     name = None
+    ship_to = None
+
     for profile_elem in doc('.profile-layout-aid-top'):
-        for name_elem in doc('.stable', profile_elem):
-            print repr(name_elem.text.strip())
+        _next_is_ship_to = False
+        for name_elem in doc('span', profile_elem):
+            if _next_is_ship_to:
+                ship_to = name_elem.text.strip()
+            elif name_elem.text.strip() == 'Ship-to:':
+                _next_is_ship_to = True
+            #print "\t",repr(name_elem.text.strip())
 
     for row_elem in doc('table.g-compact-items tr, table.compact-items tr'):
         price = None
@@ -148,6 +155,7 @@ def scrape(wishlistid, shallow=False, force_refresh=False):
         'items': items,
         'name': name,
         'externals': externals,
+        'ship_to': ship_to,
     }
 
 

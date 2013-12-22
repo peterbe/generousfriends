@@ -22,6 +22,8 @@ div.payment {
   <dd>{{ wishlist.identifier }}</dd>
   <dt>Amazon ID</dt>
   <dd><a href="http://www.amazon.com/registry/wishlist/{{ wishlist.amazon_id }}">{{ wishlist.amazon_id }}</a></dd>
+  <dt>Ship to</dt>
+  <dd>{% if wishlist.ship_to %}{{ wishlist.ship_to }}{% endif %}</dd>
   <dt>Verified</dt>
   <dd>{{ wishlist.verified }}</dd>
   <dt>Email</dt>
@@ -114,7 +116,10 @@ div.payment {
 <div class="well">
   <h4>General Action Options</h4>
   <form action="{% url 'manage:send_instructions_shipping' wishlist.identifier %}" method="post">{% csrf_token %}
-  <button class="btn btn-primary">Send Shipping Instructions</button>
+  <p><button class="btn btn-primary">Send Shipping Instructions</button></p>
+  </form>
+  <form action="{% url 'manage:refetch_ship_to' wishlist.identifier %}" method="post">{% csrf_token %}
+  <p><button class="btn btn-primary">Refetch 'Ship to'</button></p>
   </form>
 </div>
 
