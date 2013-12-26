@@ -40,7 +40,11 @@ class Command(BaseCommand):
         lookerupper = lookup.ItemLookup(asins.keys())
 
         for asin, item in asins.items():
-            image_url = lookerupper.images[asin]
+            try:
+                image_url = lookerupper.images[asin]
+            except KeyError:
+                print "SKIPPING", repr(item.title)
+                continue
             print "\tDownloading", image_url[:70]
             r = requests.get(image_url)
 
