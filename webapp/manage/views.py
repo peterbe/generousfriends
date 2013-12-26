@@ -415,3 +415,12 @@ def refetch_ship_to(request, identifier):
         msg = 'Ship+to+not+found'
     url += '?msg=%s' % msg
     return redirect(url)
+
+
+@superuser_required
+def send_last_reminder(request, identifier):
+    item = get_object_or_404(models.Item, identifier=identifier)
+    sending.send_last_reminder(item, request)
+    url = reverse('manage:wishlist_data', args=(item.wishlist.identifier,))
+    url += '?msg=Last+reminder+sent'
+    return redirect(url)

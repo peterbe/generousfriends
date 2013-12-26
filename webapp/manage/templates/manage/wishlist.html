@@ -48,6 +48,11 @@ div.payment {
   <dd><a href="{% url 'main:wishlist' item.identifier %}">{{ item.identifier }}</a></dd>
   <dt>Title</dt>
   <dd><a href="{{ item.affiliates_url_or_url }}">{{ item.title }}</a></dd>
+  <dt>Days Left</dt>
+  <dd>{% if item.has_payments %}
+  {{ item.days_left }}
+  {% else %}Not applicable
+  {% endif %}</dd>
   {% if item.closed %}
   <dt>CLOSED</dt>
   <dd><em>{% if item.closed_notes %}{{ item.closed_notes }}{% else %}no notes{% endif %}</em></dd>
@@ -112,6 +117,16 @@ div.payment {
     </dl>
     </div>
   {% endfor %}
+
+  <div class="well">
+    <h4>Item Action Options</h4>
+    {% if item.has_payments and not item.complete %}
+    <form action="{% url 'manage:send_last_reminder' item.identifier %}" method="post">{% csrf_token %}
+    <p><button class="btn btn-primary">Send Last Reminder</button></p>
+    </form>
+    {% endif %}
+  </div>
+
 </div>
 {% endfor %}
 

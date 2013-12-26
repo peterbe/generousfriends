@@ -131,6 +131,23 @@ class Item(models.Model):
             return pageviews['views__sum']
         return 0
 
+    @property
+    def has_payments(self):
+        payments = self._finished_payments()
+        return payments.exists()
+
+    @property
+    def days_left(self):
+        payments = self._finished_payments()
+        for payment in payments.order_by('added')[:1]:
+            return 30 - (utils.now() - payment.added).days
+
+    def _finished_payments(self):
+        return (
+            Payment.objects
+            .filter(item=self, declined=False, refund_amount=decimal.Decimal('0.00'))
+        )
+
 
 class Payment(models.Model):
     wishlist = models.ForeignKey(Wishlist)

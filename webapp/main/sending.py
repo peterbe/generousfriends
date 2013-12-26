@@ -353,3 +353,41 @@ def send_instructions_shipping(item, base_url):
     email.attach_alternative(html_body, "text/html")
     email.send()
     print "Sent an email to", wishlist.email, "about shipping instructions"
+
+
+def send_last_reminder(item, base_url):
+    base_url = _fix_base_url(base_url)
+    wishlist = item.wishlist
+
+    subject = 'Your Wish List is about to expire!'
+    context = {
+        'base_url': base_url,
+        'subject': subject,
+        'item': item,
+        'wishlist': item.wishlist,
+    }
+    html_body = render_to_string('main/_last_reminder.email.html', context)
+
+    html_body = premailer.transform(
+        html_body,
+        base_url=base_url
+    )
+    models.SentReminder.objects.create(
+        item=item,
+        body=html_body,
+        to=wishlist.email,
+        subject=subject
+    )
+    body = html2text(html_body)
+
+    headers = {}
+    email = EmailMultiAlternatives(
+        subject,
+        body,
+        settings.WEBMASTER_FROM,
+        [wishlist.email],
+        headers=headers,
+    )
+    email.attach_alternative(html_body, "text/html")
+    email.send()
+    print "Sent an email to", wishlist.email, "about shipping instructions"

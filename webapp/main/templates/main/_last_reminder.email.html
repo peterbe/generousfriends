@@ -1,0 +1,31 @@
+{% extends "main/email_base.html" %}
+{% block document_title %}{{ subject }}{% endblock %}
+
+{% block extra_css %}
+p.the-url { text-align: center }
+p.the-url a { font-size: 120%; font-weight: bold; }
+{% endblock %}
+
+{% block content %}
+  <h2>{{ subject }}</h2>
+
+  <p>Dear {{ wishlist.name }},</p>
+  <p>Your Wish List, <a href="{{ base_url }}{% url 'main:wishlist' item.identifier %}"><strong>{{ item.title }}</strong></a>, has payments but it's not fully completed yet
+  (<span class="price">${{ item.progress_amount|floatformat:2 }}</span> of <span class="price">${{ item.price|floatformat:2 }}</span>).</p>
+  <p>You only have
+  {% with days_left=item.days_left %}
+    {% if days_left == 1 %}
+    <strong>1 day left</strong>.
+    {% else %}
+    <strong>{{ days_left }} days left</strong>.
+    {% endif %}
+  {% endwith %}
+  </p>
+  <p>You can
+  <a href="{{ base_url }}{% url 'main:wishlist' item.identifier %}?amount={{ item.amount_remaining|floatformat:2 }}#pay"
+  >contribute the remaining <strong>${{ item.amount_remaining|floatformat:2 }}</strong> yourself</a>
+  or wait and the contributors will be automatically refunded.
+  </p>
+
+
+{% endblock %}

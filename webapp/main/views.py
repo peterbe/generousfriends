@@ -349,7 +349,7 @@ def wishlist_home(request, identifier, fuzzy=False):
 
     if request.GET.get('preview'):
         yours = False
-    elif yours and request.GET.get('amount'):
+    elif request.GET.get('amount'):
         try:
             amount_remaining = decimal.Decimal(request.GET.get('amount'))
             yours = False
