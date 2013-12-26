@@ -32,7 +32,7 @@ p.email-instructions {
 {% block main %}
 
       <div class="jumbotron">
-        <h3>Get What You REALLY Want for Christmas</h3>
+        <h3>{{ PROJECT_STRAPLINE }}</h3>
         <p class="lead">Enter your Amazon&trade; Wish List URL</p>
         <form action="." method="post">
         {% csrf_token %}

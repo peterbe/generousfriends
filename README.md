@@ -1,7 +1,7 @@
 generousfriends
 ===============
 
-Get What You Really Want for Christmas
+Get What You Really Want
 
 
 Running tests
