@@ -46,7 +46,7 @@ class Command(BaseCommand):
             asins[asin] = item
         try:
             self._convert_asins(asins)
-        except lookup.ItemNotAccessible:
+        except (lookup.ItemNotAccessible, lookup.NoImage):
             # we have to do one at a time :(
             for asin, item in asins.items():
                 if item.amazon_api_converted:
