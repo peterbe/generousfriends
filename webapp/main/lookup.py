@@ -15,6 +15,10 @@ class ItemNotAccessible(Exception):
     pass
 
 
+class NoImage(Exception):
+    pass
+
+
 class ItemLookup(object):
 
     def __init__(self, asins, locale='us'):
@@ -38,7 +42,7 @@ class ItemLookup(object):
                         except AttributeError:
                             print "ASIN", Item.ASIN.text
                             print self._debug(res)
-                            raise
+                            raise NoImage(Item.ASIN.text)
                     #print "Y", repr(y), y.tag
             res = self._lookup(asins)
             for Items in res.Items:
