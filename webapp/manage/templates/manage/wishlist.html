@@ -47,7 +47,7 @@ div.payment {
   <dt>Identifier</dt>
   <dd><a href="{% url 'main:wishlist' item.identifier %}">{{ item.identifier }}</a></dd>
   <dt>Title</dt>
-  <dd><a href="{{ item.url }}">{{ item.title }}</a></dd>
+  <dd><a href="{{ item.affiliates_url_or_url }}">{{ item.title }}</a></dd>
   {% if item.closed %}
   <dt>CLOSED</dt>
   <dd><em>{% if item.closed_notes %}{{ item.closed_notes }}{% else %}no notes{% endif %}</em></dd>
