@@ -54,6 +54,8 @@ div.payment {
   {% endif %}
   <dt>Preference</dt>
   <dd>{{ item.preference }}</dd>
+  <dt>Amazon API converted</dt>
+  <dd>{% if item.amazon_api_converted %}Yes!{% else %}No{% endif %}</dd>
   <dt>Complete</dt>
   <dd>{% if item.complete %}Yes!{% else %}No{% endif %}</dd>
   <dt>Price</dt>

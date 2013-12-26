@@ -10,5 +10,4 @@ class Command(BaseCommand):
     args = 'AMAZONID'
     def handle(self, *args, **options):
         for arg in args:
-            #pprint(scrape.scrape(arg))
-            scrape.scrape(arg)
+            pprint(scrape.scrape(arg))

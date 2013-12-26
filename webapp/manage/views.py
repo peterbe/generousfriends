@@ -402,7 +402,7 @@ def send_instructions_shipping(request, identifier):
 @superuser_required
 def refetch_ship_to(request, identifier):
     wishlist = get_object_or_404(models.Wishlist, identifier=identifier)
-    information = scrape.scrape(wishlist.amazon_id)
+    information = scrape.scrape(wishlist.amazon_id, shallow=True)
     url = reverse('manage:wishlist_data', args=(wishlist.identifier,))
     if information['ship_to']:
         if wishlist.ship_to != information['ship_to']:

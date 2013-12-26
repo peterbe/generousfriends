@@ -78,12 +78,16 @@ def _parse_price(price):
         pass
 
 
-def scrape(wishlistid, shallow=False, force_refresh=False):
+def scrape(wishlistid, shallow=False, force_refresh=False, cache_seconds=3600 * 1):
     """
     if @shallow don't bother downloading the images
     """
     url = 'http://www.amazon.com/registry/wishlist/%s?layout=compact' % wishlistid
-    html = _download(url, force_refresh=force_refresh)
+    html = _download(
+        url,
+        force_refresh=force_refresh,
+        cache_seconds=cache_seconds,
+    )
     doc = PyQuery(html)
     items = []
     externals = []
@@ -109,7 +113,7 @@ def scrape(wishlistid, shallow=False, force_refresh=False):
         for elem in doc('td.g-title a, .productTitle a', row_elem):
 
             text = elem.text.strip()
-            print repr(text)
+            #print repr(text)
 
             item_url = urlparse.urljoin('http://www.amazon.com', elem.attrib['href'])
             item = {
@@ -125,31 +129,30 @@ def scrape(wishlistid, shallow=False, force_refresh=False):
             item_doc = PyQuery(item_html)
             item_image_url = None
             _checked = set()
-            for img in item_doc('#main-image-container img,#main-image-content img'):
-                if shallow:
-                    break
-                image_url = img.attrib['src']
-                if image_url in _checked:
-                    continue
-                _checked.add(image_url)
-                content = _download(image_url, binary=True)
-                if content:
-                    f = StringIO(content)
-                    try:
-                        img = Image.open(f)
-                    except IOError:
-                        print "Was unable to open (as image)", image_url
+            if not shallow:
+                for img in item_doc('#main-image-container img,#main-image-content img'):
+                    image_url = img.attrib['src']
+                    if image_url in _checked:
                         continue
-                    width, __ = img.size
-                    if width <= 40:
-                        # thumbnail
-                        continue
-                    #print "\t", image_url
-                    #print "\t", img.size
-                    item['picture'] = {
-                        'url': image_url,
-                        'size': img.size
-                    }
+                    _checked.add(image_url)
+                    content = _download(image_url, binary=True)
+                    if content:
+                        f = StringIO(content)
+                        try:
+                            img = Image.open(f)
+                        except IOError:
+                            print "Was unable to open (as image)", image_url
+                            continue
+                        width, __ = img.size
+                        if width <= 40:
+                            # thumbnail
+                            continue
+                        #print "\t", image_url
+                        #print "\t", img.size
+                        item['picture'] = {
+                            'url': image_url,
+                            'size': img.size
+                        }
             items.append(item)
     return {
         'items': items,

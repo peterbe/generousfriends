@@ -29,7 +29,7 @@ from . import models
 from . import utils
 from . import forms
 from . import sending
-
+from . import lookup
 
 def start(request):
     context = {}
@@ -128,7 +128,7 @@ def wishlist_start(request):
             if items:
                 wishlist = models.Wishlist.objects.create(
                     amazon_id=amazon_id,
-                    ship_to=items.get('ship_to'),
+                    ship_to=information.get('ship_to'),
                 )
                 name = request.get_signed_cookie('name', None, salt=settings.COOKIE_SALT)
                 if name:
@@ -501,23 +501,39 @@ def wishlist_pick_one(request, identifier):
             wishlist.ship_to = information['ship_to']
             wishlist.save()
         items_scraped = 0
+        asins = []
+        things = {}
         for thing in information['items']:
             if thing['price'] < settings.MIN_ITEM_PRICE:
                 thing['skip_reason'] = 'Below minimum price'
                 items_skipped.append(thing)
                 continue
-            if thing.get('picture'):
-                r = requests.get(thing['picture']['url'])
-                filename = os.path.basename(thing['picture']['url'])
+            asin = lookup.url_to_asin(thing['url'])
+            asins.append(asin)
+            things[asin] = thing
+
+        lookerupper = lookup.ItemLookup(asins)
+
+        for asin in asins:
+            thing = things[asin]
+            try:
+                image_url = lookerupper.images[asin]
+                r = requests.get(image_url)
+                filename = os.path.basename(image_url)
                 content = File(StringIO(r.content), name=filename)
-            else:
-                content = None
+            except KeyError:
+                thing['skip_reason'] = 'Not available'
+                items_skipped.append(thing)
+                continue
+
+            affiliates_url = lookerupper.affiliates_urls[asin]
 
             item = models.Item.objects.create(
                 wishlist=wishlist,
-                title=thing['text'],
+                title=thing['text'][:400],
                 price=thing['price'],
                 url=thing['url'],
+                affiliates_url=affiliates_url,
                 picture=content
             )
             items_scraped += 1

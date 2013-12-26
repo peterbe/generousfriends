@@ -57,9 +57,9 @@ class Item(models.Model):
     identifier = models.CharField(max_length=8,
                                   default=utils.identifier_maker(8))
     wishlist = models.ForeignKey(Wishlist)
-    title = models.CharField(max_length=200)
-    url = models.URLField()
-    affiliates_url = models.URLField(null=True)
+    title = models.CharField(max_length=400)
+    url = models.URLField(max_length=400)
+    affiliates_url = models.URLField(max_length=400, null=True)
     price = models.DecimalField(max_digits=5, decimal_places=2)
     picture = ImageField(upload_to=utils.upload_path('pictures'))
     preference = models.IntegerField(default=0)
@@ -70,6 +70,7 @@ class Item(models.Model):
     closed_notes = models.TextField(null=True)
     cancelled = models.DateTimeField(null=True)
     congratulation_emailed = models.DateTimeField(null=True)
+    amazon_api_converted = models.BooleanField(default=True)
     added = models.DateTimeField(default=utils.now)
     modified = models.DateTimeField(default=utils.now)
 
