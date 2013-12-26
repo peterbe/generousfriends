@@ -54,10 +54,10 @@ class Command(BaseCommand):
                 try:
                     self._convert_asins({asin: item})
                 except lookup.ItemNotAccessible:
-                    print "\t\tBAD ASIN", asin, repr(item['title'])
+                    print "\t\tBAD ASIN", asin, repr(item.title)
                     pass
                 except lookup.NoImage:
-                    print "\t\tBAD ASIN NO IMAGE", asin, repr(item['title'])
+                    print "\t\tBAD ASIN NO IMAGE", asin, repr(item.title)
                     pass
 
     def _convert_asins(self, asins):
