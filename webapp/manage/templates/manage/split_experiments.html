@@ -1,0 +1,24 @@
+{% extends "manage/base.html" %}
+
+{% block extra_head %}
+{% endblock %}
+
+{% block main %}
+
+<h3>Split Experiments</h3>
+
+{% for slug, splits in experiments %}
+<div class="experiment">
+  <h4>{{ slug }}</h4>
+  <table class="table table-bordered">
+    {% for split in splits %}
+    <tr>
+      <td><code>{{ split.template }}</code></td>
+      <td style="font-size:180%; font-weight: bold">{{ split.success }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endfor %}
+
+{% endblock %}

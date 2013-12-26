@@ -1,4 +1,5 @@
 from decimal import Decimal
+from collections import defaultdict
 
 import balanced
 
@@ -424,3 +425,13 @@ def send_last_reminder(request, identifier):
     url = reverse('manage:wishlist_data', args=(item.wishlist.identifier,))
     url += '?msg=Last+reminder+sent'
     return redirect(url)
+
+
+@superuser_required
+def split_experiments(request):
+    context = {}
+    experiments = defaultdict(list)
+    for split_experiment in models.SplitExperiment.objects.all():
+        experiments[split_experiment.slug].append(split_experiment)
+    context['experiments'] = experiments.items()
+    return render(request, 'manage/split_experiments.html', context)

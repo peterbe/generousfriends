@@ -93,7 +93,7 @@ def start(request):
                 request.META.get('REMOTE_ADDR'),
             )
             request.session[experiment_slug] = template_
-            models.SplitExperiment.objects.create(
+            models.SplitExperiment.objects.get_or_create(
                 slug=experiment_slug,
                 template=template_,
             )
