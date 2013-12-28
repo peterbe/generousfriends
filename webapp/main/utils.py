@@ -150,8 +150,10 @@ def to_decimal(number):
 def split_choice(choices, *clues):
     clues = [x.strip() for x in clues if x and x.strip()]
     checksum = ''.join(clues)
+    print "CHECKSUM", repr(checksum),
     random.seed(checksum)
     i = random.randint(0, len(choices) - 1)
+    print "i:", i
     choice = choices[i]
     random.seed()  # restore
     return choice

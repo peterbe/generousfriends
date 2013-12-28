@@ -78,9 +78,14 @@ def start(request):
         # people from before
         experiment_slug = None
         template_ = 'main/start.html'
+        print "your_wishlist_identifier", repr(your_wishlist_identifier)
+        print "visited_items", repr(visited_items)
+        print "Sticking to", template_
     else:
         if request.session.get(experiment_slug):
+            print "\t", experiment_slug, "in session"
             template_ = request.session.get(experiment_slug)
+            print "\t\t", template_
         else:
             _choices = [
                 'main/start-A.html',
@@ -92,6 +97,7 @@ def start(request):
                 request.META.get('HTTP_ACCEPT_LANGUAGE'),
                 request.META.get('REMOTE_ADDR'),
             )
+            print "Randomly picked", template_
             request.session[experiment_slug] = template_
             models.SplitExperiment.objects.get_or_create(
                 slug=experiment_slug,
@@ -194,9 +200,12 @@ def wishlist_start(request):
 
     experiment_slug = 'start1213'
     if request.session.get(experiment_slug):
+        print "yay! you started an experiment!",
         # yay! you started an experiment!
         template_ = request.session.get(experiment_slug)
+        print template_
         if not request.session.get(experiment_slug + 'complete'):
+            print "You have NOT completed it"
             request.session[experiment_slug + 'complete'] = 1
             try:
                 experiment = models.SplitExperiment.objects.get(
@@ -205,8 +214,12 @@ def wishlist_start(request):
                 )
                 experiment.success += 1
                 experiment.save()
+                print "Incrmented it to", experiment.success
             except models.SplitExperiment.DoesNotExist:
+                print "\tCould not find it", (experiment_slug, template_)
                 pass
+        else:
+            print "You HAVE completed it"
     return render(request, 'main/wishlist_start.html', context)
 
 
