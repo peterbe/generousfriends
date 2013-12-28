@@ -162,6 +162,23 @@ def scrape(wishlistid, shallow=False, force_refresh=False, cache_seconds=3600 * 
     }
 
 
+def clean_cache(min_days):
+    now = time.time()
+    min_seconds = min_days * 24  * 3600
+    for root, dirs, files in os.walk(root_dir()):
+        for f in files:
+            fp = os.path.join(root, f)
+            mtime = os.stat(fp)[stat.ST_MTIME]
+            age = now - mtime
+            if age > min_seconds:
+                print "DELETE FILE", fp
+                os.remove(fp)
+        for dir_ in dirs:
+            dirp = os.path.join(root, dir_)
+            if not os.listdir(dirp):
+                print "DELETE DIR", dirp
+                os.rmdir(dirp)
+
 if __name__ == '__main__':
     import sys
     if not sys.argv[1:]:
