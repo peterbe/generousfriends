@@ -1,11 +1,11 @@
 {% extends "main/base.html" %}
 
-{% block document_title %}{{ PROJECT_STRAPLINE }}{% endblock %}
+{% block document_title %}Group-fund your Amazon&trade; Wish List{% endblock %}
 
 {% block extra_opengraph %}
 <meta property="og:type" content="website">
-<meta property="og:title" content="{{ PROJECT_STRAPLINE }}">
-<meta property="og:description" content="Enter your Amazon™ Wish List here and your friends can contribute toward you getting what you really want.">
+<meta property="og:title" content="Group-fund your Amazon&trade; Wish List">
+<meta property="og:description" content="Enter your Amazon&trade; Wish List here and your friends can contribute toward you getting what you really want.">
 <meta property="og:image" content="{{ og_image_url }}">
 <meta property="og:image:width" content="{{ og_image_width }}">
 <meta property="og:image:height" content="{{ og_image_height }}">
@@ -41,11 +41,29 @@
           {% endfor %}
         </div>
       </div>
+{% else %}
+
+      {% if sample_item %}
+      <div class="row marketing">
+        <h3>Want to see an example?</h3>
+        <p>
+          {% if sample_item.wishlist.name %}
+            <b>{{ sample_item.wishlist.name }}</b>
+          {% else %}
+          This user
+          {% endif %}
+          wishes to have a
+          <b><a href="{% url 'main:wishlist' sample_item.identifier %}"
+             title="{{ sample_item.title }}">{{ sample_item.title }}</a>.</b>
+        </p>
+      </div>
+      {% endif %}
+
 
 {% endif %}
 
       <div class="jumbotron">
-        <h1>{{ PROJECT_STRAPLINE }}</h1>
+        <h1>Group-fund your Amazon Wish List</h1>
         <p class="lead">Enter your Amazon&trade; Wish List here and your
         friends can contribute toward you getting what you really want.</p>
         <p><a class="btn btn-lg btn-success" href="{% url "main:wishlist_start" %}">Get Started!</a></p>
@@ -63,22 +81,6 @@
 
 	 </ol>
       </div>
-
-      {% if sample_item %}
-      <div class="row marketing">
-        <h3>Want to see an example?</h3>
-        <p>
-          {% if sample_item.wishlist.name %}
-            <b>{{ sample_item.wishlist.name }}</b>
-          {% else %}
-          This user
-          {% endif %}
-          wishes to have a
-          <b><a href="{% url 'main:wishlist' sample_item.identifier %}"
-             title="{{ sample_item.title }}">{{ sample_item.title }}</a></b>
-        </p>
-      </div>
-      {% endif %}
 
 
 {% endblock %}

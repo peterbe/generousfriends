@@ -57,7 +57,8 @@ def start(request):
         models.Item.objects
         .filter(wishlist__public=True,
                 preference__gt=0,
-                complete=False)
+                complete=False,
+                wishlist__verified__isnull=False)
         .exclude(wishlist__name='',
                  closed=True,
                  wishlist__verified__isnull=True)
