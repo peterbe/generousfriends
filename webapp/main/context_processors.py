@@ -22,7 +22,7 @@ def base(request):
         context['MOBILE'] = True
         if 'android' in user_agent.lower():
             context['ANDROID'] = True
-    context['USE_USERSNAP'] = not context['MOBILE'] and not context['DEBUG']
+    context['USE_USERSNAP'] = context['USE_USERSNAP'] and not context['MOBILE'] and not context['DEBUG']
     if '/manage/' in request.path_info:
         context['USE_USERSNAP'] = False
 
