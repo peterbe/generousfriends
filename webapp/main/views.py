@@ -800,7 +800,11 @@ def help_page(request):
 
 
 def rules(request):
-    return render(request, 'main/rules.html')
+    return redirect('main:how_it_works', permanent=True)
+
+
+def how_it_works(request):
+    return render(request, 'main/how_it_works.html')
 
 
 def terms(request):
