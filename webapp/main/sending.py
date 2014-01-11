@@ -246,7 +246,7 @@ def send_progress_congratulation(item, base_url):
         'http://www.amazon.com/registry/wishlist/%s'
         % wishlist.amazon_id
     )
-    subject = "Congratulation on your Wish List Item!"
+    subject = "Congratulations on your Wish List Item!"
     context = {
         'wishlist': wishlist,
         'item': item,
