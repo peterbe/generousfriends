@@ -229,6 +229,7 @@ def wishlists_data(request):
                     days_left = 30 - (now - first_payment.added).days
                     if total_amount >= item.price:
                         status = 'COMPLETE'
+                        days_left = None
                         if item.fulfilled:
                             status = 'FULFILLED'
             identifier = item.identifier
