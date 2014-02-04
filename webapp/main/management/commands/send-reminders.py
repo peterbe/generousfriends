@@ -5,6 +5,7 @@ from collections import defaultdict
 from optparse import make_option
 
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 
 from webapp.main import models
 from webapp.main import utils
@@ -25,21 +26,24 @@ class Command(BaseCommand):
         protocol = 'https' if options['https'] else 'http'
         base_url = '%s://%s' % (protocol, domainname)
 
+        neither = (
+            Q(w
+        )
         items = (
             models.Item.objects
-            .filter(preference__gt=0,
-                    wishlist__email__isnull=False)
-            .exclude(wishlist__verified__isnull=True,
-                     complete=True,
-                     closed=True,
-                     cancelled__isnull=False)
+            .filter(
+                preference__gt=0,
+                wishlist__email__isnull=False,
+                wishlist__verified=True
+            )
+            .exclude(Q(complete=True) | Q(closed=True))
         )
 
         # it has to be at least MIN_DAYS days old
         delta = datetime.timedelta(days=MIN_DAYS)
         then = utils.now() - delta
         items = items.filter(added__lt=then)
-        
+
         wishlists = defaultdict(list)
         for item in items:
             assert item.wishlist.email, item
