@@ -132,6 +132,8 @@ def handler500(request):
 def wishlist_start(request):
     context = {}
     if request.method == 'POST':
+        return http.HttpResponse('Project has been discontinued')
+
         form = forms.WishlistIDForm(request.POST)
         if form.is_valid():
             amazon_id = form.cleaned_data['amazon_id']
@@ -253,6 +255,9 @@ def wishlist_home(request, identifier, fuzzy=False):
         if not item:
             return redirect('main:wishlist_pick_one', wishlist.identifier)
         return redirect('main:wishlist', item.identifier)
+
+    if request.method == 'POST':
+        return http.HttpResponse('Project has been discontinued')
 
     if request.method == 'POST' and 'uri' in request.POST:
         form = forms.PaymentForm(request.POST, item=item)
@@ -509,6 +514,8 @@ def wishlist_pick_one(request, identifier):
         raise NotImplementedError
 
     if request.method == 'POST':
+        return http.HttpResponse('Project has been discontinued')
+
         item_identifier = request.POST['item']
         item = get_object_or_404(
             models.Item,
@@ -618,6 +625,8 @@ def wishlist_pick_another(request, identifier):
         raise NotImplementedError
 
     if request.method == 'POST':
+        return http.HttpResponse('Project has been discontinued')
+
         if request.POST.get('refresh'):
             for x in models.Item.objects.filter(wishlist=wishlist, preference=0):
                 assert not models.Payment.objects.filter(item=x, wishlist=wishlist)
@@ -710,6 +719,7 @@ def wishlist_pick_another(request, identifier):
 
 @transaction.commit_on_success
 def wishlist_your_name(request, identifier):
+    return http.HttpResponse('Project has been discontinued')
     item = get_object_or_404(models.Item, identifier=identifier)
     wishlist = item.wishlist
     try:
@@ -771,6 +781,8 @@ def wishlist_taken(request, identifier):
         'wishlist': wishlist,
     }
     if request.method == 'POST':
+        return http.HttpResponse('Project has been discontinued')
+
         form = forms.TakenForm(request.POST, wishlist=wishlist)
         if form.is_valid():
             email = form.cleaned_data['email']
@@ -905,6 +917,8 @@ def inbound_email(request):
 @require_POST
 @transaction.commit_on_success
 def wishlist_your_message(request, identifier):
+    return http.HttpResponse('Project has been discontinued')
+
     item = get_object_or_404(models.Item, identifier=identifier)
 
     payment = get_object_or_404(

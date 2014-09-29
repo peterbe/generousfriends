@@ -24,29 +24,21 @@
     {% block extra_head %}
     {% endblock %}
 
-    {% if BALANCED_DEBUG %}
     <style>
       .notice {
         background-color: #FCF8E3;
-        padding: 10px;
+        padding: 30px;
         border-bottom: 1px solid #EBCCD1;
         border-radius: 6px;
+        margin-bottom: 40px;
       }
-      .notice h3 { margin-top: 0; }
+      .notice h3 { margin: 10px; text-align: center; }
+      .notice h4 { margin: 30px; text-align: center; }
+
       body { padding-top:0; }
     </style>
-    {% endif %}
 
-    {% if GOOGLE_ANALYTICS %}
-    <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-    ga('create', 'UA-45897779-1', 'wishlistgranted.com');
-    ga('send', 'pageview');
-    </script>
-    {% endif %}
+
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script src="{{ STATIC_URL }}/assets/js/html5shiv.js"></script>
@@ -55,12 +47,11 @@
   </head>
 
   <body>
-      {% if BALANCED_DEBUG %}
       <div class="notice">
-        <h3>NOTE! Server is in Development Mode</h3>
-        <p>This means that no real payment can be made and data entered might be lost. Please don't share unless for testing purposes.</p>
+        <h3>NOTE! This Project is No Longer Active</h3>
+        <h4>As of October 2014 this project has been discontinued.
+          The pages are left but the functionality is no more.</h4>
       </div>
-      {% endif %}
 
     <div class="{% block container_class %}container{% endblock %}">
       {% block header %}
@@ -88,30 +79,10 @@
 
 {% block javascript %}
 <script src="{{ STATIC_URL }}assets/js/jquery-1.10.2.min.js"></script>
-<script async src="{{ STATIC_URL }}assets/js/bootstrap.collapse.min.js"></script>
+<script src="{{ STATIC_URL }}assets/js/bootstrap.collapse.min.js"></script>
 {% endblock %}
 
-{% if USE_USERSNAP %}
-<script type="text/javascript">
-   var _usersnapconfig = {
-       apiKey: '00a4a00e-d49b-4955-a4f7-dbf0087f8faf',
-       valign: 'bottom',
-       halign: 'right',
-       tools: ["pen", "highlight", "note"],
-       lang: 'en',
-       commentBox: true,
-       emailBox: true
-   };
-   (function() {
-       var s = document.createElement('script');
-       s.type = 'text/javascript';
-       s.async = true;
-       s.src = '//api.usersnap.com/usersnap.js';
-       var x = document.getElementsByTagName('head')[0];
-       x.appendChild(s);
-   })();
-</script>
-{% endif %}
+
 
   </body>
 </html>

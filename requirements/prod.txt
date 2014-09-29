@@ -1,5 +1,5 @@
 Django==1.6
-Pillow==2.2.1
+Pillow==2.5.3
 cssselect==0.9
 lxml==3.2.3
 pyquery==1.2.6
